@@ -1,0 +1,17 @@
+#!/usr/sbin/dtrace -s
+/*
+
+#dtrace -s dtprofile.is_in_path.dt `top -b | head -10 | tail -1 | chomp | cut -w -f1` is_in_path 
+
+*/
+BEGIN { printf("thinking, hit control-c when you are tired of it");}
+
+pid$1::$2:entry 
+        { self->st= timestamp; }
+pid$1::$2:return 
+        { 
+        @[execname,"delta(ns)" ] = quantize(  timestamp - self->st);
+        self->st = 0;
+        }
+ 
+

@@ -1,0 +1,12 @@
+#!/usr/sbin/dtrace -s
+
+:libc.so.7:malloc:entry, :libc.so.7:calloc:entry
+{
+@who[execname,probefunc] = count (); 
+self->starttime = timestamp;
+}
+:libc.so.7:malloc:return, :libc.so.7:calloc:return
+{
+@latency[execname]   = quantize( timestamp- self->starttime);
+self->starttime = 0; 
+}

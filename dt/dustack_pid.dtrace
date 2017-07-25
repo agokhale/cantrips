@@ -1,0 +1,12 @@
+#!/usr/sbin/dtrace -s
+/*possibly  useful with flame graphs?*/
+/*
+    20  23:34   inkscape r2.svg
+    19  23:34   ./env/dt/flamegraph.pl r2.collapse > r2.svg
+    18  23:34   ./env/dt/flamegraph.pl r2.collapse
+    17  23:34   ./env/dt/dtstackcollapse_flame.pl r2.stacks > r2.collapse
+    16  23:34   ./env/dt/dtstackcollapse_flame.pl r2.stacks
+    15  23:33   scp root@badger.local:/tmp/r2.stacks .
+
+*/
+pid$1:::entry { @[ustack()]= count(); } 

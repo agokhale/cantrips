@@ -1,0 +1,11 @@
+#!/usr/sbin/dtrace -s 
+
+pid$1:::entry 
+{ @hist[probefunc,probemod] = count ();} 
+
+syscall:::entry /pid==$1/ 
+{ @hist[probefunc,probemod] = count ();}
+
+tick-3sec
+{ printa ( @hist); 
+clear (@hist); }

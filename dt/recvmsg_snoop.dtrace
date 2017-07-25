@@ -1,0 +1,19 @@
+#!/usr/sbin/dtrace -s
+#pragma D option  quiet
+
+syscall:freebsd:recvmsg:entry 
+/execname=="mdnsd" / 
+
+{
+this->hdr = (struct msghdr*) copyin (arg1, sizeof (struct msghdr) ); 
+
+printf ("vecoorcount: %i\n",this->hdr->msg_iovlen );
+this->io = (struct iovec*) copyin ((uintptr_t ) this->hdr->msg_iov, sizeof ( struct iovec) ); 
+printf ("vecrlen: %i\n",this->io->iov_len ); 
+
+this->payload = (void*) copyin ((uintptr_t) this->io->iov_base, this->io->iov_len);
+
+tracemem ( this->payload, 800); 
+/*tracemem ( this->payload, this->io->iov_len);  */
+}
+

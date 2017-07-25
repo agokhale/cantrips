@@ -1,0 +1,58 @@
+#!/usr/sbin/dtrace -qs
+BEGIN
+{
+/*printf ("aggregating zfs io by proram and mount point\n hit control-c  when you are done \n  ");  */
+}
+::zfs_freebsd_write:entry 
+{ 
+@writehist[
+	curpsinfo->pr_psargs, 
+	args[0]->a_vp->v_mount->mnt_stat.f_mntonname
+	] = count() 
+}
+
+tick-5s  
+{
+printf ( " { timestamp:0x%x, writers:[ \n", timestamp); 
+printa ("\t{ process:\"%s\",  mountpoint:\"%s\", writecount:%@5d},\n ", @writehist); 
+printf ( "] }\n"); 
+trunc (@writehist); 
+}
+
+
+
+
+
+
+/* previous attempt to   filter for writes only and higer pids  by stratagy
+fbt::adastrategy:entry,
+fbt::dastrategy:entry,
+fbt::nvme_ns_strategy:entry 
+
+
+/(args[0]->bio_cmd==5) && (curpsinfo->pr_pid > 10)  / 
+{@[ curpsinfo->pr_psargs,
+	    stringof(args[0]->bio_disk->d_name), 
+	    (args[0]->bio_disk->d_unit) 
+  ] = count ();
+
+}*/
+
+ 
+/* unfortunately tn9.10's freebsd has broken pr_psargs , use this instead to get the pid of the Offender.
+also cmd  for write is '2' in freebsd 10 
+
+dtrace -n 'fbt::adastrategy:entry  
+{@[ curpsinfo->pr_pid, 
+args[0]->bio_cmd, 
+stringof(args[0]->bio_disk->d_name), 
+args[0]->bio_disk->d_unit] = count () ; }'
+
+*/
+/* 
+this is a little better and works in more places:
+dtrace -qn '::zfs_freebsd_write:entry {printf ( "p: %s f: %s\n",curpsinfo->pr_psargs, args[0]->a_vp->v_mount->mnt_stat.f_mntonname ) }'
+dtrace -qn '::zfs_freebsd_write:entry { @[curpsinfo->pr_psargs, args[0]->a_vp->v_mount->mnt_stat.f_mntonname] = count() }'
+
+
+*/

@@ -1,0 +1,12 @@
+#!/bin/sh -v
+
+/usr/sbin/dtrace -n  '
+inline string target_execname = "'$1'";
+
+syscall:::entry / execname == target_execname / 
+{ @hist[probefunc,probemod] = count ();}
+
+tick-3sec
+{ printa ( @hist); 
+clear (@hist); }
+'

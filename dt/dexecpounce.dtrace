@@ -1,0 +1,9 @@
+#!/usr/sbin/dtrace  -qs
+
+#pragma D option quiet
+
+dtrace:::BEGIN {} 
+syscall::execve:return /curpsinfo->pr_psargs!=0/
+	{ 
+	printf ("pid:%i %S\n",pid, curpsinfo->pr_psargs)
+	} 

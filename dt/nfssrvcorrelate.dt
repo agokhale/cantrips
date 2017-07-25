@@ -1,0 +1,20 @@
+#!/usr/sbin/dtrace -s 
+syscall::nfs*:entry
+{
+@hist[probefunc] = count (); 
+}
+
+fbt::nfs*:entry
+{
+@hist[probefunc] = count (); 
+}
+fbt::tcp*:entry
+{
+@hist[probefunc] = count(); 
+}
+
+tick-3sec
+{ 
+printa ( @hist);
+clear (@hist); 
+}

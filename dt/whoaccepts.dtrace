@@ -1,0 +1,39 @@
+#!/usr/sbin/dtrace -qs 
+
+
+syscall::accept:entry
+        {
+        lsockaddr  = (struct sockaddr*) copyin (arg1, sizeof ( struct sockaddr));
+        printf ( "len 0x%x fam: %x  port:%x.%x. ip:%x.%x.%x.%x" ,
+                lsockaddr->sa_len,
+                lsockaddr->sa_family,
+                lsockaddr->sa_data[0],  
+                lsockaddr->sa_data[1],  
+                lsockaddr->sa_data[2],  
+                lsockaddr->sa_data[3] , 
+                lsockaddr->sa_data[4] , 
+                lsockaddr->sa_data[5]  
+                ) ;
+	@accepts_by_ip[lsockaddr->sa_data[2],lsockaddr->sa_data[3],lsockaddr->sa_data[4],lsockaddr->sa_data[5]] = count (); 
+        }
+
+/*
+tick-3s 
+        {
+        printf ("--%x\n", timestamp);
+        printa ("%16s\t  %d %d\n",  @hist);
+        trunc (@hist);
+        }
+
+syscall::socket:entry 
+	{
+	@hist[execname, arg0, arg1]	= count (); 
+	}
+
+tick-3s 
+	{
+	printf ("--%x\n", timestamp); 
+	printa ("%16s\t  %d %d\n",  @hist); 
+	trunc (@hist); 
+	}
+*/

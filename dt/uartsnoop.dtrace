@@ -1,0 +1,8 @@
+#!/usr/bin/dtrace -qn
+
+/* uart_dev_ns8250.c: unmodified: line 957 of 1012 */
+
+::ns8250_bus_transmit:entry 
+	{
+	printf (   "%c",     ((struct uart_softc*)args[0])->sc_txbuf[0]    );
+	}

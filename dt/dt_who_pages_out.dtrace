@@ -1,0 +1,3 @@
+#!/usr/sbin/dtrace -s
+fbt::*pageout:entry  { @[execname, probefunc] = count()}  
+tick-3s {printa (@); clear(@)}

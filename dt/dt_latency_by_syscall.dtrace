@@ -1,0 +1,14 @@
+#!/usr/sbin/dtrace -s
+
+/* dt_latency_by_syscall preadv
+
+*/
+syscall::$1:entry 
+	{
+	self->starttime = timestamp;
+	}
+syscall::$1:return 
+	{
+	@["delta(ns)",execname]  =  quantize ( timestamp - self->starttime); 
+	self->starttime = 0 ; 
+	}

@@ -1,0 +1,26 @@
+## paths to grab from freebsd
+/etc/hosts
+/etc/namedb
+/etc/pf.conf
+/etc/ssh
+/etc/sysctl.conf
+/etc/fstab
+/etc/gettytab
+/etc/host.conf
+/etc/ssh
+/etc/inetd.conf
+/etc/aliases
+/etc/mail
+/etc/crontab
+/etc/passwd
+/etc/master.passwd
+/etc/profile
+/etc/rc.conf
+/etc/shells
+/etc/resolv.conf
+/etc/ssl
+/etc/sysctl.conf
+/etc/syslog.conf
+/etc/nssswitch.conf
+/usr/local/etc
+

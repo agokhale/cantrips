@@ -1,0 +1,14 @@
+# minute        0-59
+# hour          0-23
+# day of month  1-31
+# j month         1-12 (or names, see below)
+#  day of week   0-7 (0 or 7 is Sun, or 
+PATH=/bin:/root/bin:/opt/bin/:/sbin:/usr/X/bin:/usr/X11/bin:/usr/X11R6/bin:/usr/bin:/usr/games:/usr/libexec:/usr/local/bin:/usr/local/sbin:/usr/sbin:
+
+3 4	* * * ntpdate tock.usno.navy.mil
+3 4	* * * portsnap cron update
+20 6 * * 0   ${HOME}/bin/snap.sh weekly barrel/tmp
+20 5 * * *   ${HOME}/bin/snap.sh daily barrel/tmp
+29 * * * *   ${HOME}/bin/snap.sh hourly barrel/tmp
+* * * * *   ${HOME}/bin/mover.sh barrel/tmp toohey z/reaver/btmp reaverbtmpflo > /dev/null
+* * * * *   ${HOME}/bin/mover.sh barrel/tmp toohey z/reaver/btmp reaverbtmpflo > /dev/null

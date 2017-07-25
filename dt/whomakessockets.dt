@@ -1,0 +1,14 @@
+#!/usr/sbin/dtrace -qs 
+
+
+syscall::socket:entry 
+	{
+	@hist[execname, arg0, arg1]	= count (); 
+	}
+
+tick-3s 
+	{
+	printf ("--%x\n", timestamp); 
+	printa ("%16s\t  %d %d\n",  @hist); 
+	trunc (@hist); 
+	}

@@ -1,0 +1,24 @@
+#!/usr/sbin/dtrace -s
+#pragma D option quiet
+
+
+syscall:freebsd:bind:entry
+/* /execname == "mdnsd"/  */
+{
+this->sabounce = copyin(  arg1, sizeof ( struct sockaddr) ) ;
+this->incast = (struct sockaddr_in * ) this->sabounce;
+printf ("%i:%sbinds:fam:%u:addr: %i %i %i %i %x :%u %x \n",
+timestamp,
+execname,
+(this->incast)->sin_family,
+((uint8_t *)(&(this->incast)->sin_addr.s_addr))[0],
+((uint8_t *)(&(this->incast)->sin_addr.s_addr))[1],
+((uint8_t *)(&(this->incast)->sin_addr.s_addr))[2],
+((uint8_t *)(&(this->incast)->sin_addr.s_addr))[3],
+(this->incast)->sin_addr.s_addr,
+(this->incast)->sin_port ,
+(this->incast)->sin_port 
+);
+
+
+}
