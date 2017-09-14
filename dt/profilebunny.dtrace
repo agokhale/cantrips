@@ -1,0 +1,98 @@
+#!/usr/sbin/dtrace -s
+/* profilebunny speaks for the machine before it's able to speak for itself.
+early profiler bunnies ranged the codebase randomly guessing for speedups
+
+install with:
+dtrace -As profilebunny.dtrace
+
+read output:
+dtrace -ae > /var/log/profile.bunny
+*/
+
+#pragma D option  quiet
+#pragma D option  bufsize=8m
+
+BEGIN{
+tscstart=timestamp;
+printf ("profiler bunny starts@tsc:%d(ns)\n", tscstart); 
+}
+
+fbt::msgbuf_addstr:entry 
+	{ 
+	printf ("%d%s",(timestamp-tscstart)/1000000,stringof(args[2]));
+	}
+
+io:::wait-start { self->iowait_start = timestamp; }
+io:::wait-done / self->iowait_start /
+	{
+	printf ( "iowaited for %d", ( timestamp - self->iowait_start));
+	print( *args[1]);	
+	}
+
+
+/* this global scope ts seems to be necessary to work aroud a thread change
+it is a source of error and it's output is a scant heuristic */
+proc:::create { proc_start_ts = timestamp;}
+proc:::exit / proc_start_ts /
+{
+printf ("%d(ms)delta:%d(us) code:%d,%d proc:%s\n",
+	(timestamp-tscstart)/1000000 , 
+	( timestamp - proc_start_ts) /1000,
+	errno,
+	args[0],
+	curpsinfo->pr_psargs);
+}
+
+
+fbt::module_getid:entry
+{
+printf ("%d(ms) module_getid:",(timestamp-tscstart)/1000000 );
+/*print ( *args[0]);*/
+printf("%s\n", stringof( (args[0]->name)));
+}
+
+fbt::*attach*:entry, fbt::*probe_start:entry
+{
+printf ("%d(ms) dev:",(timestamp-tscstart)/1000000 );
+printf("%s\n", probefunc);
+}
+
+fbt::*console*: { @fishing[probefunc,probename] = count ();}
+fbt::sleepq_timedwait:entry {self->sqts = timestamp;}
+fbt::sleepq_timedwait:return /self->sqts/
+{
+printf(" |---timedwait :%d(ms)\n",((timestamp-self->sqts)/1000000));
+}
+
+
+/* catch slow mtx_sleep */
+fbt::__mtx_lock_sleep:entry {self->mtxts = timestamp;}
+fbt::__mtx_lock_sleep:return  
+	/ self->mtxts  && ((timestamp - self->mtxts) > 10000)  /
+	{
+	@mtxwait["mtx"]= quantize(timestamp-self->mtxts);
+	printf("  |-mtx sleep :%d(us)\n", (timestamp-self->mtxts) / 1000);
+	}
+fbt::__mtx_lock_sleep:return  
+	/ self->mtxts  && ((timestamp - self->mtxts) > 5000000)  /
+	{ 
+	printf ( "slow mtx detected");
+	stack(); 
+	}
+
+
+syscall::: { @syscall_hist[probefunc,probename] = count(); }
+/* don't allow indefinite bunnies */
+tick-33s { printf("dying of boredom"); exit (504);}
+
+END
+{
+printa(@fishing); 
+printf("wait histogram\n");
+printa(@mtxwait);
+printf("syscall histogram\n");
+/* torutrous fmt see ~cks quantization */
+printa("%-14s\t%-9s\t%@d\n", @syscall_hist);
+}
+
+
