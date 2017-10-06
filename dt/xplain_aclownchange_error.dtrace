@@ -1,0 +1,42 @@
+#!/usr/sbin/dtrace -s 
+#pragma D option quiet
+
+syscall:freebsd:chown:entry
+{
+self->path = copyinstr ( arg0); 
+self->newuid =  args[1];
+self->newgid =  args[2];
+}
+syscall:freebsd:chown:return  /arg0 !=0/
+{
+printf ("chownfailpath:%s for uid:%d newuid:%d gid %d",self->path,uid, self->newuid, self->newgid); 
+ustack(); 
+printf ("retcode: %d\n", args[0]); 
+}
+
+syscall:freebsd:__acl_set_file:entry 
+{
+self->path = copyinstr(arg0); 
+self->act =arg1; 
+self->acp =args[2]; 
+self->acs = copyin ( ( uintptr_t) args[2], sizeof ( struct acl)); 
+}
+syscall:freebsd:__acl_set_file:return /arg0 != 1 /
+{
+printf ("\nacl  fail backtrace why :%d  who: %d", errno, uid); 
+printf ("\npath: %s, acl_t: %d", self->path, self->act); 
+printf ("aclp\n:"); 
+print(*(struct acl*)self->acs);
+printf ("%s ",  probefunc); 
+printf ("ret:%d \n",  arg0); 
+ustack();
+}
+
+syscall:freebsd:__acl*:return /arg0 == 0 /
+{
+@["aclsuccess",uid]= count(); 
+}
+syscall:freebsd:chown:return /arg0 == 0 /
+{
+@["chownsuccess",uid]= count(); 
+}
