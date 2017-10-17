@@ -2,12 +2,14 @@
 
 /* dt_latency_by_syscall preadv
 
+obsoleted by latency_generic.dtrace
+
 */
 syscall::$1:entry 
 	{
 	self->starttime = timestamp;
 	}
-syscall::$1:return 
+syscall::$1:return  / self->starttime /
 	{
 	@["delta(ns)",execname]  =  quantize ( timestamp - self->starttime); 
 	self->starttime = 0 ; 

@@ -7,6 +7,8 @@ syscall:::entry / execname == target_execname /
 { @hist[probefunc,probemod] = count ();}
 
 tick-3sec
-{ printa ( @hist); 
-clear (@hist); }
+{ 
+	printa ( @hist); 
+	trunc (@hist); 
+}
 '

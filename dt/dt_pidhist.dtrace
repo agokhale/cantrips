@@ -8,4 +8,4 @@ syscall:::entry /pid==$1/
 
 tick-3sec
 { printa ( @hist); 
-clear (@hist); }
+trunc (@hist); }

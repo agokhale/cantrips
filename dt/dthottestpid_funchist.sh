@@ -1,2 +1,2 @@
 #!/bin/sh
-dtrace -n 'pid$1:::entry { @[probefunc] = count(); }' `top -b | head -10 | tail -1 | chomp | cut -w -f1`
+dtrace -n 'pid$1:::entry { @[probefunc] = count(); }' `ps -auxw | awk  '/^/  {print ($3,$2, $0);}' | sort -n | tail -2 | head -1 | awk  '/^/ { print ($2);}'`

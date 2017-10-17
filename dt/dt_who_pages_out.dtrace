@@ -1,3 +1,6 @@
 #!/usr/sbin/dtrace -s
+#pragma D option quiet
+
 fbt::*pageout:entry  { @[execname, probefunc] = count()}  
-tick-3s {printa (@); clear(@)}
+
+tick-3s {printa (@); trunc(@)}

@@ -1,0 +1,13 @@
+#!/usr/sbin/dtrace -s
+/* 
+latency_generic.dtrace syscall preadv
+*/
+$1::$2:entry 
+	{
+	self->starttime = timestamp;
+	}
+$1::$2:return  /self->starttime/
+	{
+	@["delta(us)", execname, probeprov, probefunc] = quantize ( (timestamp - self->starttime)/1000); 
+	self->starttime = 0 ; 
+	}
