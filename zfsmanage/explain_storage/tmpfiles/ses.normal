@@ -1,16 +1,8 @@
- slot:  Disk #00 status: OK ses: ses0 empty:  pass13
+ slot:  Disk #00 status: OK ses: ses0 disk:  da0
  slot:  Disk #01 status: OK ses: ses0 disk:  da1
- slot:  Disk #02 status: OK ses: ses0 disk:  da0
- slot:  Disk #03 status: OK ses: ses0 disk:  da2
- slot:  Disk #04 status: OK ses: ses0 disk:  da3
- slot:  Disk #05 status: OK ses: ses0 disk:  da4
- slot:  Disk #06 status: OK ses: ses0 disk:  da5
- slot:  Disk #07 status: OK ses: ses0 disk:  da6
- slot:  Disk #08 status: OK ses: ses0 disk:  da8
- slot:  Disk #09 status: OK ses: ses0 disk:  da7
- slot:  Disk #0A status: OK ses: ses0 disk:  da9
- slot:  Disk #0B status: OK ses: ses0 disk:  da10
- slot:  Disk #0C status: OK ses: ses0 disk:  da11
- slot:  Disk #0D status: OK ses: ses0 disk:  da13
- slot:  Disk #0E status: OK ses: ses0 disk:  da14
- slot:  Disk #0F status: OK ses: ses0 disk:  da15
+ slot:  Disk #02 status: OK ses: ses0 disk:  da2
+ slot:  Disk #03 status: OK ses: ses0 disk:  da3
+ slot:  Disk #04 status: OK ses: ses0 disk:  da4
+ slot:  Disk #05 status: OK ses: ses0 disk:  da5
+ slot:  Disk #06 status: OK ses: ses0 disk:  da6
+ slot:  Disk #07 status: OK ses: ses0 disk:  da7

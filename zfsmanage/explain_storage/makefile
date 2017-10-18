@@ -10,7 +10,7 @@ livepool: dir
 ses: 
 	cat infiles/sesutil.out | ./normalize_ses.nawk
 glabel:  dir
-	glabel status >  infiles/glabel.out
+	glabel status  >  infiles/glabel.out
 liveses:  dir
 	sesutil map | ./normalize_ses.nawk | tee tmpfiles/ses.normal
 

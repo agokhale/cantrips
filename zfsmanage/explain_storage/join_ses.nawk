@@ -4,23 +4,26 @@
 # slot:  Disk #02 status: OK ses: ses0 disk:  da0
 # -or-
 # slot:  Disk #00 status: OK ses: ses0 empty:  pass13
+# ses devices must be ' da'
 /disk/ {
 	FS=":"
 	ldiskdev = $5
 	#get the leaf vdev from the gptlabel output
 	#BUG:worst join ever; this is n^2 for disk count , meh. 
 	#Should be in the working set.; don't replace the file with the pipe implemenation
-	grepsuccess="grep " ldiskdev  " infiles/glabel.out " | getline sesline
+	grepsuccess="grep " ldiskdev  " infiles/glabel.out  | grep ' da'" | getline sesline
 	if ( grepsuccess ) {
 		split (sesline, sessplit , " " )
 		vdev_leaf = sessplit[1]
 		# check for pool membership of the leaf device
-		grepleafsuccess="grep " vdev_leaf  " tmpfiles/pool.normal " | getline poolline	
+		grepleafsuccess="grep " vdev_leaf  " tmpfiles/pool.normal" | getline poolline	
 		if ( grepleafsuccess ) { 
 			print  $0 " " poolline
 		} else 	 {
 			print  $0 " " vdev_leaf " no_pool"
 		}
+	sesline=""
+	ldiskdev=""
 	}
 	
 }
