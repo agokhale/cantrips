@@ -1,4 +1,5 @@
 #!/usr/bin/nawk -f
+# cat infiles/pool.normal | ./join_pool.nawk
 
 /disk:/ {
 	FS=":"
@@ -12,9 +13,28 @@
 		rdiskdev=sessplit[3]
 		gsub (/p[0-9]/,"", rdiskdev);
 		print ( "/dev: " rdiskdev " " $0); 
+		} else {
+			#print " 5: " $5 " 6: " $6 " 7: "$7;	
+			#resuce the gpid for a an offline disk 
+			if ( match ($6, "gptid") ){
+				ldiskdev = $6
+				gsub ( /0was\/dev\//	, "" , ldiskdev); 
+				grepsuccess="grep " ldiskdev  " infiles/glabel.out " | getline sesline
+				if ( grepsuccess )  {
+					split (sesline, sessplit , " " ) 
+					rdiskdev=sessplit[3]
+					gsub (/p[0-9]/,"", rdiskdev);
+					print ( "/dev: " rdiskdev " " $0); 
+				}
+	
+			
+				
+			} else { 
+			#no label; print somthing
+			print ("noglabel: " $0);	
+			}
 		}
 	}
-#:
 #disk: ada0p2 state: ONLINE vdev: mirror-0 pool: freenas-boot
 #disk: ada1p2 state: ONLINE vdev: mirror-0 pool: freenas-boot
 #disk: gptid/620dd98a-1911-11e6-9b9f-74d435cbbed0 state: ONLINE vdev: mirror-0 pool: test0
