@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.5"
+set ashrcversion = "10.2.5.1"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
@@ -68,7 +68,8 @@ foreach pathroot ( $path_roots )
             if ( -e $pathroot/$pathcomponent/no_auto_path ) then
                 # permit skipping paths that would  conflict with 
 		# important things eg msp430/bin/cpp which clobbers ports builds 
-                #echo skipping $pathcomponent in path  due to no_auto_path file found
+                # echo skipping $pathcomponent in path  due to no_auto_path file found
+		set pathskipped=($?pathskipped $pathroot/$pathcomponent)
 	    else
                 if ( $PATH =~ "*$pathroot/$pathcomponent*" ) then 
                     #echo "found $pathroot/$pathcomponent redundant"
@@ -307,15 +308,17 @@ if ( $?prompt ) then
 	#unsetenv LS_COLOR
 	set listflags="XaA"
 	alias v 	view
-	alias sshinitagent 'mkdir -p ~/.xpitmp/; ssh-agent > ~/.xpitmp/ssh-agent.csh'
+	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
 	alias keydsaold 	'cat ~/.ssh/id_[rd]sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys2; chmod 600 .ssh/authorized_keys2"'
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub     | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
-	alias blastcshrc 'scp ~/.cshrc \!\!:1'
-	complete blastcshrc 'p/1/$hosts/'
 	alias fixcshrc 'mv -f ~/.cshrc /tmp/oldcshrc; scp xpi@aeria.net:.cshrc ~/'
 	complete keydsa  'p/1/$hosts/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
+	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
+		set ssh_agent_report=`source ${HOME}/.tmp/ssh-agent.csh; echo "";  ssh-add -l`
+		#what could possibly wrong with picking up a random file?
+	endif
 	alias df	df -k
 	alias du	du -xk
 	alias h		'history -r | more'
@@ -476,5 +479,8 @@ if ( $?prompt ) then
 		
 	printf "\b*\b"
 	echo  $dcmesg
+	if ( $?ssh_agent_report ) then 
+		echo $ssh_agent_report 
+	endif
 endif # if prompt
 
