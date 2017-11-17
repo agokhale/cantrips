@@ -1,0 +1,15 @@
+#!/bin/sh
+urlwv='http://www.ssd.noaa.gov/goes/comp/ceus/wv-animated.gif'
+urlv='http://www.ssd.noaa.gov/goes/comp/ceus/vis-animated.gif'
+rez='4440x3100'
+rez='444x310'
+
+
+while true; do
+curl $urlwv | \
+	convert -resize $rez -level 0%,230% - - | \
+	animate -window root -scenes 2,9 \
+		-background black -loop 20 \
+		-monitor -pause 1 \
+		-
+done
