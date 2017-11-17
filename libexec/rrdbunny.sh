@@ -60,8 +60,8 @@ first_ts=`rrdtool first --rraindex $ra_idx $rrd_infile`
 last_ts=`rrdtool last $rrd_infile` 
 
 #shrink the view window by some hours
-first_ts=$(($first_ts - (3600 * 2)))
-last_ts=$(($last_ts - (3600 * 16)))
+first_ts=$(($first_ts - (3600 * 0) ))
+last_ts=$(($last_ts - (3600 * 0 )))
 
 echo "$first_ts to $last_ts"
 echo 'control q to quit xv'
