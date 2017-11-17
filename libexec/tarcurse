@@ -1,0 +1,60 @@
+#!/bin/sh
+
+# unpack_skel 
+unpack_skel()
+{
+skeldir="cursed_$in_archive"
+skeldir=$skeldir".d" #appen thing 
+mkdir $skeldir || exit 2
+echo now in `realpath $skeldir`
+cd $skeldir
+}
+
+unpack_bzip2() 
+{
+unpack_skel
+bunzip2 -c  $frealpath > payload
+tarcurse payload
+}
+unpack_gzip() 
+{
+unpack_skel
+gunzip -fk --to-stdout  $frealpath > payload
+tarcurse payload
+}
+unpack_tar()
+{
+unpack_skel
+tar -xf $frealpath
+# now recurse on things in the archive
+find . -print0  | xargs  -0 -n1 tarcurse
+}
+unpack_zip()
+{
+unpack_skel
+unzip $frealpath
+# now recurse on things in the archive
+find . -print0  | xargs -0  -n1 tarcurse
+}
+####################################################
+in_archive=$1
+
+if [ $# -lt 1 ] ; then
+        echo "args: filename.wathever "
+	exit 1
+fi
+
+ftype=`file $in_archive`
+frealpath=`realpath $in_archive`
+echo "$in_archive .. is  a  $ftype"
+
+case "$ftype" in
+	*"gzip"*) echo gzp; unpack_gzip ;;
+	*"bzip"*) echo bzip2; unpack_bzip2;;
+	*"POSIX tar archive"*) echo bzip ; unpack_tar;;
+	*"Zip archive data"*) echo Zip ; unpack_zip;;
+	*) echo no mactch for $ftype;;
+esac
+
+
+
