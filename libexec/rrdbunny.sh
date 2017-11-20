@@ -44,15 +44,24 @@ for ds in $data_sources ; do
 done 
 
 #
-ra_idx=9 #average
-#2weeks
-ra_idx=11 #average
-#ra_idx=1
-#4 days
-ra_idx=3
-#1 day
-#ra_idx=1
-#ra_idx=7
+ra_idx=0 #3 hours
+ra_idx=1 #3 hours
+ra_idx=2 #3  hours
+ra_idx=3 #24 hours
+ra_idx=4 #24 hours
+ra_idx=5 #24 hours
+ra_idx=6 #7*(24) hours
+ra_idx=7 #7*(24) hours
+ra_idx=8 #7*(24) hours
+ra_idx=9  # 1 month 
+ra_idx=10 # 1 month 
+ra_idx=11 # 1 month 
+ra_idx=12 # 1 year 
+ra_idx=13 # 1 year 
+ra_idx=14 # 1 year 
+
+
+ra_idx=6 
 
 #get epoch timestamps
 first_ts=`rrdtool first --rraindex $ra_idx $rrd_infile`
@@ -60,7 +69,7 @@ first_ts=`rrdtool first --rraindex $ra_idx $rrd_infile`
 last_ts=`rrdtool last $rrd_infile` 
 
 #shrink the view window by some hours
-first_ts=$(($first_ts - (3600 * 0) ))
+first_ts=$(($first_ts + (3600 * (0 *5)) ))
 last_ts=$(($last_ts - (3600 * 0 )))
 
 echo "$first_ts to $last_ts"
