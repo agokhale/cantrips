@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.5.1"
+set ashrcversion = "10.2.5.2"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
