@@ -61,7 +61,7 @@ ra_idx=13 # 1 year
 ra_idx=14 # 1 year 
 
 
-ra_idx=6 
+ra_idx=5 
 
 #get epoch timestamps
 first_ts=`rrdtool first --rraindex $ra_idx $rrd_infile`
@@ -69,10 +69,10 @@ first_ts=`rrdtool first --rraindex $ra_idx $rrd_infile`
 last_ts=`rrdtool last $rrd_infile` 
 
 #shrink the view window by some hours
-first_ts=$(($first_ts + (3600 * (0 *5)) ))
-last_ts=$(($last_ts - (3600 * 0 )))
+#first_ts=$((  $first_ts + (3600 * (0) )    ))
+#last_ts=$((    $last_ts - (3600 * (0) )       ))
 
-echo "$first_ts to $last_ts"
+echo "$first_ts `date -r $first_ts` to $last_ts `date -r $last_ts`"
 echo 'control q to quit xv'
 rrdtool graph - --imgformat PNG \
 	-t "bunnies as of  $first_ts ` date -r $first_ts` - $last_ts `date -r $last_ts` "  \
