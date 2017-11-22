@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.5.1"
+set ashrcversion = "10.2.5.2"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
@@ -33,7 +33,8 @@ set path_components = ( bin sbin libexec games tools )
 #start with minimal paths so we have a path should things short out during launch
 # you will see a P
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
+setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
@@ -324,7 +325,7 @@ if ( $?prompt ) then
 	alias h		'history -r | more'
 	alias wipe	'echo -n  > '
 	alias lf	ls -FA
-	alias ll	ls -lgsAF
+	alias ll	ls -lgsArtF
 	alias lr	ls -lgsAFR
 	alias netwtf 	'netstat -in; curl 'http://geoiplookup.wikimedia.org' &;  p tunnelclient; ping -c 1 -q 8.8.8.8 > /dev/null || echo "google unreachable" & ; ping -c1 -q aeria.net > /dev/null || echo "aeria unrch" &; '
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
