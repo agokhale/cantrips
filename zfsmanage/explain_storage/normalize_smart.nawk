@@ -34,7 +34,21 @@
 
 ($0 ~ /^write/  ) {
 	ldelaywrite = $3
-	print (ldev " " lmo ":" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
+
+($0 ~ /^read/  ) {
+	uncorrRead = $8
+	}
+
+($0 ~ /^write/  ) {
+	uncorrWrite = $8
+	}
+
+($0 ~ /^Elements/  ) {
+	defectList = $6
+	if (defectList || uncorrRead || uncorrWrite)
+		print (ldev " " lmo ":" lsn " C:" ltemp " dW:" ldelaywrite " dR:" ldelayread " uR:" uncorrRead " uW:" uncorrWrite " dL:" defectList " **!!**")
+	else
+		print (ldev " " lmo ":" lsn " C:" ltemp " dW:" ldelaywrite " dR:" ldelayread " uR:" uncorrRead " uW:" uncorrWrite " dL:" defectList )
 	}
 
 
