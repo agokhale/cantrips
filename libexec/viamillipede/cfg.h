@@ -18,7 +18,6 @@
 #include "util.h"
 
 #define kfootsize (1024 * 1024 )
-#define kfootcount 4 
 
 struct txconf_s;  // forward decl to permit inception 
 struct rxconf_s;  // forward decl to permit inception 

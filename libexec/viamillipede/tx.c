@@ -37,9 +37,16 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
 	return (  (fuse < 1 )? -1 : accumulator ); 
 } 
 
+
+int ebackoff ( int spins ) {
+	int clipped; 
+	clipped = MIN( 5000000,  200 + 4*spins  );
+	return  ( 1000000 * spins ) ;
+}
 int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	int retcode =-1 ; 
 	txstatus ( txconf ); 
+	int spins; 
 	while (   retcode < 0  ) {
 		//XXX fix bounds 
 		for ( int i = 0 ; (i < txconf->worker_count) && (retcode < 0 ) ; i++ ) {
@@ -47,16 +54,16 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 			if ( txconf->workers[i].state == 'i' ) {
 				//hold lock untill the buffer is filled
 				retcode = i; 
+				spins = 0 ;	
 			} else {
 				//pthread_mutex_unlock (&(txconf->workers[i].mutex));
 			}
-			
 		}
 		if (retcode <  0 ) {
-			whisper ( 3, "no workers available\n"); 
 			txstatus ( txconf ); 
-			//XXX e^t backoff?
-			usleep ( 100000 );
+			spins++; 
+			whisper ( 3, "no workers available backing off\n" ); 
+			usleep (1000000);
 		}
 	}
 
@@ -180,7 +187,7 @@ void txworker (struct  txworker_s *txworker ) {
 			}
 		pthread_mutex_unlock ( &(txworker->mutex));
 		state_spin ++; 
-		if ( (state_spin % 1000) == 0 )  {
+		if ( (state_spin % 1000) == 0 && ( txworker->state == 'i' ) )  {
 			txstatus ( txworker -> txconf_parent ) ; 
 			whisper ( 9, "txw:%i is loney after %i spins \n", txworker->id, state_spin); 
 		}
@@ -218,8 +225,7 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 		worker_cursor++;
 		}	
 	txstatus ( txconf);
-	
-	}
+}
 
 void txstatus ( struct txconf_s* txconf ) {
 	whisper ( 3, "\n");
@@ -234,7 +240,7 @@ void txbusyspin ( struct txconf_s* txconf ) {
 	char  instate; 
 	while (!done) {
 		usleep ( 10000);  // e^n backoff?
-		txstatus( txconf ); 
+		if ( (busy_cycles % 100000) == 0 ) txstatus( txconf ); 
 		busy_cycles++; 
 		int busy_workers = 0; 
 		for ( int i =0; i < txconf->worker_count ; i++ ) {

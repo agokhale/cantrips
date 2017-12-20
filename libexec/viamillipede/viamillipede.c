@@ -36,7 +36,12 @@ while ( arg_cursor  < argc  ) {
 		whisper (3, "host: %s port:%i ", txconf.hostname, txconf.port); 
 		txconf.worker_count = 4; // needs arg parsing XXX
 		mode = 1;
-		}
+	}
+	if ( strcmp ( argv[arg_cursor] , "threads" )  == 0 ) {
+		assert ( ++ arg_cursor < argc  && "threads needs <numeber> arguments");
+		txconf.worker_count  = atoi ( argv[ arg_cursor ] ); 
+		
+	}
 	if ( strcmp ( argv[arg_cursor] , "verbose" )  == 0 ) {
 		assert ( ++ arg_cursor < argc  && "verbose  needs <level ( 0 - 19) > argument");
 		gverbose  = atoi ( argv[arg_cursor]);
