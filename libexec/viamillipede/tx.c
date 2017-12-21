@@ -1,5 +1,24 @@
 #include "worker.h"
 
+void stopwatch_start (struct  timespec * t ) {
+	assert ( clock_gettime( CLOCK_UPTIME, t ) == 0); 	
+}
+int stopwatch_stop ( struct  timespec * t  , int  whisper_channel) { 
+	//  stop the timer started at t 
+	struct timespec stoptime;
+	assert ( clock_gettime( CLOCK_UPTIME, &stoptime ) == 0 ); 	
+	time_t secondsdiff =     stoptime.tv_sec   - t->tv_sec  ;
+	long nanoes =            stoptime.tv_nsec  - t->tv_nsec; 
+
+	if ( nanoes < 0 ) {
+		// borrow billions place nanoseconds to come up true
+		//nanoes += 1000000000;
+		//secondsdiff ++;
+	}
+	u_long ret = MIN( ULONG_MAX,  (secondsdiff * 1000000 ) + (nanoes/1000));
+	if ( whisper_channel > 0 ) { whisper ( whisper_channel, "%li.%03li", secondsdiff, nanoes/100000); }
+	return  ret; 
+}
 u_char * bf; 
 // forcefully read utill a bufffer completes or EOF
 ssize_t gavage ( int fd, u_char * dest, size_t size ) {
@@ -85,8 +104,8 @@ void txingest (struct txconf_s * txconf ) {
 	int foot_cursor =0;
 	int done =0; 
 	u_char taste_buf; 
-	unsigned long stream_accumulator =0; 
 	int ingest_leg_counter = 0; 
+	txconf->stream_total_bytes=0; 
 	checkperror("nuisancse ingest err");
 	while ( !done ) {
 		// select XXX a free foot worker
@@ -112,16 +131,17 @@ void txingest (struct txconf_s * txconf ) {
 			txconf->workers[worker].bufferleg = ingest_leg_counter; 
 			start_worker ( &(txconf->workers[worker]) );
 			ingest_leg_counter ++; 
-			stream_accumulator += readsize ; 
+			txconf->stream_total_bytes += readsize ; 
 		} else { 
-			whisper ( 3, "ingest no more stdin"); 
+			whisper ( 13, "ingest no more stdin"); 
 			done =1;
 		}
 	}
-	whisper ( 3, "ingest complete for fd %i  %lu  bytes\n",in_fd, stream_accumulator); 
-	
-	
-	
+
+	whisper ( 2, "ingest complete for %lu(bytes) in ",txconf->stream_total_bytes); 
+	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
+	//bytes per usec - thats interesting 
+	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes *0.0000001) / (0.000001 * usecbusy  )    );
 }
 
 
@@ -193,7 +213,7 @@ void txworker (struct  txworker_s *txworker ) {
 			txstatus ( txworker -> txconf_parent ) ; 
 			whisper ( 9, "txw:%i is loney after %i spins \n", txworker->id, state_spin); 
 		}
-		usleep ( 1000 ); 
+		usleep ( 100 ); 
 	} // while !done 
 } //  txworker
 
@@ -223,7 +243,7 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 			);
 		checkperror ("pthread launch"); 
 		assert ( ret == 0 && "pthread launch"); 
-		usleep (201000);  // XXXX
+		//usleep (1000);  // XXXX
 		worker_cursor++;
 		}	
 	txstatus ( txconf);
@@ -255,13 +275,21 @@ void txbusyspin ( struct txconf_s* txconf ) {
 	}
 	whisper ( 4, "all workers idled after %i spins\n", busy_cycles); 
 }
+struct txconf_s *gtxconf; 
 void wat ( ) {
+	struct txconf_s *txconf=gtxconf;
 	fprintf (  stderr, "I'm walking here"); 
+	whisper ( 2, "all complete for %lu(bytes) in ",txconf->stream_total_bytes); 
+	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
+	//bytes per usec - thats interesting  bytes to mb 
+	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes * 0.0000001) / (0.000001 * usecbusy  )    );
 }
+
+
 void tx (struct txconf_s * txconf) {
 	int retcode; 
 	int done = 0; 
-	
+	gtxconf = txconf;	
 	//start control channel
         struct sigaction lsigwat;
         sigset_t sigsetmask;
@@ -270,9 +298,14 @@ void tx (struct txconf_s * txconf) {
         lsigwat.sa_mask = sigsetmask;
         lsigwat.sa_handler = (void (*)) &wat;
         sigaction (SIGSEGV, &lsigwat,NULL);
-
-	txlaunchworkers ( txconf ); 	
+	stopwatch_start( &(txconf->ticker) ); 
+	txlaunchworkers( txconf ); 	
 	bf = malloc ( kfootsize); 
 	txingest ( txconf ); 
 	txbusyspin ( txconf ); 
+
+	whisper ( 2, "all complete for %lu(bytes) in ",txconf->stream_total_bytes); 
+	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
+	//bytes per usec - thats interesting  bytes to mb 
+	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes * 0.0000001) / (0.000001 * usecbusy  )    );
 }

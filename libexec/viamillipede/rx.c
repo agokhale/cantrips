@@ -8,7 +8,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	char  okphrase[] ="ok";
 	char  checkphrase[] ="yoes";
 	u_char   rxpreamble_in [2]; 
-	u_char   rxpreamble [] = { 0xa5, 0x5a}; 
+	u_char   rxpreamble_cannon [] = { 0xa5, 0x5a}; 
 	int rxbuffersize; 
 	int rxbufferleg; 
 	buffer = calloc ( 1 , (size_t)kfootsize );
@@ -18,10 +18,11 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	checkperror (" nuiscance ");
 	assert ( write (rxworker->fd, okphrase, (size_t)  2 ) && "sigwritefail");
 	checkperror ( "signaturewrite "); 
+	// /usr/src/contrib/netcat has a nice pipe input routine
 	while ( ! done) {
 		readlen = read ( rxworker->fd , rxpreamble_in, 2 );  // XXX this shuold all be XDR/protocol 
 		//XXXX way too hot
-		whisper ( 19 ," worker %i readpreamlble: %i\n", rxworker->id, readlen); 
+		whisper ( 19 ,"rxw:%i preamble: %i\n", rxworker->id, readlen); 
 		// this is where we expect to die when eof comes for us; or the line idles
 		//assert ( readlen == 2 && "preamble read failure"); 
 		// so dont' assert 
@@ -30,11 +31,12 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		}
 		if ( readlen == 0 ) { 	
 			//usleep ( 100);  //XXXX
-			pthread_exit ( NULL); 
+			whisper ( 6, "rxw:%i last_leg:%i exits after empty preable", rxworker->id, rxbufferleg); 
+			pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
 			continue;
 		}; 
 		
-		assert ( bcmp ( rxpreamble_in, rxpreamble, 2) == 0  && "preamble check  fail")	;
+		assert ( bcmp ( rxpreamble_in, rxpreamble_cannon, 2) == 0  && "preamble check");
 		readlen = read ( rxworker->fd , &rxbuffersize , sizeof (int) ); 
 		assert ( readlen == sizeof(int)); 
 		if ( rxbuffersize < 1 )  {
@@ -54,7 +56,8 @@ void rxworker ( struct rxworker_s * rxworker ) {
 			readsize = read ( rxworker->fd, buffer+cursor, MIN(remainder, MAXBSIZE )); 
 			cursor += readsize; 
 			remainder -= readsize ; 
-			if (readsize == 0) {
+			assert ( readsize > 0 );  //XXX 
+			if (readsize == 0) { //XXXXXXXX 
 				whisper ( 9, "0 byte read ;giving up. are we done?" );  // XXX this shoulf not be the end
 				done = 1; 	
 				break;
@@ -81,8 +84,12 @@ void rxworker ( struct rxworker_s * rxworker ) {
 			cursor += writesize; 
 			remainder -= writesize ; 
 		}
-		rxworker->rxconf_parent->next_leg ++ ;
 		checkperror ("write buffer"); 	
+		//XXX protect with mutex?
+		rxworker->rxconf_parent->next_leg ++ ;
+		rxbufferleg = -77;	
+		rxbuffersize= -55;
+		readlen = readsize = -111;
 	}// while !done
 	whisper ( 7, "rxw:%i leg:%i done\n", rxworker->id, rxbufferleg); 
 	
@@ -101,6 +108,7 @@ void rxlaunchworkers ( struct rxconf_s * rxconf ) {
 		whisper ( 5, " rxworker %i stalled ", worker_cursor); 
 		rxconf->workers[worker_cursor].fd = tcp_accept ( &(rxconf->sa), rxconf->socknum); 
 		whisper ( 5, " rxw:%i connected fd:%i\n", worker_cursor, rxconf->workers[worker_cursor].fd); 
+		// all the bunnies made to hassenfeffer
 		retcode = pthread_create ( 
 			&rxconf->workers[worker_cursor].thread, 
 			NULL, //attrs - none

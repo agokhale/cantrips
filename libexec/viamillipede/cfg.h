@@ -37,6 +37,8 @@ struct txworker_s {
 
 struct txconf_s {
 	int worker_count;
+	struct timespec ticker; 
+	u_long stream_total_bytes; 
 	struct txworker_s workers[16];	//XXX make dynamic??? 
 	char * hostname; 
 	unsigned short port;
