@@ -10,9 +10,11 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
 	int fuse=1055;  // don't spin  forever
 	do	{
 		assert ( (fuse > 1 ) && "fuse blown" ); 
+		checkperror ( "nuiscance sdinread"); 
+		
 		readsize = read( fd, dest_cursor ,MIN( MAXBSIZE, remainder) ); 
 		checkperror( "gavageread"); 
-		whisper( 18, "txingest: read stdin size %ld offset:%i remaining %i \n", readsize,(int) ((u_char*)dest_cursor -  (u_char*)dest), remainder ); 
+		whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n", readsize,(int) ((u_char*)dest_cursor -  (u_char*)dest), remainder ); 
 		if ( readsize < 0 ) { 
 			whisper (2, "negative read"); 
 			perror ( "negread"); 
@@ -103,8 +105,8 @@ void txingest (struct txconf_s * txconf ) {
 			int worker = dispatch_idle_worker ( txconf ); 
 			txconf->workers[worker].buffer[0] = taste_buf;
 			readsize = gavage (  in_fd ,(u_char *) (txconf->workers[worker].buffer)+1 , kfootsize-1  ) ;  // unfortunate alignment due to taste
-			whisper ( 7, "\ntxw:%i reading leg %i : fd:%i siz%i\n",worker,  ingest_leg_counter, in_fd, kfootsize-1); 
-			if ( readsize > kfootsize-1) { whisper (3,"too big read %i", readsize); }
+			whisper ( 7, "\ntxw:%i read leg %i : fd:%i siz:%i\n",worker,  ingest_leg_counter, in_fd, kfootsize-1); 
+			if ( readsize > kfootsize-1) { whisper (1,"too big read %i", readsize); }
 			assert ( readsize+1 <= kfootsize ); 
 			txconf->workers[worker].buffersize = readsize+1;   // +1 for the tasing byte
 			txconf->workers[worker].bufferleg = ingest_leg_counter; 
@@ -143,7 +145,7 @@ void txpush ( struct txworker_s *txworker ) {
 		writelen = write ( txworker->sockfd , ((txworker->buffer)+cursor) , MIN (MAXBSIZE,writeremainder)  ) ;
 		writeremainder -= writelen; 
 		cursor += writelen; 
-		whisper (9, "txw:%i.%i.%i ", txworker->id, writelen,writeremainder); 
+		whisper (10, "txw:%i push leg:%i.(+%i -%i)  ", txworker->id, txworker->bufferleg, writelen,writeremainder); 
 	}
 	checkperror( "writesocket"); 
 	assert ( writelen );
@@ -228,9 +230,9 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 }
 
 void txstatus ( struct txconf_s* txconf ) {
-	whisper ( 3, "\n");
+	whisper ( 4, "\n");
 	for ( int i=0; i < txconf->worker_count ; i++) {
-		whisper(3, "%c:%i ", txconf->workers[i].state, txconf->workers[i].bufferleg);
+		whisper(4, "%c:%i ", txconf->workers[i].state, txconf->workers[i].bufferleg);
 		}
 }
 void txbusyspin ( struct txconf_s* txconf ) {
@@ -253,10 +255,22 @@ void txbusyspin ( struct txconf_s* txconf ) {
 	}
 	whisper ( 4, "all workers idled after %i spins\n", busy_cycles); 
 }
+void wat ( ) {
+	fprintf (  stderr, "I'm walking here"); 
+}
 void tx (struct txconf_s * txconf) {
 	int retcode; 
 	int done = 0; 
+	
 	//start control channel
+        struct sigaction lsigwat;
+        sigset_t sigsetmask;
+        sigprocmask (SIG_SETMASK, NULL, &sigsetmask);
+        lsigwat.sa_flags = 0;
+        lsigwat.sa_mask = sigsetmask;
+        lsigwat.sa_handler = (void (*)) &wat;
+        sigaction (SIGSEGV, &lsigwat,NULL);
+
 	txlaunchworkers ( txconf ); 	
 	bf = malloc ( kfootsize); 
 	txingest ( txconf ); 

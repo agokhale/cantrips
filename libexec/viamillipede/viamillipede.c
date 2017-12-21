@@ -45,7 +45,7 @@ while ( arg_cursor  < argc  ) {
 	if ( strcmp ( argv[arg_cursor] , "verbose" )  == 0 ) {
 		assert ( ++ arg_cursor < argc  && "verbose  needs <level ( 0 - 19) > argument");
 		gverbose  = atoi ( argv[arg_cursor]);
-		whisper ( 1, "verbose set to %i", gverbose ); 	
+		whisper ( 11, "verbose set to %i", gverbose ); 	
 	}
 	arg_cursor ++;
 	}

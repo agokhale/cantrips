@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <pthread.h> 
 
+#include <signal.h>
 #include "util.h"
 
 #define kfootsize (1024 * 1024 )

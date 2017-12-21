@@ -20,6 +20,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	checkperror ( "signaturewrite "); 
 	while ( ! done) {
 		readlen = read ( rxworker->fd , rxpreamble_in, 2 );  // XXX this shuold all be XDR/protocol 
+		//XXXX way too hot
 		whisper ( 19 ," worker %i readpreamlble: %i\n", rxworker->id, readlen); 
 		// this is where we expect to die when eof comes for us; or the line idles
 		//assert ( readlen == 2 && "preamble read failure"); 
@@ -28,7 +29,8 @@ void rxworker ( struct rxworker_s * rxworker ) {
 			assert (readlen  && " bad preamble read, are we done now?");
 		}
 		if ( readlen == 0 ) { 	
-			usleep ( 100); 
+			//usleep ( 100);  //XXXX
+			pthread_exit ( NULL); 
 			continue;
 		}; 
 		
@@ -82,6 +84,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		rxworker->rxconf_parent->next_leg ++ ;
 		checkperror ("write buffer"); 	
 	}// while !done
+	whisper ( 7, "rxw:%i leg:%i done\n", rxworker->id, rxbufferleg); 
 	
 }
 
