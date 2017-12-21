@@ -11,6 +11,6 @@ echo -n payload bytes:
 cat rand.payload | ./viamillipede tx localhost 12123  verbose $verb
 
 sleep 2
-kill $rxpid 
+#kill $rxpid 
 diff rand.payload rand.out
 wc  -c rand.payload rand.out

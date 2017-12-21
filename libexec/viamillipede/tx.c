@@ -60,10 +60,10 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 			}
 		}
 		if (retcode <  0 ) {
-			txstatus ( txconf ); 
+			//txstatus ( txconf ); 
 			spins++; 
-			whisper ( 3, "no workers available backing off\n" ); 
-			usleep (1000000);
+			//whisper ( 3, "no workers available backing off\n" ); 
+			usleep (1000);
 		}
 	}
 

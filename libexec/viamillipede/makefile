@@ -7,7 +7,7 @@ test: clean all
 	sh -x test.sh
 
 payload:
-	dd if=/dev/random of=rand.payload bs=1m count=4
+	dd if=/dev/random of=rand.payload bs=1m count=114
 server : 
 	./viamillipede rx 12323  verbose 19 > out.payload
 client:
