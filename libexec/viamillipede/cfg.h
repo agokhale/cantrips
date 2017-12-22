@@ -32,6 +32,7 @@ struct txworker_s {
 	u_char * buffer; 
 	int buffersize; // is ths leg filled
 	int bufferleg;  // leg is the total ordering sequence  for the stream 
+	int writeremainder;
 	
 };
 
@@ -67,7 +68,7 @@ struct rxconf_s {
 	struct sockaddr_in sa;  // reusable bound sa for later accepts
 	int socknum ;  // reusable bound socket number  later accepts
 	unsigned short port; 
-	struct rxworker_s workers[16]; 
+	struct rxworker_s workers[17]; 
 	int next_leg ; 
 	int done_mbox; 
 } ;
