@@ -1,24 +1,5 @@
 #include "worker.h"
 
-void stopwatch_start (struct  timespec * t ) {
-	assert ( clock_gettime( CLOCK_UPTIME, t ) == 0); 	
-}
-int stopwatch_stop ( struct  timespec * t  , int  whisper_channel) { 
-	//  stop the timer started at t 
-	struct timespec stoptime;
-	assert ( clock_gettime( CLOCK_UPTIME, &stoptime ) == 0 ); 	
-	time_t secondsdiff =     stoptime.tv_sec   - t->tv_sec  ;
-	long nanoes =            stoptime.tv_nsec  - t->tv_nsec; 
-
-	if ( nanoes < 0 ) {
-		// borrow billions place nanoseconds to come up true
-		//nanoes += 1000000000;
-		//secondsdiff ++;
-	}
-	u_long ret = MIN( ULONG_MAX,  (secondsdiff * 1000000 ) + (nanoes/1000));
-	if ( whisper_channel > 0 ) { whisper ( whisper_channel, "%li.%03li", secondsdiff, nanoes/100000); }
-	return  ret; 
-}
 u_char * bf; 
 // forcefully read utill a bufffer completes or EOF
 ssize_t gavage ( int fd, u_char * dest, size_t size ) {
@@ -28,9 +9,8 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
 	ssize_t readsize; 
 	int fuse=1055;  // don't spin  forever
 	do	{
-		assert ( (fuse > 1 ) && "fuse blown" ); 
 		checkperror ( "nuiscance sdinread"); 
-		
+		if ( errno !=0 ) errno = 0 ; //reset nuiscances
 		readsize = read( fd, dest_cursor ,MIN( MAXBSIZE, remainder) ); 
 		checkperror( "gavageread"); 
 		whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n", readsize,(int) ((u_char*)dest_cursor -  (u_char*)dest), remainder ); 
@@ -55,6 +35,7 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
 			}
 		}
 	} while ( (remainder > 0) && ( fuse-- > 0 ) );
+	assert ( (fuse > 1 ) && "fuse blown" ); 
 	return (  (fuse < 1 )? -1 : accumulator ); 
 } 
 
@@ -66,7 +47,7 @@ int ebackoff ( int spins ) {
 }
 int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	int retcode =-1 ; 
-	txstatus ( txconf ); 
+	txstatus ( txconf , 6); 
 	int spins; 
 	while (   retcode < 0  ) {
 		//XXX fix bounds 
@@ -81,7 +62,7 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 			}
 		}
 		if (retcode <  0 ) {
-			//txstatus ( txconf ); 
+			txstatus ( txconf , 19); 
 			spins++; 
 			//whisper ( 3, "no workers available backing off\n" ); 
 			usleep (1000);
@@ -94,7 +75,7 @@ return (retcode);
 
 void start_worker ( struct txworker_s * txworker ) {
 	txworker->state='d'; 	
-	txstatus ( txworker->txconf_parent ); 
+	txstatus ( txworker->txconf_parent, 6 ); 
 }
 	
 //dump stdin in chunks
@@ -138,20 +119,20 @@ void txingest (struct txconf_s * txconf ) {
 		}
 	}
 
-	whisper ( 2, "ingest complete for %lu(bytes) in ",txconf->stream_total_bytes); 
-	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
+	whisper ( 4, "ingest complete for %lu(bytes) in ",txconf->stream_total_bytes); 
+	u_long usecbusy = stopwatch_stop( &(txconf->ticker),4 );
 	//bytes per usec - thats interesting 
-	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes *0.0000001) / (0.000001 * usecbusy  )    );
+	whisper (4, " %8.4f mbps\n" , ( txconf->stream_total_bytes *0.0000001) / (0.000001 * usecbusy  )    );
 }
 
 
 void txpush ( struct txworker_s *txworker ) {
 	//push this buffer out the socket
 	int writelen =-1; 
-	int writeremainder = txworker->buffersize;
+	txworker->writeremainder = txworker->buffersize;
 	int cursor=0 ;
 	u_char preamble[]= {0xa5,0x5a};
-	assert ( writeremainder <= kfootsize ); 
+	assert ( txworker->writeremainder <= kfootsize ); 
 	checkperror( "writesocket nuisnace err"); 
 	
 	write (txworker->sockfd ,  preamble, 2);  // this XXX hsoule be  a protocol
@@ -161,11 +142,11 @@ void txpush ( struct txworker_s *txworker ) {
 	write (txworker->sockfd ,  &(txworker->bufferleg), sizeof(int)); 
 		whisper (9, "."); 
 
-	while (  writeremainder  ) {
-		writelen = write ( txworker->sockfd , ((txworker->buffer)+cursor) , MIN (MAXBSIZE,writeremainder)  ) ;
-		writeremainder -= writelen; 
+	while (  txworker->writeremainder  ) {
+		writelen = write(txworker->sockfd , ((txworker->buffer)+cursor) , MIN (MAXBSIZE,txworker->writeremainder) ) ;
+		txworker->writeremainder -= writelen; 
 		cursor += writelen; 
-		whisper (10, "txw:%i push leg:%i.(+%i -%i)  ", txworker->id, txworker->bufferleg, writelen,writeremainder); 
+		whisper (10, "txw:%i push leg:%i.(+%i -%i)  ",txworker->id,txworker->bufferleg,writelen,txworker->writeremainder); 
 	}
 	checkperror( "writesocket"); 
 	assert ( writelen );
@@ -194,7 +175,7 @@ void txworker (struct  txworker_s *txworker ) {
 	checkperror ("read fail"); 
 	assert ( bcmp ( checkphrase, readback, 2 ) == 0 ); 
 	whisper ( 8, "txw:%i online and idling fd:%i\n", txworker->id, txworker->sockfd);
-	txstatus (txworker->txconf_parent); 
+	txstatus (txworker->txconf_parent,7); 
 	txworker->state = 'i'; //idle
 	txworker->buffer = calloc ( 1,(size_t) kfootsize ); 
 	txworker->buffersize = 0 ; 
@@ -210,7 +191,7 @@ void txworker (struct  txworker_s *txworker ) {
 		pthread_mutex_unlock ( &(txworker->mutex));
 		state_spin ++; 
 		if ( (state_spin % 1000) == 0 && ( txworker->state == 'i' ) )  {
-			txstatus ( txworker -> txconf_parent ) ; 
+			txstatus ( txworker -> txconf_parent,10 ) ; 
 			whisper ( 9, "txw:%i is loney after %i spins \n", txworker->id, state_spin); 
 		}
 		usleep ( 100 ); 
@@ -243,16 +224,23 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 			);
 		checkperror ("pthread launch"); 
 		assert ( ret == 0 && "pthread launch"); 
-		//usleep (1000);  // XXXX
+		//allow the remote connection some refractory time to spawn another accept
+		usleep (10000);  
 		worker_cursor++;
 		}	
-	txstatus ( txconf);
+	txstatus ( txconf, 5);
 }
 
-void txstatus ( struct txconf_s* txconf ) {
-	whisper ( 4, "\n");
+void txstatus ( struct txconf_s* txconf , int log_level) {
+	whisper ( log_level, "\n");
+	
 	for ( int i=0; i < txconf->worker_count ; i++) {
-		whisper(4, "%c:%i ", txconf->workers[i].state, txconf->workers[i].bufferleg);
+		
+		whisper(log_level, "%c:%i-%i ", 
+				txconf->workers[i].state, 
+				txconf->workers[i].bufferleg,
+				(txconf->workers[i].writeremainder) >> 10 //kbytes are sufficient
+			);
 		}
 }
 void txbusyspin ( struct txconf_s* txconf ) {
@@ -261,8 +249,8 @@ void txbusyspin ( struct txconf_s* txconf ) {
 	int busy_cycles; 
 	char  instate; 
 	while (!done) {
-		usleep ( 10000);  // e^n backoff?
-		if ( (busy_cycles % 100000) == 0 ) txstatus( txconf ); 
+		usleep ( 1000);  // e^n backoff?
+		if ( (busy_cycles % 100) == 0 ) txstatus( txconf, 4 ); 
 		busy_cycles++; 
 		int busy_workers = 0; 
 		for ( int i =0; i < txconf->worker_count ; i++ ) {
@@ -273,16 +261,17 @@ void txbusyspin ( struct txconf_s* txconf ) {
 		} 
 		done = ( busy_workers == 0 ) ; 
 	}
-	whisper ( 4, "all workers idled after %i spins\n", busy_cycles); 
+	whisper ( 4, "\nall workers idled after %i spins\n", busy_cycles); 
 }
 struct txconf_s *gtxconf; 
 void wat ( ) {
 	struct txconf_s *txconf=gtxconf;
-	fprintf (  stderr, "I'm walking here"); 
-	whisper ( 2, "all complete for %lu(bytes) in ",txconf->stream_total_bytes); 
+	whisper ( 1, "\n%lu(bytes) in ",txconf->stream_total_bytes); 
 	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
+	whisper ( 1 , "\n" ); 
+	txstatus  ( txconf, 1 );  
 	//bytes per usec - thats interesting  bytes to mb 
-	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes * 0.0000001) / (0.000001 * usecbusy  )    );
+	whisper (1, "\n %8.4f mbps\n" , ( txconf->stream_total_bytes / ( 1.0 *  usecbusy  ))    );
 }
 
 
@@ -291,13 +280,7 @@ void tx (struct txconf_s * txconf) {
 	int done = 0; 
 	gtxconf = txconf;	
 	//start control channel
-        struct sigaction lsigwat;
-        sigset_t sigsetmask;
-        sigprocmask (SIG_SETMASK, NULL, &sigsetmask);
-        lsigwat.sa_flags = 0;
-        lsigwat.sa_mask = sigsetmask;
-        lsigwat.sa_handler = (void (*)) &wat;
-        sigaction (SIGSEGV, &lsigwat,NULL);
+        signal (SIGINFO, &wat);
 	stopwatch_start( &(txconf->ticker) ); 
 	txlaunchworkers( txconf ); 	
 	bf = malloc ( kfootsize); 
@@ -306,6 +289,6 @@ void tx (struct txconf_s * txconf) {
 
 	whisper ( 2, "all complete for %lu(bytes) in ",txconf->stream_total_bytes); 
 	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
-	//bytes per usec - thats interesting  bytes to mb 
-	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes * 0.0000001) / (0.000001 * usecbusy  )    );
+	//bytes per usec - thats interesting   ~== to mbps
+	whisper (1, " %8.4f mbps\n" , ( txconf->stream_total_bytes  / ( 1.0 * usecbusy  ))    );
 }

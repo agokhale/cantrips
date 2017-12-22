@@ -3,6 +3,25 @@
 #include "util.h"
 #include <sys/socket.h>
 
+void stopwatch_start (struct  timespec * t ) {
+        assert ( clock_gettime( CLOCK_UPTIME, t ) == 0);
+}
+int stopwatch_stop ( struct  timespec * t  , int  whisper_channel) {
+        //  stop the timer started at t
+        struct timespec stoptime;
+        assert ( clock_gettime( CLOCK_UPTIME, &stoptime ) == 0 );
+        time_t secondsdiff =     stoptime.tv_sec   - t->tv_sec  ;
+        long nanoes =            stoptime.tv_nsec  - t->tv_nsec;
+
+        if ( nanoes < 0 ) {
+                // borrow billions place nanoseconds to come up true
+                nanoes += 1000000000;
+                secondsdiff --;
+        }
+        u_long ret = MIN( ULONG_MAX,  (secondsdiff * 1000000 ) + (nanoes/1000));
+        if ( whisper_channel > 0 ) { whisper ( whisper_channel, "%li.%03li", secondsdiff, nanoes/1000000); }
+        return  ret;
+}
 //return a connected socket fd
 int tcp_connect ( char * host, int port )  {
 	int ret_sockfd= -1; 

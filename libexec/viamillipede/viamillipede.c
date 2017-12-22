@@ -40,6 +40,7 @@ while ( arg_cursor  < argc  ) {
 	if ( strcmp ( argv[arg_cursor] , "threads" )  == 0 ) {
 		assert ( ++ arg_cursor < argc  && "threads needs <numeber> arguments");
 		txconf.worker_count  = atoi ( argv[ arg_cursor ] ); 
+		assert ( txconf.worker_count <= 16 && "it's unlikely that a large threadcount is beneficial");
 		
 	}
 	if ( strcmp ( argv[arg_cursor] , "verbose" )  == 0 ) {

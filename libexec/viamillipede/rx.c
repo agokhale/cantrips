@@ -14,7 +14,10 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	buffer = calloc ( 1 , (size_t)kfootsize );
 	whisper ( 8, "   rx worker  connected id%i fd:%i\n", rxworker->id, rxworker->fd); 
 	read ( rxworker->fd , buffer, (size_t)  4 ); //XXX this is vulnerable to slow starts
-	if ( bcmp ( buffer, checkphrase, 4 ) == 0 ) { whisper ( 4, "checkphrase ok\n"); } else { assert (-1 && "checkphrase failure "); }	
+	if ( bcmp ( buffer, checkphrase, 4 ) == 0 ) 
+		{ whisper ( 8, "checkphrase ok\n"); } 
+	else 
+		{ assert (-1 && "checkphrase failure "); }	
 	checkperror (" nuiscance ");
 	assert ( write (rxworker->fd, okphrase, (size_t)  2 ) && "sigwritefail");
 	checkperror ( "signaturewrite "); 
@@ -40,7 +43,8 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		readlen = read ( rxworker->fd , &rxbuffersize , sizeof (int) ); 
 		assert ( readlen == sizeof(int)); 
 		if ( rxbuffersize < 1 )  {
-			whisper ( 3, "rxw:%i fishy rxbuffersize:%i  readlen:%iare we done?\n",rxworker->id, rxbuffersize,readlen);
+			whisper ( 3, "rxw:%i fishy rxbuffersize:%i  readlen:%iare we done?\n",
+				rxworker->id, rxbuffersize,readlen);
 		}
 		assert ( rxbuffersize >= 0 ); 
 		assert ( rxbuffersize <= kfootsize); 
@@ -71,7 +75,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		// possibly voilates some cocurrency noise
 		int sequencer_stalls =0 ; 
 		while ( rxbufferleg !=  rxworker->rxconf_parent->next_leg ) {
-			usleep ( 100 ); 
+			usleep ( 1000 ); 
 			sequencer_stalls++; 
 			assert ( sequencer_stalls  < 100000 && " rx sseqencer stalled");
 		}
@@ -105,9 +109,9 @@ void rxlaunchworkers ( struct rxconf_s * rxconf ) {
 	do  {
 		rxconf->workers[worker_cursor].id = worker_cursor; 
 		rxconf->workers[worker_cursor].rxconf_parent= rxconf; 
-		whisper ( 5, " rxworker %i stalled ", worker_cursor); 
+		whisper ( 8, "rxworker %i stalled ", worker_cursor); 
 		rxconf->workers[worker_cursor].fd = tcp_accept ( &(rxconf->sa), rxconf->socknum); 
-		whisper ( 5, " rxw:%i connected fd:%i\n", worker_cursor, rxconf->workers[worker_cursor].fd); 
+		whisper ( 5, "rxw:%i connected fd:%i\n", worker_cursor, rxconf->workers[worker_cursor].fd); 
 		// all the bunnies made to hassenfeffer
 		retcode = pthread_create ( 
 			&rxconf->workers[worker_cursor].thread, 
@@ -124,7 +128,6 @@ void rxlaunchworkers ( struct rxconf_s * rxconf ) {
 void rx (struct rxconf_s* rxconf) {
 	char buf;
 	int readlen; 
-	
 	rxlaunchworkers( rxconf); 
 }
 

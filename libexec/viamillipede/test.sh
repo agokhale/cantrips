@@ -1,24 +1,27 @@
 #!/bin/sh -x
-verb=${1:-4}
+verb=${1:-6}
 remotetest () {
 	pwd
 	user='xpi'
 	host='delerium'
+	#host='localhost'
 	rsh="ssh $user@$host "
-	sample="rand1.payload"
+	sample="rand10.payload"
 	echo -n rtt
 	time $rsh " echo aaack"
 	$rsh "pkill viamillipede-sample ; rm  -f /tmp/junk"
 	cat viamillipede |  $rsh "cat - > /tmp/viamillipede-sample"
- 	$rsh "cd /tmp; ./viamillipede-sample rx 12323 verbose 15  > /tmp/junk  " 2> /tmp/verr &
+	$rsh "chmod 700 /tmp/viamillipede-sample"
+ 	$rsh "cd /tmp; ./viamillipede-sample rx 12323 verbose $verb  > /tmp/junk  " 2> /tmp/verr &
 	sshpid=$!
+	sleep 1.7 
+	time viamillipede tx $host 12323 threads 16 verbose  $verb  < $sample
 	sleep 0.7 
-	time viamillipede tx delerium 12323 verbose  5  < $sample
-	sleep 0.7 
+	cat /tmp/verr
 	$rsh " md5 -q /tmp/junk"
-	md5 -q $sample
+	       md5 -q $sample
 	kill $sshpid
-	
+
 }
 
 remotetest 
