@@ -1,50 +1,5 @@
 #include "worker.h"
 
-u_char * bf; 
-// forcefully read utill a bufffer completes or EOF
-ssize_t gavage ( int fd, u_char * dest, size_t size ) {
-	int remainder=size;
-	u_char * dest_cursor = dest; 
-	ssize_t accumulator=0; 
-	ssize_t readsize; 
-	int fuse=1055;  // don't spin  forever
-	do	{
-		checkperror ( "nuiscance sdinread"); 
-		if ( errno !=0 ) errno = 0 ; //reset nuiscances
-		readsize = read( fd, dest_cursor ,MIN( MAXBSIZE, remainder) ); 
-		checkperror( "gavageread"); 
-		whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n", readsize,(int) ((u_char*)dest_cursor -  (u_char*)dest), remainder ); 
-		if ( readsize < 0 ) { 
-			whisper (2, "negative read"); 
-			perror ( "negread"); 
-			break;
-			}
-		else {
-			remainder -= readsize ; 
-			assert ( remainder >= 0); 
-			accumulator += readsize;
-			assert ( accumulator < kfootsize); 
-			dest_cursor += readsize; 
-			if ( readsize < 16384) {
-				// discourage tinygrams - they just beat us up
-				// XXX histgram the readsize and use ema to track optimal effort
-				//usleep ( 500); 
-			} 
-			if ( readsize < 1 )  { // short reads  are the end
-				break;
-			}
-		}
-	} while ( (remainder > 0) && ( fuse-- > 0 ) );
-	assert ( (fuse > 1 ) && "fuse blown" ); 
-	return (  (fuse < 1 )? -1 : accumulator ); 
-} 
-
-
-int ebackoff ( int spins ) {
-	int clipped; 
-	clipped = MIN( 5000000,  200 + 4*spins  );
-	return  ( 1000000 * spins ) ;
-}
 int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	int retcode =-1 ; 
 	txstatus ( txconf , 6); 
@@ -287,7 +242,6 @@ void tx (struct txconf_s * txconf) {
         signal (SIGINFO, &wat);
 	stopwatch_start( &(txconf->ticker) ); 
 	txlaunchworkers( txconf ); 	
-	bf = malloc ( kfootsize); 
 	txingest ( txconf ); 
 	txbusyspin ( txconf ); 
 
