@@ -1,13 +1,16 @@
 #!/bin/sh -x
-verb=${1:-5}
+verb=${1:-4}
+user='xpi'
+host='delerium'
+targets="tx delerium 12323 tx 192.168.239.250 12323"
+#host='localhost'
+rsh="ssh $user@$host "
+sample="rand100.payload"
+
 remotetest () {
 	pwd
-	user='xpi'
-	host='delerium'
-	targets="tx delerium 12323 tx 192.168.239.250 12323"
-	#host='localhost'
-	rsh="ssh $user@$host "
-	sample="rand100.payload"
+	#export millipede_serializer=" /bin/cat -   "
+	export millipede_deserializer=" /bin/cat - "
 	echo -n rtt
 	time $rsh " echo aaack"
 	$rsh "pkill viamillipede-sample ; rm  -f /tmp/junk"
@@ -22,11 +25,23 @@ remotetest () {
 	$rsh " md5 -q /tmp/junk"
 	       md5 -q $sample
 	kill $sshpid
-
 }
 
-remotetest 
+ncref () {
+	time $rsh " echo ack"
+	$rsh "p 'nc -l'; p 'nc -l' | redtide ; cd /tmp/; rm -f junk;"
+	$rsh "  nc -l 12323 > /tmp/junk " &
+	sshpid=$!
+	sleep 1;
+	time   dd if=$sample bs=16k |  nc -N $host 12323  
+	$rsh " md5 -q /tmp/junk"
+	       md5 -q $sample
+	wait $sshpi
+	kill $sshpid
+}
 
+ncref
+remotetest 
 localtest () { 
 	pkill viamillipede
 	rm -f out.test
