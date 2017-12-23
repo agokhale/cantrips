@@ -36,16 +36,18 @@ struct txworker_s {
 	
 };
 
+struct target_port_s {
+	char * name; 
+	unsigned short port ; 
+};
 struct txconf_s {
 	int worker_count;
 	struct timespec ticker; 
 	u_long stream_total_bytes; 
 	struct txworker_s workers[16];	//XXX make dynamic??? 
-	char * hostname; 
-	unsigned short port;
-	int sockfd;
-	
-} ;
+	int target_port_count; 	
+	struct target_port_s target_ports[16]; 
+};
 
 
 // the bearer channel 

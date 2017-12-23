@@ -167,7 +167,11 @@ void txworker (struct  txworker_s *txworker ) {
 	pthread_mutex_init ( &(txworker->mutex)	, NULL ) ; 
 	pthread_mutex_lock ( &(txworker->mutex));
 	txworker->state = 'c'; //connecting
-	txworker->sockfd = tcp_connect ( txworker->txconf_parent->hostname, txworker->txconf_parent->port); 
+	int target_count = txworker->txconf_parent->target_port_count;
+	assert ( target_count > 0 ); 
+	txworker->sockfd = tcp_connect ( 
+		txworker->txconf_parent->target_ports[txworker->id % target_count].name, 
+		txworker->txconf_parent->target_ports[txworker->id % target_count].port); 
 	//can the remote end talk? this is lame  but rudimentary q/a session will assert that the tcp stream is able to bear traffic
 	retcode = write (txworker->sockfd, hellophrase, 4); 
 	checkperror ( "write fail"); 
