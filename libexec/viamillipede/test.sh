@@ -27,8 +27,8 @@ remotetest () {
 	vmpid=$!
 	sleep 1.7 
 	kill -s INFO $vmpid
-	sleep 10.7 
-	#wait $vmpid
+	#sleep 10.7 
+	wait $vmpid
 	sudo kill $sshpid $tdpid $vmpid
 	cat /tmp/verr
 	$rsh " md5 -q /tmp/junk"

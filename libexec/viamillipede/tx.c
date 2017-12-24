@@ -86,6 +86,10 @@ void txpush ( struct txworker_s *txworker ) {
 	//push this buffer out the socket
 	int writelen =-1; 
 	int cursor=0 ;
+	if ( txworker->writeremainder > kfootsize  ) { 
+		whisper ( 2, "tx villany, the remaining buffer must not be larger ( %i) than the buffer, %i", 
+		txworker->writeremainder , kfootsize); 
+	}
 	assert ( txworker->writeremainder <= kfootsize ); 
 	checkperror( "writesocket nuisnace err"); 
  	/*	
@@ -99,15 +103,18 @@ void txpush ( struct txworker_s *txworker ) {
 	txworker->state='a';// preAmble
 	write (txworker->sockfd , &txworker->pkt, sizeof(struct millipacket_s)); 
 	txworker->writeremainder = txworker->pkt.size;
+	assert ( txworker->writeremainder <= kfootsize ); 
 	while (  txworker->writeremainder  ) {
 		int minedsize = MIN (MAXBSIZE,txworker->writeremainder);
 		txworker->state='P'; // 'P'ush
 		writelen = write(txworker->sockfd , ((txworker->buffer)+cursor) , minedsize ) ;
 		txworker->state='p'; // 'p'ush complete
 		txworker->writeremainder -= writelen; 
+		assert ( txworker->writeremainder <= kfootsize ); 
 		cursor += writelen; 
 		whisper (10, "txw:%i push leg:%lu.(+%i -%i)  ",txworker->id,txworker->pkt.leg_id,writelen,txworker->writeremainder); 
 	}
+	assert ( txworker->writeremainder == 0 );
 	checkperror( "writesocket"); 
 	assert ( writelen );
 	assert( errno == 0 ); 
@@ -143,6 +150,7 @@ void txworker (struct  txworker_s *txworker ) {
 	txstatus (txworker->txconf_parent,7); 
 	txworker->state = 'i'; //idle
 	txworker->pkt.size = 0 ; 
+	txworker->writeremainder=-88; 
 	txworker->pkt.leg_id=666;
 	txworker->pkt.preamble = preamble_cannon_ul;
 	txworker->buffer = calloc ( 1,(size_t) kfootsize ); 

@@ -30,8 +30,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 			assert (readlen  && " badpackethreader read, are we done now?");
 		}
 		if ( readlen == 0 ) { 	
-			//usleep ( 100);  //XXXX
-			whisper ( 6, "rxw:%i last_leg:%lu exits after empty preamble", rxworker->id, pkt.leg_id); 
+			whisper ( 6, "rxw:%i  exits after empty preamble", rxworker->id); 
 			pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
 			continue;
 		}; 
