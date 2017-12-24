@@ -1,5 +1,4 @@
 #include "worker.h"
-
 #include "util.h"
 #include <sys/socket.h>
 
@@ -15,8 +14,10 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
                 if ( errno !=0 ) errno = 0 ; //reset nuiscances
                 readsize = read( fd, dest_cursor ,MIN( MAXBSIZE, remainder) );
                 checkperror( "gavageread");
-                whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n", readsize,(int) ((u_char*)dest_cursor -
- (u_char*)dest), remainder );
+                whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n",
+			 readsize,
+			(int) ((u_char*)dest_cursor - (u_char*)dest), 
+			remainder );
                 if ( readsize < 0 ) {
                         whisper (2, "negative read");
                         perror ( "negread");
