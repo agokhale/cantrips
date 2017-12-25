@@ -6,16 +6,14 @@ port=12322
 targets="tx delerium $port tx 192.168.239.250 $port"
 #host='localhost'
 rsh="ssh $user@$host "
-sample="rand100.payload"
+sample="rand.payload"
 
 remotetest () {
 	pwd
-	export millipede_serializer=" /bin/cat -   "
-	#export millipede_deserialiser=" /bin/cat - "
-	echo -n rtt
 	pkill viamillipede
-	$rsh "pkill viamillipede-sample ; rm  -f /tmp/junk"
-	cat viamillipede |  $rsh "cat - > /tmp/viamillipede-sample"
+	cat viamillipede |  $rsh "cat - > /tmp/viamillipede-sample" &
+	$rsh "pkill viamillipede-sample " &
+	$rsh "rm  -f /tmp/junk" &
 	sudo tcpdump -i em0 -s0 -w /tmp/mili.pcap host $host and port $port  &
 	tdpid=$1
 	$rsh "chmod 700 /tmp/viamillipede-sample"
@@ -31,8 +29,15 @@ remotetest () {
 	wait $vmpid
 	sudo kill $sshpid $tdpid $vmpid
 	cat /tmp/verr
-	$rsh " md5 -q /tmp/junk"
-	       md5 -q $sample
+	set rem_md=`$rsh " md5 -q /tmp/junk"`
+	set     md=`md5 -q $sample`
+	if [ $md = $rem_md ]; then 
+		banner -w 40  pass
+	else 
+		banner -w 40 fail
+
+	fi
+	
 	
 }
 

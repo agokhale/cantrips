@@ -111,9 +111,9 @@ int  tcp_recieve_prep (struct sockaddr_in * sa, int * socknum,  int inport) {
 int tcp_accept(struct sockaddr_in *  sa , int socknum ){  
         int out_sockfd;
         socklen_t socklen = sizeof (struct  sockaddr_in ) ;
-        whisper (7, "accept sockid: %i\n",socknum);
+        whisper (17, "accept sockid: %i\n",socknum);
         out_sockfd = accept (socknum,(struct sockaddr *)sa,&socklen);
-        whisper (7, "socket %i accepted to fd:%i \n" , socknum,out_sockfd);
+        whisper (10, "socket %i accepted to fd:%i \n" , socknum,out_sockfd);
 	checkperror  ("acceptor"); 
         return (out_sockfd);
 }

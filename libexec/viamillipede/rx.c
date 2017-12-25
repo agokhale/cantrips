@@ -19,18 +19,15 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	assert ( write (rxworker->sockfd, okphrase, (size_t)  2 ) && "okwritefail");
 	checkperror ( "signaturewrite "); 
 	// /usr/src/contrib/netcat has a nice pipe input routine XXX perhaps lift it
-	while ( ! done) {
+	while ( ! done && !rxworker->rxconf_parent->done_mbox) {
 		struct millipacket_s pkt; 
 		readlen = read ( rxworker->sockfd , &pkt, sizeof(struct millipacket_s)); 
-		whisper ( 19 ,"rxw:%i preamble: len %i\n", rxworker->id, readlen); 
-		// this is where we expect to die when eof comes for us; or the line idles
-		//assert ( readlen == 2 && "preamble read failure"); 
-		// so dont' assert 
+		whisper ( 19 ,"rxw:%i preamble and millipacket: len %i\n", rxworker->id, readlen); 
 		if ( readlen < 0 ) {
-			assert (readlen  && " badpackethreader read, are we done now?");
+			assert (readlen  && " badpackethreader read");
 		}
 		if ( readlen == 0 ) { 	
-			whisper ( 6, "rxw:%i  exits after empty preamble", rxworker->id); 
+			whisper ( 6, "rxw:%i  exits after empty preamble\n", rxworker->id); 
 			pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
 			continue;
 		}; 
@@ -38,9 +35,9 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		assert ( pkt.preamble == preamble_cannon_ul   && "preamble check");
 		assert ( pkt.size >= 0 ); 
 		assert ( pkt.size <= kfootsize); 
-		assert ( pkt.size >  0);  
-		assert ( readlen = sizeof(int)); 
-		whisper ( 9, "wrk:%i leg:%lu siz:%lu caught new leg  \n", rxworker->id,  pkt.leg_id , pkt.size); 
+		// it's ok for pkt.size == 0 for the end of the line 
+		//assert ( pkt.size >  0);  
+		whisper ( 9, "wrk:%i leg:%lu siz:%lu op:%x caught new leg  \n", rxworker->id,  pkt.leg_id , pkt.size,pkt.opcode); 
 		int remainder = pkt.size; 
 		assert ( remainder <= kfootsize); 
 		int cursor = 0;
@@ -83,6 +80,11 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		//XXX protect with mutex?
 		rxworker->rxconf_parent->next_leg ++ ;
 		readlen = readsize = -111;
+		if ( pkt.opcode == end_of_millipede ) {
+			whisper ( 5, "rxw:%i caught %x done with last frame\n", rxworker->id,  pkt.opcode); 
+			rxworker->rxconf_parent->done_mbox = 1; 
+			pthread_exit (rxworker); 
+		}
 	}// while !done
 	whisper ( 7, "rxw:%i  done\n", rxworker->id); 
 	

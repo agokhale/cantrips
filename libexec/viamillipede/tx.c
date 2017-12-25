@@ -50,7 +50,7 @@ void txingest (struct txconf_s * txconf ) {
 		usleep ( 1 * 1000); 
 		checkperror ( "stdinread");
 		readsize = read ( in_fd  , &taste_buf , 1 ); // taste the input  for existance
-		// i have amanaged to turn a  cs undergrad problem poorly
+		// i have managed to turn a  cs undergrad problem poorly
 		if ( readsize > 0 ) { 
 			//fixup the buffer because we ate a byte for tasting ; 
 			//conversely all our read maths are b0rked fencepostly
@@ -66,13 +66,19 @@ void txingest (struct txconf_s * txconf ) {
 			
 			txconf->workers[worker].pkt.size = readsize+1;   // +1 for the tasing byte
 			txconf->workers[worker].pkt.leg_id = ingest_leg_counter; 
+			txconf->workers[worker].pkt.opcode=feed_more; 
 			start_worker ( &(txconf->workers[worker]) );
-			ingest_leg_counter ++; 
 			txconf->stream_total_bytes += readsize ; 
 		} else { 
-			whisper ( 13, "ingest no more stdin"); 
-			done =1;
+			whisper ( 4, "txingest no more stdin, send shutdown"); 
+			done = 1; 
+			int worker = dispatch_idle_worker ( txconf ); 
+			txconf->workers[worker].pkt.size=0; 
+			txconf->workers[worker].pkt.leg_id = ingest_leg_counter; 
+			txconf->workers[worker].pkt.opcode=end_of_millipede; 
+			start_worker ( &(txconf->workers[worker]) );
 		}
+		ingest_leg_counter ++; 
 	}
 
 	whisper ( 4, "tx:ingest complete for %lu(bytes) in ",txconf->stream_total_bytes); 
@@ -200,8 +206,6 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 			);
 		checkperror ("pthread launch"); 
 		assert ( ret == 0 && "pthread launch"); 
-		//allow the remote connection some refractory time to spawn another accept
-		usleep (10000);  
 		worker_cursor++;
 		}	
 	txstatus ( txconf, 5);
