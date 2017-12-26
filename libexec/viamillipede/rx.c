@@ -37,11 +37,12 @@ void rxworker ( struct rxworker_s * rxworker ) {
 				pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
 				continue;
 			}; 
-			if ( readlen < sizeof(struct millipacket_s) ) { 
-				whisper ( 3, "rx: short read %i< %lu attempting recovery, errno", readlen, sizeof(struct millipacket_s)); 
+			if ( readlen < (sizeof(struct millipacket_s) - preamble_cursor) ) { 
+				whisper ( 3, "rx: short read %i< %lu attempting recovery, preamble cursor: %i errno,  %i", readlen, sizeof(struct millipacket_s),preamble_cursor, errno); 
 				checkperror ("short read");
 			}
 			preamble_cursor += readlen;
+			assert ( preamble_cursor <= sizeof(struct millipacket_s));
 			assert ( preamble_fuse ++ < 100000 && " preamble fuse popped, check network ");
 		}
 		assert ( preamble_cursor == sizeof(struct millipacket_s) ); 

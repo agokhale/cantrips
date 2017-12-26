@@ -4,6 +4,7 @@ user='xpi'
 host='delerium'
 port=12322
 targets="tx delerium $port tx 192.168.239.250 $port"
+threads=" threads 4"
 #host='localhost'
 rsh="ssh $user@$host "
 sample="rand4.payload"
@@ -33,7 +34,7 @@ zstreamremote () {
  	$rsh "cd /tmp; ./viamillipede-sample rx $port verbose $verb  | zfs recv $target_ds  " 2> /tmp/verr &
 	sshpid=$!
 	sleep 1.8
-	zfs send $ds  | ./viamillipede  verbose $verb $targets threads 9   
+	zfs send $ds  | dd bs=16k | ./viamillipede  verbose $verb $targets  $threads
 	#vmpid=$!
 	sleep 1.8
 	#wait $vmpid
@@ -98,7 +99,7 @@ localtest () {
 
 
 #zstreamref
-#zstreamremote
+zstreamremote
 #ncref
 #localtest
-remotetest 
+#remotetest 
