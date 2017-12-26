@@ -27,11 +27,13 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		int preamble_fuse=0; 
 		while ( preamble_cursor < sizeof(struct millipacket_s))   {
 			// fill the preamble + millipacket structure whole
-			readlen = read ( rxworker->sockfd , (&pkt)+preamble_cursor, ( sizeof(struct millipacket_s) - preamble_cursor )); 
-			whisper ( 19 ,"rxw:%i preamble and millipacket: len %i\n", rxworker->id, readlen); 
-			if ( readlen < 0 ) {
-				assert (readlen  && " badpackethreader read");
-			}
+			checkperror ("nuicsance before preamble read");
+			whisper ( ((errno == 0)?19:3) ,"rxw:%i prepreamble and millipacket: len %i errno:%i cursor:%i\n", rxworker->id, readlen,errno, preamble_cursor); 
+			//XX regrettable pointer cast  other wise we get sizeof(pkt) * cursor
+			readlen = read ( rxworker->sockfd , ((u_char*)&pkt)+preamble_cursor, ( sizeof(struct millipacket_s) - preamble_cursor )); 
+			checkperror ("preamble read");
+			whisper ( ((errno == 0)?19:3) ,"rxw:%i preamble and millipacket: len %i errno:%i cursor:%i\n", rxworker->id, readlen,errno, preamble_cursor); 
+			assert (( readlen >= 0 )  && " badpackethreader read");
 			if ( readlen == 0 ) { 	
 				whisper ( 6, "rxw:%i  exits after empty preamble\n", rxworker->id); 
 				pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
@@ -55,20 +57,24 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		int remainder = pkt.size; 
 		assert ( remainder <= kfootsize); 
 
-		while (  remainder && !done  ) {
-			readsize = read ( rxworker->sockfd, buffer+cursor, MIN(remainder, MAXBSIZE )); 
+		while ( remainder && !done  ) {
+			readsize = read( rxworker->sockfd, buffer+cursor, MIN(remainder, MAXBSIZE )); 
+			assert( readsize > 0 );  //XXX 
 			cursor += readsize; 
+			assert( cursor <= kfootsize ); 
 			remainder -= readsize ; 
-			assert ( readsize > 0 );  //XXX 
+			assert (remainder >=0);
 			if (readsize == 0) { //XXXXXXXX 
-				whisper ( 9, "0 byte read ;giving up. are we done?" );  // XXX this should not be the end
+				whisper ( 2, "0 byte read ;giving up. are we done?" );  // XXX this should not be the end
 				done = 1; 	
 				break;
 			}
-			whisper  ( 9, "rxw:%i leg:%lu siz:%i-%i\t", rxworker->id, pkt.leg_id ,  readsize >> 10 ,remainder >>10 ) ; 
+			checkperror ("read buffer"); 	
+			whisper( (errno != 0)?3:9 , "rxw:%i leg:%lu siz:%i-%i\t", rxworker->id, pkt.leg_id ,  readsize >> 10 ,remainder >>10 ) ; 
 		}
-		whisper  ( 9, "\nrxw: %i leg:%lu buffer filled to :%i\n", rxworker->id, pkt.leg_id,  cursor) ; 
-		checkperror ("read buffer"); 	
+		whisper( 8, "\nrxw: %i leg:%lu buffer filled to :%i\n", rxworker->id, pkt.leg_id,  cursor) ; 
+		checkperror ("read leg"); 	
+		//assert ( errno != 0 && "read leg"); 
 		// XXX crc32 check
 		//block until the sequencer is ready to push this 
 		///XXXX  terrible sequencer
