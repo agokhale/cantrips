@@ -34,12 +34,12 @@ zstreamremote () {
  	$rsh "cd /tmp; ./viamillipede-sample rx $port verbose $verb  | zfs recv $target_ds  " 2> /tmp/verr &
 	sshpid=$!
 	sleep 1.8
-	zfs send $ds  | dd bs=16k | ./viamillipede  verbose $verb $targets  $threads
+	zfs send $ds  |  ./viamillipede  verbose $verb $targets  $threads
 	#vmpid=$!
 	sleep 1.8
 	#wait $vmpid
 	sudo kill $sshpid $tdpid $vmpid
-	cat /tmp/verr
+	#cat /tmp/verr
 	}
 remotetest () {
 	pwd

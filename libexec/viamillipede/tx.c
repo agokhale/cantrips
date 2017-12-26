@@ -2,8 +2,8 @@
 
 int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	int retcode =-1 ; 
-	txstatus ( txconf , 6); 
-	int spins; 
+	txstatus ( txconf , 5); 
+	int spins = 0; 
 	while (   retcode < 0  ) {
 		for ( int i = 0 ; (i < txconf->worker_count) && (retcode < 0 ) ; i++ ) {
 			//pthread_mutex_lock (&(txconf->workers[i].mutex));
@@ -18,8 +18,8 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 		if (retcode <  0 ) {
 			txstatus ( txconf , 19); 
 			spins++; 
-			whisper ( 13, "no workers available backing off\n" ); 
-			usleep (1000);
+			whisper ( 6, "no workers available backing off spins: %i\n", spins ); 
+			usleep (MIN(1000 * (spins << 2), 10000000)); // XXX cheap backoff
 		}
 	}
 return (retcode); 

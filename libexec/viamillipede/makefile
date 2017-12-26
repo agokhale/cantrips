@@ -4,7 +4,7 @@ clean:
 	rm -f viamillipede viamillipede.core
 
 test: clean all
-	sh -x test.sh
+	sh  test.sh
 
 payload:
 	dd if=/dev/random of=rand.payload bs=512k count=4
