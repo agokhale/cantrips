@@ -1,0 +1,2 @@
+#!/usr/sbin/dtrace -s 
+proc:::signal-send  { @[probename, args[1]->p_pid, args[2], execname] = count();}
