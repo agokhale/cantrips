@@ -12,6 +12,7 @@ payload:
 	dd if=/dev/random of=rand10.payload bs=1m count=10
 	dd if=/dev/random of=rand1.payload bs=1m count=1
 	dd if=/dev/random of=rand100.payload bs=1m count=100
+	dd if=/dev/random of=rand10g.payload bs=1m count=10000
 server : 
 	./viamillipede rx 12323  verbose 19 > out.payload
 client:

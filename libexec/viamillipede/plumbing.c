@@ -3,17 +3,21 @@
 #include <sys/socket.h>
 
 // forcefully read utill a bufffer completes or EOF
-ssize_t gavage ( int fd, u_char * dest, size_t size ) {
+ssize_t bufferfill ( int fd, u_char * dest, size_t size ) {
         int remainder=size;
         u_char * dest_cursor = dest;
         ssize_t accumulator=0;
         ssize_t readsize;
         int fuse=1055;  // don't spin  forever
         do      {
-                checkperror ( "nuiscance sdinread");
-                if ( errno !=0 ) errno = 0 ; //reset nuiscances
-                readsize = read( fd, dest_cursor ,MIN( MAXBSIZE, remainder) );
-                checkperror( "gavageread");
+                checkperror ( "bufferfill nuiscance err");
+                if ( errno !=0 ) { 
+			whisper (3, "ignoring sig %i\n", errno); 
+			errno = 0 ; 
+		}
+		//reset nuiscances
+                readsize = read( fd, dest_cursor, MIN( MAXBSIZE, remainder) );
+                checkperror( "bufferfill read err");
                 whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n",
 			 readsize,
 			(int) ((u_char*)dest_cursor - (u_char*)dest), 
@@ -32,7 +36,7 @@ ssize_t gavage ( int fd, u_char * dest, size_t size ) {
                         if ( readsize < 16384) {
                                 // discourage tinygrams - they just beat us up
                                 // XXX histgram the readsize and use ema to track optimal effort
-                                //usleep ( 500);
+                                usleep ( 500);
                         }
                         if ( readsize < 1 )  { // short reads  are the end
                                 break;

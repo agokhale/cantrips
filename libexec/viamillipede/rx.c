@@ -19,19 +19,32 @@ void rxworker ( struct rxworker_s * rxworker ) {
 	assert ( write (rxworker->sockfd, okphrase, (size_t)  2 ) && "okwritefail");
 	checkperror ( "signaturewrite "); 
 	// /usr/src/contrib/netcat has a nice pipe input routine XXX perhaps lift it
+	// XXX stop using bespoke heirloom bufferfill routines. 
 	while ( ! done && !rxworker->rxconf_parent->done_mbox) {
 		struct millipacket_s pkt; 
-		readlen = read ( rxworker->sockfd , &pkt, sizeof(struct millipacket_s)); 
-		whisper ( 19 ,"rxw:%i preamble and millipacket: len %i\n", rxworker->id, readlen); 
-		if ( readlen < 0 ) {
-			assert (readlen  && " badpackethreader read");
+		int cursor = 0;
+		int preamble_cursor=0;
+		int preamble_fuse=0; 
+		while ( preamble_cursor < sizeof(struct millipacket_s))   {
+			// fill the preamble + millipacket structure whole
+			readlen = read ( rxworker->sockfd , (&pkt)+preamble_cursor, ( sizeof(struct millipacket_s) - preamble_cursor )); 
+			whisper ( 19 ,"rxw:%i preamble and millipacket: len %i\n", rxworker->id, readlen); 
+			if ( readlen < 0 ) {
+				assert (readlen  && " badpackethreader read");
+			}
+			if ( readlen == 0 ) { 	
+				whisper ( 6, "rxw:%i  exits after empty preamble\n", rxworker->id); 
+				pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
+				continue;
+			}; 
+			if ( readlen < sizeof(struct millipacket_s) ) { 
+				whisper ( 3, "rx: short read %i< %lu attempting recovery, errno", readlen, sizeof(struct millipacket_s)); 
+				checkperror ("short read");
+			}
+			preamble_cursor += readlen;
+			assert ( preamble_fuse ++ < 100000 && " preamble fuse popped, check network ");
 		}
-		if ( readlen == 0 ) { 	
-			whisper ( 6, "rxw:%i  exits after empty preamble\n", rxworker->id); 
-			pthread_exit( rxworker );  // no really we are done, and who wants our exit status?
-			continue;
-		}; 
-		assert ( readlen == sizeof(struct millipacket_s)); 
+		assert ( preamble_cursor == sizeof(struct millipacket_s) ); 
 		assert ( pkt.preamble == preamble_cannon_ul   && "preamble check");
 		assert ( pkt.size >= 0 ); 
 		assert ( pkt.size <= kfootsize); 
@@ -40,7 +53,6 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		whisper ( 9, "wrk:%i leg:%lu siz:%lu op:%x caught new leg  \n", rxworker->id,  pkt.leg_id , pkt.size,pkt.opcode); 
 		int remainder = pkt.size; 
 		assert ( remainder <= kfootsize); 
-		int cursor = 0;
 
 		while (  remainder && !done  ) {
 			readsize = read ( rxworker->sockfd, buffer+cursor, MIN(remainder, MAXBSIZE )); 
@@ -52,7 +64,7 @@ void rxworker ( struct rxworker_s * rxworker ) {
 				done = 1; 	
 				break;
 			}
-			whisper  ( 9, "rxw:%i leg:%lu siz:%i-%i\t", rxworker->id, pkt.leg_id ,  readsize,remainder) ; 
+			whisper  ( 9, "rxw:%i leg:%lu siz:%i-%i\t", rxworker->id, pkt.leg_id ,  readsize >> 10 ,remainder >>10 ) ; 
 		}
 		whisper  ( 9, "\nrxw: %i leg:%lu buffer filled to :%i\n", rxworker->id, pkt.leg_id,  cursor) ; 
 		checkperror ("read buffer"); 	
@@ -117,8 +129,6 @@ void rxlaunchworkers ( struct rxconf_s * rxconf ) {
 	
 }
 void rx (struct rxconf_s* rxconf) {
-	char buf;
-	int readlen; 
 	rxlaunchworkers( rxconf); 
 }
 

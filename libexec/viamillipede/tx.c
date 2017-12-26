@@ -50,6 +50,7 @@ void txingest (struct txconf_s * txconf ) {
 		usleep ( 1 * 1000); 
 		checkperror ( "stdinread");
 		readsize = read ( in_fd  , &taste_buf , 1 ); // taste the input  for existance
+		checkperror ( "stdinread2");
 		// i have managed to turn a  cs undergrad problem poorly
 		if ( readsize > 0 ) { 
 			//fixup the buffer because we ate a byte for tasting ; 
@@ -58,7 +59,7 @@ void txingest (struct txconf_s * txconf ) {
 			// XXX find the idle worker , lock it and dispatch as seprarte calls -- perhaps
 			int worker = dispatch_idle_worker ( txconf ); 
 			txconf->workers[worker].buffer[0] = taste_buf; //is this pipe still readable
-			readsize = gavage (  in_fd ,(u_char *) (txconf->workers[worker].buffer)+1 , kfootsize-1  ) ;  
+			readsize = bufferfill (  in_fd ,(u_char *) (txconf->workers[worker].buffer)+1 , kfootsize-1  ) ;  
 			// unfortunate buffer alignment due to taste
 			whisper ( 7, "\ntxw:%i read leg %i : fd:%i siz:%i\n",worker,  ingest_leg_counter, in_fd, kfootsize-1); 
 			if ( readsize > kfootsize-1) { whisper (1,"too big read %i", readsize); }
@@ -127,7 +128,7 @@ void txpush ( struct txworker_s *txworker ) {
 	txworker->state='i'; 
 	txworker->pkt.size=0; 
 	whisper ( 6 , "txw:%i  leg:%lu unlocked \n" , txworker->id, txworker->pkt.leg_id); 
-	txworker->pkt.leg_id=-99; 
+	//txworker->pkt.leg_id=0; 
 	//pthread_mutex_unlock( &(txworker->mutex)); 
 }
 void txworker (struct  txworker_s *txworker ) {
@@ -157,7 +158,7 @@ void txworker (struct  txworker_s *txworker ) {
 	txworker->state = 'i'; //idle
 	txworker->pkt.size = 0 ; 
 	txworker->writeremainder=-88; 
-	txworker->pkt.leg_id=666;
+	txworker->pkt.leg_id=0;
 	txworker->pkt.preamble = preamble_cannon_ul;
 	txworker->buffer = calloc ( 1,(size_t) kfootsize ); 
 	checkperror( "worker buffer allocator");
@@ -187,13 +188,13 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 	for ( int i=0; i < 16 ; i++) {
 		txconf->workers[i].state = '0'; // unitialized
 		txconf->workers[i].txconf_parent = txconf; // allow inpection/inception
-		txconf->workers[i].pkt.leg_id = -66; // 
+		txconf->workers[i].pkt.leg_id = 0; // 
 		txconf->workers[i].pkt.size = -66; // 
 		txconf->workers[i].sockfd = -66; // 
 	}
 
 	while ( worker_cursor < txconf->worker_count )  {
-		whisper( 6, "launching %i\n", worker_cursor); 
+		whisper( 16, "txw:%i launching ", worker_cursor); 
 		txconf->workers[worker_cursor].state = 'L';
 		txconf->workers[worker_cursor].id = worker_cursor; 
 		//digression: pthreads murders all possible kittens stored in  argument types
@@ -246,7 +247,7 @@ void txbusyspin ( struct txconf_s* txconf ) {
 struct txconf_s *gtxconf; 
 void wat ( ) {
 	struct txconf_s *txconf=gtxconf;
-	whisper ( 1, "\n%lu(bytes) in ",txconf->stream_total_bytes); 
+	whisper ( 1, "\n%lu(mbytes) in ",txconf->stream_total_bytes >> 20); 
 	u_long usecbusy = stopwatch_stop( &(txconf->ticker),2 );
 	whisper ( 1 , "\n" ); 
 	txstatus  ( txconf, 1 );  
