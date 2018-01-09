@@ -1,7 +1,11 @@
 #include "cfg.h"
 #include "worker.h"
 
-void usage ()  { printf ( "insert somthing sharp here\n"); }
+void usage ()  { 
+printf ( "viamillipede scatter gather multiplexed tcp for pipe transport between hosts usage: \n"); 
+printf ( "tranmitter:  vimillipede tx 192.168.0.2 12323  tx 192.168.0.3 12323 threads 3 verbose 3\n"); 
+printf ( "receiver:  vimillipede rx 12323 3\n"); 
+}
 	
 int gverbose = 0; 
 
@@ -31,7 +35,8 @@ while ( arg_cursor  < argc  ) {
 		//
 		assert ( ++ arg_cursor < argc  && "tx needs <host> and <port> arguments");
 		assert ( strlen ( argv[arg_cursor] ) > 0  && "hostname seems fishy" );
-		txconf.target_ports[txconf.target_port_count].name =  argv[arg_cursor];
+		txconf.target_ports[txconf.target_port_count].name =  argv[arg_cursor]; 
+		// XXX NDEBUG wil break
 		assert ( ++ arg_cursor < argc  && " tx  requires a  <portnumber> from 0-SHRT_MAX" );
 		users_input_port  = atoi ( argv[ arg_cursor ] ); 
 		assert ( 0 < users_input_port  && users_input_port < USHRT_MAX && "port number should be 0-USHRT_MAX" );
@@ -49,6 +54,7 @@ while ( arg_cursor  < argc  ) {
 		
 	}
 	if ( strcmp ( argv[arg_cursor] , "verbose" )  == 0 ) {
+		/// XXXX NDEBUG will break
 		assert ( ++ arg_cursor < argc  && "verbose  needs <level ( 0 - 19) > argument");
 		gverbose  = atoi ( argv[arg_cursor]);
 		whisper ( 11, "verbose set to %i", gverbose ); 	
