@@ -2,12 +2,13 @@
 verb=${1:-4}
 user='xpi'
 host='delerium'
+host='localhost'
 port=12322
 targets="tx delerium $port tx 192.168.239.250 $port"
-threads=" threads 14"
+threads=" threads 4"
 #host='localhost'
 rsh="ssh $user@$host "
-sample="rand4.payload"
+sample="rand10g.payload"
 
 
 zstreamref () {
@@ -90,16 +91,16 @@ localtest () {
 	pkill viamillipede
 	rm -f out.test
 	rm -f rand.out
-	./viamillipede rx 12123  verbose $verb > /tmp/rand.out &
+	./viamillipede rx 12123  verbose $verb > /dev/null &
 	sleep 0.75
-	cat $sample | ./viamillipede tx localhost 12123  verbose $verb
+	 ./viamillipede tx localhost 12123  verbose $verb $threads < $sample
 	sleep 0.75
-	diff rand.payload rand.out  
 }
 
 
+
 #zstreamref
-zstreamremote
+#zstreamremote
 #ncref
-#localtest
+localtest
 #remotetest 
