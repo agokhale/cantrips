@@ -173,6 +173,8 @@ if ( $?prompt ) then
 	#pkg wb
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
+	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
+	
 
 	alias __pkgs  'pkg info -q'
 	# aliases that show lists of possible completions including both package names and options
@@ -190,7 +192,10 @@ if ( $?prompt ) then
 			'n/info/`__pkg-info-opts`/' \
 			'N/info/`__pkgs`/' \
 			'n/which/`__pkg-which-opts`/' \
-			'N/which/`__pkgs`/'
+			'N/which/`__pkgs`/' \
+			'n/install/$pkgtgt/'
+			
+			
 
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
