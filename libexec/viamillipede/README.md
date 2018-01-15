@@ -1,23 +1,33 @@
-viamillipede: A client and server programt for network pipe transport using mulitple tcp sessions.  It muliplexes a single pipe into mulitple tcp connectons and  terminates them into a pipe transparently on another host.  It's not dissimlar to  netcat's simplest mode of remote pipe transparency
+### viamillipede: 
 
-problems: Single TCP connections have limitations when they are expected to carry high throughput loads.
-	- poor mss window scaling, congestion controlls aggessively collapse mss when network conditions are not prestine.
-	- poor buffer interactions, 'shoe shining' when buffer sizing is not appropriate 
-	- newreno alternatives are not often acceptable 
-	- flows are stuck to one physical interface,defeats benefits of aggregation and multihomed connections 
+Viamillipede is client and server program for network pipe transport using mulitple tcp sessions.  It muliplexes a single pipe into mulitple tcp connectons and terminates them into a pipe transparently on another host.  It is not dissimlar to netcat's simplest mode of remote pipe transparency
 
-goals/features:
-	- provide sufficent buffering for throughpout
-	- increase throughput by using parallel connections that can each vie for survial against scaling window collapse
-	- increate throughput by using muliple destination address, via lacp/lagg or seprate Layer 2 adressing
-	- steer traffic to preferred interfaces 
-	- greedily use faster destinations if preferred interfaces are clogged
-	- provide runtime SIGINFO inspection of traffic flow ( parallelism, worker allocation , total throughput ) 
-	- provide resiliancy against dropped tcp connections(*)
-	- parallelize compression/porcessing steps (*)
-	- architechure independance (*)
-	(*) work in progress, because hard*ugly > time
+#### Problems: 
 
++ Single TCP connections have limitations when they are expected to carry high throughput loads.
++ Poor mss window scaling. Congestion controls will aggessively collapse mss when network conditions are not prestine.
++ Poor buffer interactions. 'Shoe shining' when buffer sizing is not appropriate. 
++ NewReno alternatives are not often acceptable 
++ Currently flows are stuck to one physical interface.  Unfortunately it defeats the benefits of aggregation and multihomed connections 
+
+#### Goals/Features:
+
++ Provide:
+     + Sufficent buffering for throughput.
+     + Runtime SIGINFO inspection of traffic flow `( parallelism, worker allocation, total throughput )` 
+     + Resiliancy against dropped tcp connections `(*)`
++ Increase throughput by:
+     + Using parallel connections that can each vie for survial against scaling window collapse.
+     + Using muliple destination address, via lacp/lagg or seprate Layer 2 adressing.
++ Intellegent Traffic Shaping
+     + Steer traffic to preferred interfaces 
+     + Greedily use faster destinations if preferred interfaces are clogged.
++ Make the compression/porcessing steps parallel. `(*)`
++ Architechure independance `(*)`
+
+`(*)` denotes work in progress, because hard*ugly > time
+
+```
 TOP:
 	scatter gather transport via multiple workers
 	feet  are the work blocks
@@ -38,4 +48,4 @@ TOP:
 	maximize throughput vs window vs latency product
 		
 	Retry broken transport works
-
+```
