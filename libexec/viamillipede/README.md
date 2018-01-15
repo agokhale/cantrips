@@ -13,15 +13,15 @@ Viamillipede is client and server program for network pipe transport using mulit
 #### Goals/Features:
 
 + Provide:
- + Sufficent buffering for throughput.
- + Runtime SIGINFO inspection of traffic flow ( parallelism, worker allocation , total throughput ) 
- + Resiliancy against dropped tcp connections(*)
+     + Sufficent buffering for throughput.
+     + Runtime SIGINFO inspection of traffic flow ( parallelism, worker allocation , total throughput ) 
+     + Resiliancy against dropped tcp connections(*)
 + Increase throughput by:
- + Using parallel connections that can each vie for survial against scaling window collapse.
- + Using muliple destination address, via lacp/lagg or seprate Layer 2 adressing.
-+ Traffic Shaping
- + Steer traffic to preferred interfaces 
- + Greedily use faster destinations if preferred interfaces are clogged.
+     + Using parallel connections that can each vie for survial against scaling window collapse.
+     + Using muliple destination address, via lacp/lagg or seprate Layer 2 adressing.
++ Intellegent Traffic Shaping
+     + Steer traffic to preferred interfaces 
+     + Greedily use faster destinations if preferred interfaces are clogged.
 + Make the compression/porcessing steps parallel. (*)
 + Architechure independance (*)
 
