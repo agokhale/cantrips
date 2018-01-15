@@ -25,7 +25,7 @@ Viamillipede is client and server program for network pipe transport using mulit
 + Make the compression/porcessing steps parallel. (*)
 + Architechure independance (*)
 
-(/*) work in progress, because hard*ugly > time
+(`*`) denotes work in progress, because hard*ugly > time
 
 ```
 TOP:
