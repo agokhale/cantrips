@@ -1,8 +1,8 @@
-###viamillipede: 
+### viamillipede: 
 
 A client and server programt for network pipe transport using mulitple tcp sessions.  It muliplexes a single pipe into mulitple tcp connectons and  terminates them into a pipe transparently on another host.  It's not dissimlar to  netcat's simplest mode of remote pipe transparency
 
-####Problems: 
+#### Problems: 
 
 + Single TCP connections have limitations when they are expected to carry high throughput loads.
 + poor mss window scaling, congestion controlls aggessively collapse mss when network conditions are not prestine.
@@ -10,7 +10,7 @@ A client and server programt for network pipe transport using mulitple tcp sessi
 + newreno alternatives are not often acceptable 
 + flows are stuck to one physical interface,defeats benefits of aggregation and multihomed connections 
 
-####Goals/Features:
+#### Goals/Features:
 
 + provide sufficent buffering for throughpout
 + increase throughput by using parallel connections that can each vie for survial against scaling window collapse
@@ -22,7 +22,7 @@ A client and server programt for network pipe transport using mulitple tcp sessi
 + parallelize compression/porcessing steps (*)
 + architechure independance (*)
 
-###(*) work in progress, because hard*ugly > time
+#### (*) work in progress, because hard*ugly > time
 
 ```
 TOP:
