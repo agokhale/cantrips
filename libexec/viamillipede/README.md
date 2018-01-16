@@ -2,6 +2,7 @@
 
 Viamillipede is client and server program built to improve network pipe transport using multiple TCP sessions.  It multiplexes a single network pipe into multiple TCP connectons and then terminates the connections into a pipe transparently on another host.  It is similar to the simplest mode of remote pipe transparency of Netcat.
 
+![alt text](theory_operation_viamillipede.svg "theory of operation")
 #### Problems:
 
 + Single TCP connections have limitations on when they are expected to carry high throughput loads.
