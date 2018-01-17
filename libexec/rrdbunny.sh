@@ -20,22 +20,16 @@ colorburst()
 }
 
 if [ $# -lt 1 ] ; then
-	cat  << asdf
+	cat  << DONE_HERE
 	rrdbunny.sh graph output: rrdbunny.sh a.file*.rrd
 
-	knobs for turning are provided by getenv: 
-
+knobs for turning are provided by getenv: 
 setenv RRDBUNNY_RESOLUTION " --width 3800 --height 1600 "
-
-#shrink the view window by some hours
 setenv RRDBUNNY_SHRINK_START 0
-setnv RRDBUNNY_SHRINK_STOP  0
-#desination override
+setenv RRDBUNNY_SHRINK_STOP  0
+setenv RRDBUNNY_TIMESCALE  6
 setenv RRDBUNNY_OUTPIPE  " xv - " 
-#set timescale
-setenv  RRDBUNNY_TIMESCALE  6
-
-##
+setenv RRD_OPTIONS " -o "
 #ra_idx=0 #3 hours
 #ra_idx=1 #3 hours
 #ra_idx=2 #3  hours
@@ -49,9 +43,8 @@ setenv  RRDBUNNY_TIMESCALE  6
 #ra_idx=10 # 1 month 
 #ra_idx=11 # 1 month 
 #ra_idx=12 # 1 year 
-
-	
-asdf
+DONE_HERE
+	#nothing to do, usage printed, leave now
 	exit
 fi 
 
@@ -77,7 +70,8 @@ first_ts=$((  $first_ts + (3600 * (shrink_start) )    ))
 last_ts=$((    $last_ts - (3600 * (shrink_stop ) )    ))
 
 resolution=${RRDBUNNY_RESOLUTION:-" --width 800 --height 600 "}
-options=${RRDBUNNY_OPTIONS:-" --grid-dash 1:3  "}
+options=${RRDBUNNY_OPTIONS:-" --grid-dash 1:3   "}
+# log scale options=${RRDBUNNY_OPTIONS:-"  -o  "}
 export RRBDUNNY_RESOLUTION
 echo $resolution
 output_pipeline=${RRDBUNNY_OUTPIPE:-" xv - "}
