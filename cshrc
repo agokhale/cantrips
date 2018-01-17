@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.5.2"
+set ashrcversion = "10.2.6"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
@@ -6,8 +6,6 @@ set ashrcversion = "10.2.5.2"
 #"software"
 #___________________________________core paths_________________________________
 set notify
-set spinspites = ( 'i' '/' '-' '\' '|' '/' '-' '\' ) 
-set spincursor = 0
 if ( $?prompt ) then
   #diagnostic P to indicate pathmangling
   printf "P"
@@ -31,7 +29,6 @@ set path_roots = ( $path_roots /opt/local /usr/share /sw /opt/X11 /usr/X11 )
 set path_components = ( bin sbin libexec games tools ) 
 
 #start with minimal paths so we have a path should things short out during launch
-# you will see a P
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
@@ -83,33 +80,27 @@ foreach pathroot ( $path_roots )
     end #foreach pathcomponent
 end # foreach pathroot
 
-#____________________________________________________global nonineractive macros
-	setenv REDSIG	2
-	setenv REDCOL	1
-
-	alias redpids  "sed -E 's/^ +//' | sed -E 's/ +/	/g' | cut -f${REDCOL} " 
-	alias redtide  "redpids | xargs -n1 kill"
+if ( $?prompt ) then
+#______________________________________________________interactive 
 	setenv gTODAY `date +"%Y%m%d"`
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	setenv gUNAME `uname`
+	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
+
+	printf "\b-"
+	alias chomp "sed -E 's/^ +//'"  #strip leading space
+	alias usage  "du -sxk * | sort -rn > usage; less usage"
+	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
+	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
 	alias p[        pushd
 	alias p]        popd
 	alias p[]       "dirs -v"
 	alias p		"ps -axwww | grep -v grep | grep "
-    alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
-    alias chomp "sed -E 's/^ +//'"  #strip leading space
-
-    set hunthome=${HOME}
-    alias hunting_ground 'set hunthome=`pwd`'
-    #find a zymbol
-    alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome'    
-
-    #transform  file:linenum: into vi $1 +$2
-    alias viize "sed -E 's/^(.*):([0-9]*):/vi \1  +\2/'"    
-
-    #go edit file with symbol $1 in filename matching $2
-    alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
+	setenv REDSIG	2
+	setenv REDCOL	1
+	alias redpids  "sed -E 's/^ +//' | sed -E 's/ +/	/g' | cut -f${REDCOL} " 
+	alias redtide  "redpids | xargs -n1 kill"
 
 	alias srx 's \!\!:1 "cd \!\!:2 ; tar -cf - \!\!:3-$ " | tar -xpf -' 
 	alias stx 'tar -cf - \!\!:3-$  | s \!\!:1 "cd \!\!:2 ; tar -xpf - "' 
@@ -117,16 +108,18 @@ end # foreach pathroot
 	alias R 's -x  -Y -l root'
 	alias s 'ssh '
 	alias S 's -Y '
-	alias usage  "du -sxk * | sort -rn > usage; less usage"
-	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
-	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
-#/______________________________________________________global interactive stuff
-if ( $?prompt ) then
-	printf "\b-"
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
-    
+
+	set hunthome=${HOME}
+	alias hunting_ground 'set hunthome=`pwd`'
+	#find a zymbol
+	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome'    
+	#transform  file:linenum: into vi $1 +$2
+	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
+	#go edit file with symbol $1 in filename matching $2
+	alias viize "sed -E 's/^(.*):([0-9]*):/vi \1  +\2/'"    
 	set listjobs="long"
 	set autologout="0  1"
 	set promptchars="#&"
@@ -324,6 +317,8 @@ if ( $?prompt ) then
 	alias du	du -xk
 	alias h		'history -r | more'
 	alias wipe	'echo -n  > '
+	alias hide 	'mkdir -p .hidden; mv \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
+	alias checkpoint 	'mkdir -p .hidden; cp \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias lf	ls -FA
 	alias ll	ls -lgsArtF
 	alias lr	ls -lgsAFR
@@ -453,17 +448,11 @@ if ( ${gUNAME} == "SunOS" ) then
 
 endif ##sunos
 
-setenv CVSROOT 'xpi@death.aeria.net:/home/xpi/CVSPrivate'
-
-setenv BUGS 1
-setenv SRCBASE ~/src
-setenv LIBBASE ~/src/lib
 
 setenv CVS_RSH	`which ssh`
 setenv RSYNC_RSH `which ssh`	 
 setenv RSH `which ssh`	 #for rdist
-#______________________________________________________________________securitry
-#/________________________________________________________the last word locally
+#________________________________________________________the last word locally
 #makes all things here mutable
 #let the local thing bollackup  my nice presets
 if ( -r ${HOME}/.cshrc.local ) then
@@ -478,7 +467,7 @@ if ( $?prompt ) then
 		set prompt="%"
 	endif
 		
-	printf "\b*\b"
+	printf "\b*\b\b"
 	echo  $dcmesg
 	if ( $?ssh_agent_report ) then 
 		echo $ssh_agent_report 
