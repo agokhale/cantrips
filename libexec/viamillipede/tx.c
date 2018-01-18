@@ -85,7 +85,7 @@ void txingest (struct txconf_s * txconf ) {
 	whisper ( 4, "tx:ingest complete for %lu(bytes) in ",txconf->stream_total_bytes); 
 	u_long usecbusy = stopwatch_stop( &(txconf->ticker),4 );
 	//bytes per usec - thats interesting 
-	whisper (6, " %8.4f mbps\n" , ( txconf->stream_total_bytes *0.0000001) / (0.000001 * usecbusy  )    );
+	whisper (6, " %8.4f MBps\n" , ( txconf->stream_total_bytes *0.0000001) / (0.000001 * usecbusy  )    );
 }
 
 
