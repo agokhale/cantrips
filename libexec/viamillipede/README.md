@@ -28,6 +28,33 @@ Viamillipede is client and server program built to improve network pipe transpor
 
 `(*)` denotes work in progress, because "hard * ugly > time"
 
+#### Examples:
+
++ trivial operation
+     + Configure receiver  with rx <portnum>
+	` viamillipede rx 8834  `
+     + Configure transmitter with  tx <receiver_host> <portnum> 
+	` echo "Osymandias" | viamillipede tx foreign.shore.net 8834  `
++ verbose  <0-20>
+	` viamillipede rx 8834   verbose 5 `
++ control worker thread count (only on transmitter) with threads <1-16>
+	` viamillipede tx foreign.shore.net 8834 threads 16 `
++ use with zfs send/recv
+     + Configure transmitter with  tx <receiver_host> <portnum>  and provide stdin from zfs send
+	` zfs send dozer/visage | viamillipede tx foriegn.shore.net 8834  `
+     + Configure receiver  with rx <portnum>  and ppipe output to zfs recv
+     +	`viamillipede rx 8834   | zfs recv trinity/broken `
+
++ explicitly distribute load to reciever with multiple ip addresses, preferring the first ones used
+     + Use the cheap link, saturate it, then fill the fast (north) transport and then use the last resort link (east) if there is still source and sync throughput available.
+     + The destination machine has three interfaces and may have:
+          + varying layer1 media ( ether, serial, Infiniband , 1488)
+          + varying layer2 attachment ( vlan, aggregation )
+          + varying layer3 routes
+     + `viamillipede tx foreign-cheap-1g.shore.net 8834 tx foreign-north-10g.shore.net 8834  tx foreign-east-1g.shore.net 8834 `
+
+
+
 ```
 TOP:
 	scatter gather transport via multiple workers
