@@ -80,12 +80,12 @@ foreach pathroot ( $path_roots )
     end #foreach pathcomponent
 end # foreach pathroot
 
+setenv gUNAME `uname` #must be global
 if ( $?prompt ) then
 #______________________________________________________interactive 
 	setenv gTODAY `date +"%Y%m%d"`
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
-	setenv gUNAME `uname`
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
 
 	printf "\b-"
