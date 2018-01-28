@@ -1,15 +1,48 @@
 #!/bin/sh -x
 verb=${1:-4}
-user='xpi'
-host='delerium'
-host='localhost'
-port=12322
-targets="tx delerium $port tx 192.168.239.250 $port"
-threads=" threads 4"
-#host='localhost'
-rsh="ssh $user@$host "
-sample="rand10g.payload"
+howmuchpain=${2:-2} 
+txhost="192.168.1.86"
+txpool="zroot"
+txdataset="payloads"
+txsnapshot="intial"
+rxhost="192.168.1.87"
+txrsh="ssh root@$txhost "
+rxrsh="ssh root@$rxhost "
 
+
+
+dddriver() {
+	# sizeinMB outfile infile
+	siz=${1:-"1"}
+	infile=${2:-"/dev/random"}
+	outfile=${3:-"/$txpool/$txdataset/rand$siz.MB.payload"}
+	echo "	  creating  random payload: $outfile"
+	remfilestatus=`$txrsh  "ls $outfile.md5"  | wc -c`
+	if [ '0'  -ne $remfilestatus  ]; then
+		echo skipping  existing$outfile
+	else
+		$txrsh "dd  if=$infile of=$outfile bs=1m count=$siz &&\
+		 	md5 $outfile  > $outfile.md5"
+	fi
+}
+
+makepayloadds () {
+	$txrsh " zfs create $txpool/payloads"
+}
+cleanpayloadds () {
+	$txrsh " zfs destroy -r $txpool/payloads "
+}
+
+makepayloads () {
+	makepayloadds
+	echo  " creating $howmuchpain painful inputs"
+	seq=`jot $howmuchpain 0  `  
+	for cursor in $seq 
+	do
+		siz=`dc -e "2 $cursor 4 * ^ p"` 
+		dddriver  $siz 
+	done
+}
 
 zstreamref () {
 	ds="dozer/bbone@c"
@@ -97,10 +130,19 @@ localtest () {
 	sleep 0.75
 }
 
+zsend_dd_shunt () {
+	#provide a reference for how fast the storage is, and what the pipe capability is
+	now=`date +"%s'
+	$txrsh "zfs send $txpool/$txdataset@initial | dd  > /dev/null"
+}
 
 
 #zstreamref
 #zstreamremote
 #ncref
-localtest
+#localtest
+makepayloads
+zsend_dd_shunt
 #remotetest 
+sleep 60 
+#cleanpayloadds
