@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh   -x
 verb=${1:-4}
 howmuchpain=${2:-2} 
 txhost="192.168.1.86"
@@ -109,40 +109,75 @@ remotetest () {
 }
 
 ncref () {
-	$rsh "pkill -f ln -l 12323 ; cd /tmp/; rm -f junk"
-	$rsh "  nc -l 12323 > /tmp/junk " &
+	sample=$1	
+	$rxrsh "pkill -f nc -l 12323 "
+	$rxrsh "  nc -l 12323 > /dev/null " &
 	sshpid=$!
 	sleep 1.3;
-	time   dd if=$sample bs=16k |  nc -N $host 12323  
-	$rsh " md5 -q /tmp/junk"
-	       md5 -q $sample
+	time_start 	
+	$txrsh "zfs send $txpool/$txdataset@initial |  nc -N $rxhost 12323  "
+	time_stop nc_ref
 	wait $sshpid
 	kill $sshpid
 }
 
-localtest () { 
-	pkill viamillipede
-	rm -f out.test
-	rm -f rand.out
-	./viamillipede rx 12123  verbose $verb > /dev/null &
-	sleep 0.75
-	 ./viamillipede tx localhost 12123  verbose $verb $threads < $sample
-	sleep 0.75
+install_bin () {
+	$txrsh "pkill viamillipede"
+	$rxrsh "pkill viamillipede"
+	cat viamillipede | $txrsh " cat -  > /tmp/viamillipede"
+	cat viamillipede | $rxrsh " cat -  > /tmp/viamillipede"
+	$txrsh "chmod 700 /tmp/viamillipede"
+	$rxrsh "chmod 700 /tmp/viamillipede"
+}
+smoke () { 
+	verb=9
+	$rxrsh "/tmp/viamillipede rx 12123  verbose $verb > /dev/null "  & 
+	sshpid=$!
+	sleep 1.75
+	time_start
+	threads="threads 1"
+	$txrsh "cat /etc/hosts | /tmp/viamillipede tx $rxhost 12123  verbose $verb $threads "
+	#$txrsh "zfs send $txpool/$txdataset@initial | /tmp/viamillipede tx $rxhost 12123  verbose $verb $threads "
+	time_stop smoke
+	sleep 1
+	rempid=`$rxrsh "ps -auxw | grep -v grep | grep viamillipede" `
+	if [  $rempid ] ; then
+		echo " still running?"
+		exit 4
+	fi
+	kill $sshpid
 }
 
+time_start()  {
+	begint=`date +"%s"`
+}
+time_stop()  {
+	endt=`date +"%s"`
+	let delta=endt-begint
+	echo "$1 took $delta(s)"
+}
+
+zsend_shunt () {
+	#provide a reference for how fast the storage is, and what the pipe capability is
+	time_start
+	$txrsh "zfs send $txpool/$txdataset@initial > /dev/null"
+	time_stop zsend_shunt
+}
 zsend_dd_shunt () {
 	#provide a reference for how fast the storage is, and what the pipe capability is
-	now=`date +"%s'
-	$txrsh "zfs send $txpool/$txdataset@initial | dd  > /dev/null"
+	time_start
+	$txrsh "zfs send $txpool/$txdataset@initial | dd bs=64k > /dev/null"
+	time_stop zsend_dd_shunt
 }
 
 
-#zstreamref
-#zstreamremote
+time_start 
+$txrsh "true"
+time_stop trvialcommand
+#makepayloads
+install_bin 
+#zsend_shunt
+#zsend_dd_shunt
 #ncref
-#localtest
-makepayloads
-zsend_dd_shunt
-#remotetest 
-sleep 60 
+smoke
 #cleanpayloadds

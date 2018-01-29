@@ -101,8 +101,8 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		readlen = readsize = -111;
 		if ( pkt.opcode == end_of_millipede ) {
 			whisper ( 5, "rxw:%i caught %x done with last frame\n", rxworker->id,  pkt.opcode); 
-			rxworker->rxconf_parent->done_mbox = 1; 
-			pthread_exit (rxworker); 
+			//rxworker->rxconf_parent->done_mbox = 1; 
+			exit (0); 
 		}
 	}// while !done
 	whisper ( 7, "rxw:%i  done\n", rxworker->id); 
