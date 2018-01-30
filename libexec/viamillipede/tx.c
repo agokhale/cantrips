@@ -15,9 +15,9 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 		}
 		pthread_mutex_unlock (&(txconf->mutex));
 		if (retcode <  0 ) {
-			txstatus ( txconf , 19); 
+			//txstatus ( txconf , 19); 
 			spins++; 
-			whisper ( 11, "no workers available backing off spins: %i\n", spins ); 
+			//whisper ( 11, "no workers available backing off spins: %i\n", spins ); 
 			usleep(  1 << spins  ); 	
 		}
 	}
@@ -50,6 +50,7 @@ void txingest (struct txconf_s * txconf ) {
 		// perhaps wait longer for less overhead  or  wait %1 of iotime? or wait vs achievable BW?
 		//usleep ( 1 * 1000); 
 		int worker = dispatch_idle_worker ( txconf ); 
+		assert (  (txconf->workers[worker].buffer) != NULL ); 
 		readsize = bufferfill (  in_fd ,(u_char *) (txconf->workers[worker].buffer) , kfootsize  ) ;  
 		whisper ( 8, "\ntxw:%i read leg %i : fd:%i siz:%i\n",worker,  ingest_leg_counter, in_fd, kfootsize); 
 		assert ( readsize <= kfootsize ); 
@@ -85,12 +86,13 @@ void txpush ( struct txworker_s *txworker ) {
 	//push this buffer out the socket
 	int writelen =-1; 
 	int cursor=0 ;
+	/*
 	if ( txworker->writeremainder > kfootsize  ) { 
 		whisper ( 2, "tx villany, the remaining buffer must not be larger ( %i) than the buffer, %i", 
 		txworker->writeremainder , kfootsize); 
 	}
 	assert ( txworker->writeremainder <= kfootsize ); 
-	checkperror( "writesocket nuisnace err"); 
+	*/
  	/*	
 	write (txworker->sockfd ,  preamble, 2);  // this XXX hsoule be  a protocol
 		whisper (9, "."); 
@@ -109,19 +111,18 @@ void txpush ( struct txworker_s *txworker ) {
 		writelen = write(txworker->sockfd , ((txworker->buffer)+cursor) , minedsize ) ;
 		txworker->state='p'; // 'p'ush complete
 		txworker->writeremainder -= writelen; 
-		assert ( txworker->writeremainder <= kfootsize ); 
+		//assert ( txworker->writeremainder <= kfootsize ); 
 		cursor += writelen; 
-		whisper (10, "txw:%i push leg:%lu.(+%i -%i)  ",txworker->id,txworker->pkt.leg_id,writelen,txworker->writeremainder); 
+		//whisper (10, "txw:%i push leg:%lu.(+%i -%i)  ",txworker->id,txworker->pkt.leg_id,writelen,txworker->writeremainder); 
 	}
 	assert ( txworker->writeremainder == 0 );
 	checkperror( "writesocket"); 
-	assert ( writelen );
-	assert( errno == 0 ); 
+	//assert ( writelen );
 	pthread_mutex_lock (&(txworker->txconf_parent->mutex));
 	txworker->state='i'; 
 	pthread_mutex_unlock (&(txworker->txconf_parent->mutex));
 	txworker->pkt.size=0; 
-	whisper ( 6 , "txw:%i  leg:%lu idled \n" , txworker->id, txworker->pkt.leg_id); 
+	//whisper ( 6 , "txw:%i  leg:%lu idled \n" , txworker->id, txworker->pkt.leg_id); 
 	//txworker->pkt.leg_id=0; 
 	//pthread_mutex_unlock( &(txworker->mutex)); 
 }
@@ -155,7 +156,6 @@ void txworker (struct  txworker_s *txworker ) {
 	txworker->writeremainder=-88; 
 	txworker->pkt.leg_id=0;
 	txworker->pkt.preamble = preamble_cannon_ul;
-	txworker->buffer = calloc ( 1,(size_t) kfootsize ); 
 	checkperror( "worker buffer allocator");
 	pthread_mutex_unlock ( &(txworker->mutex));
 	while ( !done ) {
@@ -193,6 +193,9 @@ void txlaunchworkers ( struct txconf_s * txconf) {
 		whisper( 16, "txw:%i launching ", worker_cursor); 
 		txconf->workers[worker_cursor].state = 'L';
 		txconf->workers[worker_cursor].id = worker_cursor; 
+		//allocate before thread launch
+		txconf->workers[worker_cursor].buffer = calloc ( 1,(size_t) kfootsize ); 
+		assert (txconf->workers[worker_cursor].buffer != NULL && "insufficient memory up front" ); 
 		//digression: pthreads murders all possible kittens stored in  argument types
 		ret = pthread_create ( 
 			&(txconf->workers[worker_cursor].thread ),

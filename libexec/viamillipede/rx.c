@@ -83,9 +83,11 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		// possibly voilates some cocurrency noise
 		int sequencer_stalls =0 ; 
 		while ( pkt.leg_id !=  rxworker->rxconf_parent->next_leg ) {
-			usleep ( 100 ); 
+#define ktimeout ( 1000 * 3000 ) 
+#define ktimeout_chunks ( 10000  )
+			usleep ( ktimeout / ktimeout_chunks ); 
 			sequencer_stalls++; 
-			assert ( sequencer_stalls  < 100000 && "rx seqencer stalled");
+			assert ( sequencer_stalls  < ktimeout_chunks && "rx seqencer stalled");
 		}
 		whisper ( 5, "rxw:%i dumping leg:%lu.%lu after %i stalls\n", rxworker->id,  pkt.leg_id, pkt.size, sequencer_stalls); 
 		remainder = pkt.size; 

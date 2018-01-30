@@ -18,18 +18,19 @@
 #include <signal.h>
 #include "util.h"
 
-#define kfootsize ( 1024 * 1024 )
+#define kfootsize ( 2048 * 1024 )
 
 struct txconf_s;  // forward decl to permit inception 
 struct rxconf_s;  // forward decl to permit inception 
 
 #define preamble_cannon_ul 0xa5a5a5a55a5a5a5a 
+	// opcodes for signaling oob status to remote end
 #define feed_more 0xcafe 
 #define end_of_millipede 0xdead  
 // the bearer channel header
 struct millipacket_s { 
-	unsigned long preamble; 
-	unsigned long leg_id; // pr = ( streampos  % leg_size)
+	unsigned long preamble;  // shoudl always be preamble_cannon_ul constant
+	unsigned long leg_id; //  leg_id= ( streampos  % leg_size ) is the main sequencer for the whole session
 	unsigned long size;
 	int	checksum; 
 	int 	opcode; 
@@ -79,7 +80,7 @@ struct rxconf_s {
 	int socknum ;  // reusable bound socket number  later accepts
 	unsigned short port; 
 	struct rxworker_s workers[17]; 
-	int next_leg ; 
+	int next_leg ;  // main sequencer to monotonically order legs to stdout
 	int done_mbox; 
 } ;
 

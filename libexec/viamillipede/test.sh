@@ -10,8 +10,14 @@ rxhost2="192.168.238.1"
 rxhost3="192.168.238.2"
 rxhost4="192.168.238.3"
 rxhost5="192.168.238.4"
+rxhost6="192.168.238.5"
+rxhost7="192.168.238.6"
+rxhost8="192.168.238.8"
+rxhost9="192.168.238.9"
 rxport=12323
-rxhost_graph="tx $rxhost2 $rxport tx $rxhost $rxport tx $rxhost3 $rxport tx $rxhost4 $rxport tx $rxhost5 $rxport tx $rxhost4 $rxport tx $rxhost2 $rxport"
+rxhost_graph="tx $rxhost2 $rxport tx $rxhost5 $rxport tx $rxhost3 $rxport \
+	tx $rxhost4 $rxport tx $rxhost9 $rxport tx $rxhost $rxport tx $rxhost6 $rxport \
+        tx $rxhost7 $rxport tx $rxhost8 $rxport tx $rxhost9 $rxport"
 txrsh="ssh root@$txhost "
 rxrsh="ssh root@$rxhost "
 
@@ -181,15 +187,14 @@ zsend_dd_shunt () {
 #time_start 
 #$txrsh "true"
 #time_stop trvialcommand
-makepayloads
+#makepayloads
 install_bin 
-zsend_shunt
-zsend_dd_shunt
-ncref
-smoke "cat /etc/hosts" 1 1
-smoke " zfs send $txpool/$txdataset@initial" 2 1
-smoke " zfs send $txpool/$txdataset@initial" 2 2
-smoke " zfs send $txpool/$txdataset@initial" 2 4
-smoke " zfs send $txpool/$txdataset@initial" 2 8 
-smoke " zfs send $txpool/$txdataset@initial" 2 16 
-cleanpayloadds
+#$zsend_shunt
+#zsend_dd_shunt
+#ncref
+thread_counts=`jot 13 1`
+for thread_count in $thread_counts 
+do 
+	smoke "zfs send $txpool/$txdataset@initial" 2 $thread_count
+done
+#cleanpayloadds
