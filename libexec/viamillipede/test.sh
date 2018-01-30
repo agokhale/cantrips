@@ -1,6 +1,6 @@
 #!/bin/sh 
 verb=${1:-4}
-howmuchpain=${2:-4} 
+howmuchpain=${2:-5} 
 txhost="kaylee.a.aeria.net"
 txpool="dozer"
 txdataset="payloads"
@@ -147,7 +147,8 @@ smoke() {
 	payloadstream=$1
 	verb=$2 
 	threads="threads $3"
-	$rxrsh "/tmp/viamillipede rx $rxport verbose $verb > /dev/null "  & 
+	#$rxrsh "/tmp/viamillipede rx $rxport verbose $verb | md5 && echo remote done "  & 
+	$rxrsh "/tmp/viamillipede rx $rxport verbose $verb > /dev/null && echo -n remote done "  & 
 	sleep 0.5
 	sshpid=$!
 	time_start
@@ -166,7 +167,7 @@ time_start()  {
 }
 time_stop()  {
 	endt=`date +"%s"`
-	let delta=endt-begint
+	delta=`dc -e "$endt $begint - p "`
 	echo "$1 took $delta(s)"
 }
 
@@ -175,6 +176,9 @@ zsend_shunt () {
 	time_start
 	$txrsh "zfs send $txpool/$txdataset@initial > /dev/null"
 	time_stop zsend_shunt
+	time_start
+	$txrsh "zfs send $txpool/$txdataset@initial | md5 "
+	time_stop zsend_md5
 }
 zsend_dd_shunt () {
 	#provide a reference for how fast the storage is, and what the pipe capability is
@@ -187,14 +191,14 @@ zsend_dd_shunt () {
 #time_start 
 #$txrsh "true"
 #time_stop trvialcommand
-#makepayloads
+makepayloads
 install_bin 
-#$zsend_shunt
-#zsend_dd_shunt
-#ncref
-thread_counts=`jot 14 1`
+zsend_shunt
+zsend_dd_shunt
+ncref
+thread_counts=`jot 16 1`
 for thread_count in $thread_counts 
 do 
 	smoke "zfs send $txpool/$txdataset@initial" 2 $thread_count
 done
-#cleanpayloadds
+#$cleanpayloadds

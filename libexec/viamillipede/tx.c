@@ -46,12 +46,6 @@ void txingest (struct txconf_s * txconf ) {
 	txconf->stream_total_bytes=0; 
 	checkperror("nuisancse ingest err");
 	while ( !done ) {
-		// select XXX a free foot worker
-		//here lies a conundrum - if the input is slow, we will not fill buffers, 
-		// how long should we wait before attempttig to grab what we want?
-		// waiting n ms for a kfootsize should be an accepable tradeoff or self tuning
-		// perhaps wait longer for less overhead  or  wait %1 of iotime? or wait vs achievable BW?
-		//usleep ( 1 * 1000); 
 		int worker = dispatch_idle_worker ( txconf ); 
 		assert (  (txconf->workers[worker].buffer) != NULL ); 
 		readsize = bufferfill (  in_fd ,(u_char *) (txconf->workers[worker].buffer) , kfootsize  ) ;  
@@ -59,8 +53,6 @@ void txingest (struct txconf_s * txconf ) {
 		assert ( readsize <= kfootsize ); 
 		if ( readsize > 0  ) { 
 			// XXX find the idle worker , lock it and dispatch as seprarte calls -- perhaps
-			//txconf->workers[worker].buffer[0] = taste_buf; //is this pipe still readable
-			// unfortunate buffer alignment due to taste
 			txconf->workers[worker].pkt.size = readsize;   
 			txconf->workers[worker].pkt.leg_id = ingest_leg_counter; 
 			txconf->workers[worker].pkt.opcode=feed_more; 
@@ -258,7 +250,7 @@ void wat ( ) {
 	whisper ( 1 , "\n" ); 
 	txstatus  ( txconf, 1 );  
 	//bytes per usec - thats interesting  bytes to mb 
-	whisper (1, "\n %8.4f mbps\n" , ( txconf->stream_total_bytes / ( 1.0 *  usecbusy  ))    );
+	whisper (1, "\n %8.4f MBps\n" , ( txconf->stream_total_bytes / ( 1.0 *  usecbusy  ))    );
 }
 
 void partingshot() {
