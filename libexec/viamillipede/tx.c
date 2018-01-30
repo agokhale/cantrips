@@ -4,11 +4,13 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	int retcode =-1 ; 
 	txstatus ( txconf , 5); 
 	int spins = 0; 
+	int sleep_thief =0; 
 	while (   retcode < 0  ) {
 		pthread_mutex_lock (&(txconf->mutex));
 		for ( int i = 0 ; (i < txconf->worker_count) && (retcode < 0 ) ; i++ ) {
 			if ( txconf->workers[i].state == 'i' ) {
 				retcode = i; 
+				sleep_thief=0; 
 				spins = 0 ;	
 			} else {
 			}
@@ -18,7 +20,8 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 			//txstatus ( txconf , 19); 
 			spins++; 
 			//whisper ( 11, "no workers available backing off spins: %i\n", spins ); 
-			usleep(  1 << spins  ); 	
+			sleep_thief ++; 
+			usleep( sleep_thief);
 		}
 	}
 return (retcode); 
@@ -133,6 +136,7 @@ void txworker (struct  txworker_s *txworker ) {
 	char hellophrase[]="yoes";
 	char checkphrase[]="ok";
 	int state_spin =0; 
+	int sleep_thief =0; 
 	char readback[2048]; 
 	pthread_mutex_init ( &(txworker->mutex)	, NULL ) ; 
 	pthread_mutex_lock ( &(txworker->mutex));
@@ -164,7 +168,7 @@ void txworker (struct  txworker_s *txworker ) {
 		pthread_mutex_unlock ( &(txworker->txconf_parent->mutex));
 		switch (local_state) {
 			case 'i': break; //idle
-			case 'd': txpush ( txworker );  break; 
+			case 'd': txpush ( txworker ); sleep_thief=0; break; 
 			default: assert( -1 && "bad zoot");
 			}
 		state_spin ++; 
@@ -172,7 +176,9 @@ void txworker (struct  txworker_s *txworker ) {
 			//txstatus ( txworker -> txconf_parent,10 ) ; 
 			whisper ( 9, "txw:%i is lonely after %i spins \n", txworker->id, state_spin); 
 		}
-		//usleep ( 60 ); 
+		sleep_thief ++; // this Looks crazy ; but it's good for 30% 
+		// this works by allowing a context switch and permitting a dispatch ready thread to push
+		usleep ( sleep_thief ); 
 	} // while !done 
 	pclose ( txworker->pip); 
 } //  txworker

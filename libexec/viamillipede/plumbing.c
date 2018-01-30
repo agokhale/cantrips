@@ -9,6 +9,7 @@ ssize_t bufferfill ( int fd, u_char * dest, size_t size ) {
         ssize_t accumulator=0;
         ssize_t readsize;
         int fuse=1055;  // don't spin  forever
+	int sleep_thief =0;
 	assert ( dest != NULL ); 
         do      {
                 checkperror ( "bufferfill nuiscance err");
@@ -22,10 +23,12 @@ ssize_t bufferfill ( int fd, u_char * dest, size_t size ) {
 			whisper ( 3, "erno: %i  readsize %ld requestedsiz: %d  fd:%i dest:%p \n", errno , readsize, MIN( MAXBSIZE, remainder), fd, dest_cursor );  
 		}
                 checkperror( "bufferfill read err");
+		/*
                 whisper( 20, "txingest: read stdin size %ld offset:%i remaining %i \n",
 			 readsize,
 			(int) ((u_char*)dest_cursor - (u_char*)dest), 
 			remainder );
+		*/
                 if ( readsize < 0 ) {
                         whisper (2, "negative read");
                         perror ( "negread");
@@ -35,14 +38,15 @@ ssize_t bufferfill ( int fd, u_char * dest, size_t size ) {
                         remainder -= readsize ;
                         assert ( remainder >= 0);
                         accumulator += readsize;
-                        //assert ( accumulator < kfootsize);
-			// XXX don't depend on the foot size anymore
                         dest_cursor += readsize;
-                        if ( readsize < 16384) {
-                                // discourage tinygrams - they just beat us up
+                        if ( readsize < MAXBSIZE) {
+                                // discourage tinygrams - they just beat us up and chew the cpu
                                 // XXX histgram the readsize and use ema to track optimal effort
-                                //usleep ( 100);
-                        }
+				sleep_thief ++;
+                        } else { 
+				sleep_thief= 0;
+			} 
+                        usleep ( sleep_thief );
                         if ( readsize < 1 )  { // short reads  are the end
                                 break;
                         }

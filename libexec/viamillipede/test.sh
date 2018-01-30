@@ -15,9 +15,9 @@ rxhost7="192.168.238.6"
 rxhost8="192.168.238.8"
 rxhost9="192.168.238.9"
 rxport=12323
-rxhost_graph="tx $rxhost2 $rxport tx $rxhost5 $rxport tx $rxhost3 $rxport \
-	tx $rxhost4 $rxport tx $rxhost9 $rxport tx $rxhost $rxport tx $rxhost6 $rxport \
-        tx $rxhost7 $rxport tx $rxhost8 $rxport tx $rxhost9 $rxport"
+rxhost_graph="tx $rxhost2 $rxport tx $rxhost3 $rxport tx $rxhost4 $rxport \
+	tx $rxhost5 $rxport tx $rxhost6 $rxport tx $rxhost7 $rxport tx $rxhost8 $rxport \
+        tx $rxhost9 $rxport tx $rxhost $rxport "
 txrsh="ssh root@$txhost "
 rxrsh="ssh root@$rxhost "
 
@@ -192,7 +192,7 @@ install_bin
 #$zsend_shunt
 #zsend_dd_shunt
 #ncref
-thread_counts=`jot 13 1`
+thread_counts=`jot 14 1`
 for thread_count in $thread_counts 
 do 
 	smoke "zfs send $txpool/$txdataset@initial" 2 $thread_count

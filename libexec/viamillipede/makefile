@@ -1,5 +1,5 @@
 all:
-	cc -g -o viamillipede -lpthread  plumbing.c rx.c tx.c viamillipede.c
+	cc -g  -o viamillipede -lpthread  plumbing.c rx.c tx.c viamillipede.c
 clean: 
 	rm -f viamillipede viamillipede.core
 
