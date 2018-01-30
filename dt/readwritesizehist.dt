@@ -1,0 +1,7 @@
+#!/usr/sbin/dtrace -s
+#pragma D option quiet
+#pragma D option aggsize=20m
+
+syscall::read:return,syscall::write:return 
+/execname == "viamillipede" / 
+{ @[probefunc] = quantize(arg1); }
