@@ -5,28 +5,29 @@ int dispatch_idle_worker ( struct txconf_s * txconf ) {
 	txstatus ( txconf , 5); 
 	int spins = 0; 
 	while (   retcode < 0  ) {
+		pthread_mutex_lock (&(txconf->mutex));
 		for ( int i = 0 ; (i < txconf->worker_count) && (retcode < 0 ) ; i++ ) {
-			//pthread_mutex_lock (&(txconf->workers[i].mutex));
 			if ( txconf->workers[i].state == 'i' ) {
-				//hold lock untill the buffer is filled
 				retcode = i; 
 				spins = 0 ;	
 			} else {
-				//pthread_mutex_unlock (&(txconf->workers[i].mutex));
 			}
 		}
+		pthread_mutex_unlock (&(txconf->mutex));
 		if (retcode <  0 ) {
 			txstatus ( txconf , 19); 
 			spins++; 
-			whisper ( 6, "no workers available backing off spins: %i\n", spins ); 
-			usleep (MIN(1000 * (spins << 2), 10000000)); // XXX cheap backoff
+			whisper ( 11, "no workers available backing off spins: %i\n", spins ); 
+			usleep(  1 << spins  ); 	
 		}
 	}
 return (retcode); 
 }
 
 void start_worker ( struct txworker_s * txworker ) {
+	pthread_mutex_lock (&(txworker->txconf_parent->mutex));
 	txworker->state='d'; 	
+	pthread_mutex_unlock (&(txworker->txconf_parent->mutex));
 	txstatus ( txworker->txconf_parent, 6 ); 
 }
 	
@@ -47,25 +48,16 @@ void txingest (struct txconf_s * txconf ) {
 		// how long should we wait before attempttig to grab what we want?
 		// waiting n ms for a kfootsize should be an accepable tradeoff or self tuning
 		// perhaps wait longer for less overhead  or  wait %1 of iotime? or wait vs achievable BW?
-		usleep ( 1 * 1000); 
-		checkperror ( "stdinread");
-		readsize = read ( in_fd  , &taste_buf , 1 ); // taste the input  for existance
-		checkperror ( "stdinread2");
-		// i have managed to turn a  cs undergrad problem poorly
-		if ( readsize > 0 ) { 
-			//fixup the buffer because we ate a byte for tasting ; 
-			//conversely all our read maths are b0rked fencepostly
-			// as so as we dispatch - another thread writes  a frame- potentially empty
+		//usleep ( 1 * 1000); 
+		int worker = dispatch_idle_worker ( txconf ); 
+		readsize = bufferfill (  in_fd ,(u_char *) (txconf->workers[worker].buffer) , kfootsize  ) ;  
+		whisper ( 8, "\ntxw:%i read leg %i : fd:%i siz:%i\n",worker,  ingest_leg_counter, in_fd, kfootsize); 
+		assert ( readsize <= kfootsize ); 
+		if ( readsize > 0  ) { 
 			// XXX find the idle worker , lock it and dispatch as seprarte calls -- perhaps
-			int worker = dispatch_idle_worker ( txconf ); 
-			txconf->workers[worker].buffer[0] = taste_buf; //is this pipe still readable
-			readsize = bufferfill (  in_fd ,(u_char *) (txconf->workers[worker].buffer)+1 , kfootsize-1  ) ;  
+			//txconf->workers[worker].buffer[0] = taste_buf; //is this pipe still readable
 			// unfortunate buffer alignment due to taste
-			whisper ( 7, "\ntxw:%i read leg %i : fd:%i siz:%i\n",worker,  ingest_leg_counter, in_fd, kfootsize-1); 
-			if ( readsize > kfootsize-1) { whisper (1,"too big read %i", readsize); }
-			assert ( readsize+1 <= kfootsize ); 
-			
-			txconf->workers[worker].pkt.size = readsize+1;   // +1 for the tasing byte
+			txconf->workers[worker].pkt.size = readsize;   
 			txconf->workers[worker].pkt.leg_id = ingest_leg_counter; 
 			txconf->workers[worker].pkt.opcode=feed_more; 
 			start_worker ( &(txconf->workers[worker]) );
@@ -106,7 +98,7 @@ void txpush ( struct txworker_s *txworker ) {
 		whisper (9, "."); 
 	write (txworker->sockfd ,  &(txworker->bufferleg), sizeof(int)); 
 		whisper (9, "."); 
-	*/
+	*/		
 	txworker->state='a';// preAmble
 	write (txworker->sockfd , &txworker->pkt, sizeof(struct millipacket_s)); 
 	txworker->writeremainder = txworker->pkt.size;
@@ -125,15 +117,18 @@ void txpush ( struct txworker_s *txworker ) {
 	checkperror( "writesocket"); 
 	assert ( writelen );
 	assert( errno == 0 ); 
+	pthread_mutex_lock (&(txworker->txconf_parent->mutex));
 	txworker->state='i'; 
+	pthread_mutex_unlock (&(txworker->txconf_parent->mutex));
 	txworker->pkt.size=0; 
-	whisper ( 6 , "txw:%i  leg:%lu unlocked \n" , txworker->id, txworker->pkt.leg_id); 
+	whisper ( 6 , "txw:%i  leg:%lu idled \n" , txworker->id, txworker->pkt.leg_id); 
 	//txworker->pkt.leg_id=0; 
 	//pthread_mutex_unlock( &(txworker->mutex)); 
 }
 void txworker (struct  txworker_s *txworker ) {
 	int done =0; 
 	int retcode =-1; 
+	char local_state = 0 ;
 	char hellophrase[]="yoes";
 	char checkphrase[]="ok";
 	int state_spin =0; 
@@ -154,7 +149,7 @@ void txworker (struct  txworker_s *txworker ) {
 	checkperror ("read fail"); 
 	assert ( bcmp ( checkphrase, readback, 2 ) == 0 ); 
 	whisper ( 8, "txw:%i online and idling fd:%i\n", txworker->id, txworker->sockfd);
-	txstatus (txworker->txconf_parent,7); 
+	//txstatus (txworker->txconf_parent,7); 
 	txworker->state = 'i'; //idle
 	txworker->pkt.size = 0 ; 
 	txworker->writeremainder=-88; 
@@ -164,19 +159,20 @@ void txworker (struct  txworker_s *txworker ) {
 	checkperror( "worker buffer allocator");
 	pthread_mutex_unlock ( &(txworker->mutex));
 	while ( !done ) {
-		pthread_mutex_lock ( &(txworker->mutex));
-		switch (txworker->state) {
+		pthread_mutex_lock ( &(txworker->txconf_parent->mutex));
+		local_state = txworker->state; 
+		pthread_mutex_unlock ( &(txworker->txconf_parent->mutex));
+		switch (local_state) {
 			case 'i': break; //idle
 			case 'd': txpush ( txworker );  break; 
 			default: assert( -1 && "bad zoot");
 			}
-		pthread_mutex_unlock ( &(txworker->mutex));
 		state_spin ++; 
 		if ( (state_spin % 30000) == 0 && ( txworker->state == 'i' ) )  {
-			txstatus ( txworker -> txconf_parent,10 ) ; 
+			//txstatus ( txworker -> txconf_parent,10 ) ; 
 			whisper ( 9, "txw:%i is lonely after %i spins \n", txworker->id, state_spin); 
 		}
-		usleep ( 100 ); 
+		//usleep ( 60 ); 
 	} // while !done 
 	pclose ( txworker->pip); 
 } //  txworker
@@ -225,6 +221,7 @@ void txstatus ( struct txconf_s* txconf , int log_level) {
 		}
 }
 void txbusyspin ( struct txconf_s* txconf ) {
+	// wait until all legs are pushed; called after ingest is complete
 	// if there are launche/dispatched /pushing workers; hang here
 	int done =0; 
 	int busy_cycles; 
@@ -271,6 +268,7 @@ void tx (struct txconf_s * txconf) {
         signal (SIGINFO, &wat);
         signal (SIGINT, &partingshot);
         signal (SIGHUP, &partingshot);
+	pthread_mutex_init ( &(txconf->mutex), NULL ) ; 
 	stopwatch_start( &(txconf->ticker) ); 
 	txlaunchworkers( txconf ); 	
 	txingest ( txconf ); 

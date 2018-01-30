@@ -18,7 +18,7 @@
 #include <signal.h>
 #include "util.h"
 
-#define kfootsize (2048 * 1024 )
+#define kfootsize ( 1024 * 1024 )
 
 struct txconf_s;  // forward decl to permit inception 
 struct rxconf_s;  // forward decl to permit inception 
@@ -60,6 +60,7 @@ struct txconf_s {
 	struct txworker_s workers[16];	//XXX make dynamic??? 
 	int target_port_count; 	
 	struct target_port_s target_ports[16]; 
+	pthread_mutex_t mutex;
 };
 
 

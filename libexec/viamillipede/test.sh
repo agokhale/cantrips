@@ -1,11 +1,17 @@
-#!/bin/sh   -x
+#!/bin/sh 
 verb=${1:-4}
-howmuchpain=${2:-2} 
-txhost="192.168.1.86"
-txpool="zroot"
+howmuchpain=${2:-4} 
+txhost="kaylee.a.aeria.net"
+txpool="dozer"
 txdataset="payloads"
 txsnapshot="intial"
-rxhost="192.168.1.87"
+rxhost="mal.a.aeria.net"
+rxhost2="192.168.238.1"
+rxhost3="192.168.238.2"
+rxhost4="192.168.238.3"
+rxhost5="192.168.238.4"
+rxport=12323
+rxhost_graph="tx $rxhost2 $rxport tx $rxhost $rxport tx $rxhost3 $rxport tx $rxhost4 $rxport tx $rxhost5 $rxport tx $rxhost4 $rxport tx $rxhost2 $rxport"
 txrsh="ssh root@$txhost "
 rxrsh="ssh root@$rxhost "
 
@@ -42,6 +48,7 @@ makepayloads () {
 		siz=`dc -e "2 $cursor 4 * ^ p"` 
 		dddriver  $siz 
 	done
+	$txrsh "zfs snapshot  $txpool/$txdataset@initial"
 }
 
 zstreamref () {
@@ -115,13 +122,13 @@ ncref () {
 	sshpid=$!
 	sleep 1.3;
 	time_start 	
-	$txrsh "zfs send $txpool/$txdataset@initial |  nc -N $rxhost 12323  "
+	$txrsh "zfs send $txpool/$txdataset@initial |  nc -N $rxhost2 12323  "
 	time_stop nc_ref
 	wait $sshpid
-	kill $sshpid
-}
 
+}
 install_bin () {
+	echo cleaning bins
 	$txrsh "pkill viamillipede"
 	$rxrsh "pkill viamillipede"
 	cat viamillipede | $txrsh " cat -  > /tmp/viamillipede"
@@ -129,23 +136,23 @@ install_bin () {
 	$txrsh "chmod 700 /tmp/viamillipede"
 	$rxrsh "chmod 700 /tmp/viamillipede"
 }
-smoke () { 
-	verb=9
-	$rxrsh "/tmp/viamillipede rx 12123  verbose $verb > /dev/null "  & 
+
+smoke() { 
+	payloadstream=$1
+	verb=$2 
+	threads="threads $3"
+	$rxrsh "/tmp/viamillipede rx $rxport verbose $verb > /dev/null "  & 
+	sleep 0.5
 	sshpid=$!
-	sleep 1.75
 	time_start
-	threads="threads 1"
-	$txrsh "cat /etc/hosts | /tmp/viamillipede tx $rxhost 12123  verbose $verb $threads "
-	#$txrsh "zfs send $txpool/$txdataset@initial | /tmp/viamillipede tx $rxhost 12123  verbose $verb $threads "
-	time_stop smoke
-	sleep 1
+	$txrsh "$payloadstream | /tmp/viamillipede $rxhost_graph verbose $verb $threads "
+	time_stop "smoke-stream$1-verb$2-th$3"
 	rempid=`$rxrsh "ps -auxw | grep -v grep | grep viamillipede" `
 	if [  $rempid ] ; then
-		echo " still running?"
+		echo "rx vmpd still running?"
 		exit 4
 	fi
-	kill $sshpid
+	wait $sshpid
 }
 
 time_start()  {
@@ -171,13 +178,18 @@ zsend_dd_shunt () {
 }
 
 
-time_start 
-$txrsh "true"
-time_stop trvialcommand
-#makepayloads
+#time_start 
+#$txrsh "true"
+#time_stop trvialcommand
+makepayloads
 install_bin 
-#zsend_shunt
-#zsend_dd_shunt
-#ncref
-smoke
-#cleanpayloadds
+zsend_shunt
+zsend_dd_shunt
+ncref
+smoke "cat /etc/hosts" 1 1
+smoke " zfs send $txpool/$txdataset@initial" 2 1
+smoke " zfs send $txpool/$txdataset@initial" 2 2
+smoke " zfs send $txpool/$txdataset@initial" 2 4
+smoke " zfs send $txpool/$txdataset@initial" 2 8 
+smoke " zfs send $txpool/$txdataset@initial" 2 16 
+cleanpayloadds

@@ -40,7 +40,8 @@ void rxworker ( struct rxworker_s * rxworker ) {
 				continue;
 			}; 
 			if ( readlen < (sizeof(struct millipacket_s) - preamble_cursor) ) { 
-				whisper ( 3, "rx: short read %i< %lu attempting recovery, preamble cursor: %i errno,  %i", readlen, sizeof(struct millipacket_s),preamble_cursor, errno); 
+				whisper ( 7, "rx: short header %i(read)< %lu (headersize), preamble cursor: %i \n",
+					 readlen, sizeof(struct millipacket_s),preamble_cursor); 
 				checkperror ("short read");
 			}
 			preamble_cursor += readlen;
@@ -82,9 +83,9 @@ void rxworker ( struct rxworker_s * rxworker ) {
 		// possibly voilates some cocurrency noise
 		int sequencer_stalls =0 ; 
 		while ( pkt.leg_id !=  rxworker->rxconf_parent->next_leg ) {
-			usleep ( 1000 ); 
+			usleep ( 100 ); 
 			sequencer_stalls++; 
-			assert ( sequencer_stalls  < 100000 && " rx sseqencer stalled");
+			assert ( sequencer_stalls  < 100000 && "rx seqencer stalled");
 		}
 		whisper ( 5, "rxw:%i dumping leg:%lu.%lu after %i stalls\n", rxworker->id,  pkt.leg_id, pkt.size, sequencer_stalls); 
 		remainder = pkt.size; 
