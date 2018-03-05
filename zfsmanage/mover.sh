@@ -7,18 +7,19 @@ Shared with no implied warranty or suitability for purpose; this will probably l
 # aeria zfs mover 
 # ash@aeria.net
 # 
-# ./mover.sh barrel/tmp          toohey.aeria.lab  z/repli/reaver/tmp        reaver-tmp_to_toohey_flow
-#            (local file system) (remote host)     (remote file system)      (flowtag)
+# ./mover.sh  kaylee.a.aeria.net   dozer/var           mal.a.aeria.net  trinity/dozer-target  flow-kayeevartomal
+#             (transmithost)       (local file system) (receive host)   (remote file system)  (flowtag)
 #
 # reference: https://www.slideshare.net/MatthewAhrens/openzfs-send-and-receive
 
 zfs  restartable delta sigma replication 
 
 Each replication relationship is described by a four tulple which are the required argements that define a replication flow
-	1) lfs: local file system source , must be a zfs dataset  eg: tank/usr/home
-	2) rhost: remote host replication taret running rsh compatible transport   eg:tardis.co.uk
-	3) rfs: remote file system  target must be an existant dataset.  eg: dozer/repltarget/tank_usr_home
-	4) flowtag: a string that describes the flow  eg: ash-home-lab_to_tardis_transatlantic_flow
+	1) txhost: host to transmit from 
+	2) txfs: local file system source , must be a zfs dataset  eg: tank/usr/home
+	3) rxhost: remote host replication taret running rsh compatible transport   eg:tardis.co.uk
+	4) rxfs: remote file system  target  eg: dozer/repltarget/tank_usr_home
+	5) flowtag: a string that describes the flow  eg: ash-home-lab_to_tardis_transatlantic_flow
 
 
 Initally the mover will transmit a bulk snapshot to prime later instances of incremntal sends.
@@ -27,7 +28,6 @@ The mover is restartable; zfs resume tokens are queried for restarts; no extra c
 Each flow is rentrant safe.  Feel free to schedule it in a tight loop or  from cron.  
 
 Not BUGS exactly:
-Recursion is not suported. 
 This script must manage all the snapshots on both zfs  datsets. External removal of snapshots is discouraged.  
 Snapshots retained longer than strictly required because paranoia abounds. 
 Flowtag is used as part of a regex on remote zfs list operations to identify snapshots that belog to this replication context. 
@@ -47,15 +47,16 @@ if [ $# -ne 4 ]; then
 fi
 
 
-#local dataset to send
-lfs=${1}
+txhost=${1}
+# dataset to send
+txfs=${2}
 #remote host to receive
-rhost=${2}
+rxhost=${3}
 #remote zfs dataset
-rfs=${3} 
+rxfs=${4} 
 #tracking tag which we use to brand snapshots for our exclusive use to 
 #please use a decriptive name that describes the replication relationship
-mytag=${4} 
+mytag=${5} 
 thedate=`date +"%s"`
 
 send_verbose_arg="    "
@@ -69,7 +70,7 @@ rsh=" $rsh -o ConnectionAttempts=5 "
 #rsh=" $rsh -o ForwardX11=no -o LogLevel=INFO "  
 #rsh=" $rsh -v  "  
 
-echo "the time is now: ${thedate}. we are sending $lfs.$mytag to $rhost:$rfs "
+echo "the time is now: ${thedate}. we are sending $txhost:$txfs.$mytag to $rxhost:$rxfs"
 
 
 lockfile_cleanup() {
