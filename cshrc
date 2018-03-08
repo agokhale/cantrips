@@ -293,7 +293,7 @@ if ( $?prompt ) then
 		complete lprm       'c/-P/$printers/'
 	endif
 	
-    alias tat 'cvs status | grep Stat | grep -v Up-to-date'
+    alias tat 'cvs status | grep Stat | grep -v Up-to-date || git status ' 
 	set dunique
 	set colorcat
 	set prompt2="loop%R>"
