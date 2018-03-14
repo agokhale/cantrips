@@ -1,7 +1,7 @@
 #!/usr/sbin/dtrace -s 
 
 tcp:::,udp:::
- {@nethist [execname,probename] = count();}
+ {@nethist [execname,probeprov, probefunc,probename] = count();}
 
 tick-3sec
 { printa ( @nethist); 
