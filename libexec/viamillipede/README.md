@@ -22,7 +22,7 @@ Viamillipede is client and server program built to improve network pipe transpor
  + network hardware is tuned against hot single tcp connections
  + Poor mss window scaling. Congestion controls aggressively collapse mss when network conditions are not pristine.
  + Long bandwidth latency product connections vs. short skinny pipes; niether work out of the box due to 'impedence mismatches' ( not really Z !) 
- + Poor buffer interactions. "Shoe shining" when buffer sizing is not appropriate. Taoe libaries muxed connections soon after helical  type drives. 
+ + Poor buffer interactions. "Shoe shining" when buffer sizing is not appropriate. Tape libaries muxed connections soon after helical  type drives. 
  + NewReno alternatives are not often acceptable.
  + Flows are stuck on one L3 path.  This defeats the benefits of aggregation and multi-homed connections.
  + Alternate Scatter gather transport is usually not pipe transparent and difficult to set up; eg: pftp, bittorrent, pNFS

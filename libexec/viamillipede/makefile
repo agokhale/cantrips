@@ -1,3 +1,7 @@
+.SUFFIXES: .o .c
+
+.c.o: .c
+	$(CC) $(CFLAGS) -c $(.IMPSRC)
 all:
 	cc -g  -o viamillipede -lpthread  plumbing.c rx.c tx.c viamillipede.c
 clean: 

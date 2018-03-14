@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.6"
+set ashrcversion = "10.2.6.1"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
@@ -233,9 +233,9 @@ if ( $?prompt ) then
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty sqick foo)/' 'p/*/$tdterms/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
-	complete sc 'p/1/(-r) /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
-	alias  sa screen -r
-	complete sa  'p/1/`screen -ls | grep tached | sed "s/[ \t][0-9]*\.\([0-z]*\).*/\1/"`'
+	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
+	alias  sa screen 
+	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/' 'p/2/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete ifconfig  'p/1/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s1500 )/'
@@ -293,7 +293,7 @@ if ( $?prompt ) then
 		complete lprm       'c/-P/$printers/'
 	endif
 	
-    alias tat 'cvs status | grep Stat | grep -v Up-to-date'
+    alias tat 'cvs status | grep Stat | grep -v Up-to-date || git status ' 
 	set dunique
 	set colorcat
 	set prompt2="loop%R>"

@@ -1,8 +1,57 @@
 #!/usr/sbin/dtrace -s 
+#pragma D option quiet
 
 tcp:::,udp:::
  {@nethist [execname,probeprov, probefunc,probename] = count();}
 
+
+tcp:::send 
+{ 
+@conmaptx[ execname,  args[2]->ip_daddr] =sum (args[2]->ip_plength) ; 
+} 
+
+tcp:::receive 
+/* this is actually not very helpful as intr, and kernel own all the traffic :(  */
+{ 
+@conmaprx[ execname,  args[2]->ip_saddr] =sum (args[2]->ip_plength) ; 
+} 
+
+
+tcp:::debug-user  / args[1] == 8 /
+{
+	/* 
+	debug-user is all purpose desert-wax! may not be stable long term, this works in 12.somthing.current
+	8 magic constant in predicate comes from 
+	get rx events for proccesses  /usr/12headsrc/sys/sys/protosw.h:140:#define    PRU_RCVD                8    
+	arg0 is netinet/tcp_var.h   L struct tcpcb *tp
+	tracepoint is  tcp_usrreq.c: line 838
+	@du [ execname,  ( *(struct tcpcb*)arg0).rcv_wnd] =sum() ; 
+	*/
+
+	/* this is wrong as  summing the tcp window is nonsense, but it's better that nothing */
+	@du [ execname] = sum(  ( *(struct tcpcb*)arg0).rcv_wnd ) ;  
+	/* neet, too much stuffs print ( *(struct tcpcb*)arg0);   */
+
+}
+
+
 tick-3sec
-{ printa ( @nethist); 
-clear (@nethist); }
+{ 
+printf ("\033[2J"); /* clear screen - mostly*/
+
+normalize ( @nethist, 3);
+normalize ( @conmaptx, 3);
+normalize ( @conmaprx, 3);
+normalize ( @du, 64); /* this is totally bogus */
+printa ( @nethist );  
+printf ("connection map -------------------------  tx" );
+printa ( @conmaptx );
+printf ("connection map -------------------------  rx");
+printa ( @conmaprx );
+printf ("psuodowindow range -------------------------  rx");
+printa ( @du );
+trunc (@nethist); 
+trunc (@du); 
+trunc (@conmaptx);
+trunc (@conmaprx);
+}
