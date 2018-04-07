@@ -2,79 +2,111 @@
 usage() {
 cat << HOOOEY
 
-Shared with no implied warranty or suitability for purpose; this will probably lose data.
+Shared with no implied warranty or suitability for purpose. This will probably lose your data, eat your snacks and run away with your dog.
 
 # aeria zfs mover 
 # ash@aeria.net
 # 
-# ./mover.sh  kaylee.a.aeria.net   dozer/var           mal.a.aeria.net  trinity/dozer-target  flow-kayeevartomal
-#             (transmithost)       (local file system) (receive host)   (remote file system)  (flowtag)
+# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   pipe           rxuser@mal.a.aeria.net:trinity/dozer-target  
+# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   ssh            rxuser@mal.a.aeria.net:trinity/dozer-target  
+#             (transmithost):(source file system)   (transport)    (receive host):(destination file system)
 #
 # reference: https://www.slideshare.net/MatthewAhrens/openzfs-send-and-receive
+# ealier version: https://github.com/agokhale/cantrips/blob/d3df2e2468427aaf6f607cbd0fa493af5f4e7ad0/zfsmanage/mover.sh
 
-zfs  restartable delta sigma replication 
-
-Each replication relationship is described by a four tulple which are the required argements that define a replication flow
-	1) txhost: host to transmit from 
-	2) txfs: local file system source , must be a zfs dataset  eg: tank/usr/home
-	3) rxhost: remote host replication taret running rsh compatible transport   eg:tardis.co.uk
-	4) rxfs: remote file system  target  eg: dozer/repltarget/tank_usr_home
-	5) flowtag: a string that describes the flow  eg: ash-home-lab_to_tardis_transatlantic_flow
-
+zfs replication resumeable, resiliant
 
 Initally the mover will transmit a bulk snapshot to prime later instances of incremntal sends.
-Snapshots are created and destroyed autmatically and retained only slightly longer than needed. 
-The mover is restartable; zfs resume tokens are queried for restarts; no extra configuration is required. 
-Each flow is rentrant safe.  Feel free to schedule it in a tight loop or  from cron.  
+Snapshots are created and destroyed autmatically and retained.
+The mover is restartable; zfs resume tokens are queried for resumable replication.
+Each flow is rentrant safe.  Feel free to schedule it in a tight loop or from cron.  
 
-Not BUGS exactly:
-This script must manage all the snapshots on both zfs  datsets. External removal of snapshots is discouraged.  
-Snapshots retained longer than strictly required because paranoia abounds. 
-Flowtag is used as part of a regex on remote zfs list operations to identify snapshots that belog to this replication context. 
-If a flowtag is a superstring of another, behaviour is undefined. 
-No user properites, throttling, rebuffering, readonly status or holds are managed. 
-
-FIXME:
-Needs more argument checks; always more. Invarients. Paranioa. 
-Push is not always nice; Needs a pull mode to run in a 'bunker' where network access is asymmetric due to nat. 
-Bulk transport mode; get ssh and perpaps userland out of the way. Perform 3rd party orchestration remotely away from the push host. 
 HOOOEY
-
 }
-if [ $# -ne 4 ]; then 
+if [ $# -lt 3 ]; then 
 	usage 
 	exit  0
 fi
 
 
-txhost=${1}
-# dataset to send
-txfs=${2}
-#remote host to receive
-rxhost=${3}
-#remote zfs dataset
-rxfs=${4} 
-#tracking tag which we use to brand snapshots for our exclusive use to 
-#please use a decriptive name that describes the replication relationship
-mytag=${5} 
-thedate=`date +"%s"`
+txspec=${1}
+transport=${2}
+rxspec=${3}
+start_unixtime=`date +"%s"`
 
 send_verbose_arg="    "
 send_verbose_arg=" -v "
 
-# I advocate any rsh compatible pipe transpport,  ssh is ok I guess; netcat transport orchestration would be better 
-rsh=" ssh  "  
-#gild the ssh opts
-#rsh=" $rsh -o CompressionLevel=9  -o Compression=yes"  
-rsh=" $rsh -o ConnectionAttempts=5 "  
-#rsh=" $rsh -o ForwardX11=no -o LogLevel=INFO "  
-#rsh=" $rsh -v  "  
+## XX use ipqos, nopasswd,  controlpersist
+ssh_patience="5"
+rsh=" ssh -o ConnectTimeout=$ssh_patience "  
 
-echo "the time is now: ${thedate}. we are sending $txhost:$txfs.$mytag to $rxhost:$rxfs"
+# input:  $1 is txuser@kaylee.a.aeria.net:dozer/va
+# output: ousername,ohostname,ofspart
+parse_spec() { 
+	if [ $# -ne 1 ]; then
+		echo arg count incorrect
+		exit
+	fi
+	ohostspecpart=` echo $1 | cut -s -f1 -d:`	
+	hasatsign=`echo $ohostspecpart   | grep '@' `
+	if [ "$hasatsign" ];  then
+		ousername=`echo $ohostspecpart | cut -f1 -d@`
+		ohostname=`echo $ohostspecpart | cut -f2 -d@`
+	else
+		ousername="root"
+		ohostname=$ohostspecpart
+
+	fi
+	ofspart=` echo $1 | cut -s -f2 -d:`	
+	if [ "$ofspart" ]; then
+	else
+		echo nofspart
+		exit -3
+	fi
+	if [ "$ohostname" ]; then
+	else
+		echo nohostname
+		exit -3
+	fi
+}
+
+check_access_from_spec(){
+	tstart=`date +"%s"`
+	remote_type=`$rsh $ousername@$ohostname "zfs get -H type $ofspart" `
+	tend=`date +"%s"`
+	echo "$ohostname took $(( $tend - tstart ))s to query $ofspart returned:'$remote_type'"
+	if [ ${#remote_type} -ge 1 ];  then
+	else 
+		echo "can't query dataset  $rsh $ousername@$ohostname 'zfs get -H type $ofspart' "
+		exit -123
+	fi
+
+}
+
+parse_spec  $txspec
+check_access_from_spec
+tx_user_name=$ousername
+tx_host=$ohostname
+tx_fs=$ofspart
+
+parse_spec  $rxspec
+check_access_from_spec
+rx_user_name=$ousername
+rx_host=$ohostname
+rx_fs=$ofspart
+
+
+# synthetic flow name will make the relationship clear and provide unique snapshot names
+# allowable snapshot names: 
+# the old approach may have confused ppl 
+# https://docs.oracle.com/cd/E26505_01/html/E37384/gbcpt.html
+flowtag_prefix=`echo "$tx_host:$tx_fs-_-$rx_host:$rx_fs" | tr '/' '-'`
+echo $flowtag_prefix
 
 
 lockfile_cleanup() {
-	rm $mover_lockfile $remote_flow_snapnumbers_file $local_flow_snapnumbers_file || echo "can't kill lockfile"
+	rm $mover_lockfile $rx_flow_snapnumbers_file $tx_flow_snapnumbers_file || echo "can't remove lockfile"
 }
 
 catch_trap() {
@@ -82,7 +114,7 @@ catch_trap() {
 	lockfile_cleanup
 	exit -99
 }
-child_trap (){
+child_trap() {
 	if [ $? -ne 0 ]; then 
 		# trap context elides some of the normal shell context
 		echo "got abnormal exit code $? from $! $*"
@@ -92,56 +124,60 @@ child_trap (){
 	fi 
 }
 
-mover_lockfile=`mktemp /tmp/.mover-$mytag.lockXXX` ||  exit -4
-remote_flow_snapnumbers_file=`mktemp /tmp/.mover$mytag-rfs.XXX` || exit -5
-local_flow_snapnumbers_file=`mktemp /tmp/.mover$mytag-lfs.XXX` || exit -6
+mover_lockfile=`mktemp /tmp/.mover-$flowtag_prefix.lockXXX` ||  exit -4
+rx_flow_snapnumbers_file=`mktemp /tmp/.mover$flowtag_prefix-rxfs.XXX` || exit -5
+tx_flow_snapnumbers_file=`mktemp /tmp/.mover$flowtag_prefix-txfs.XXX` || exit -6
 
-echo tracking remote flow in $remote_flow_snapnumbers_file, local flow  in $local_flow_snapnumbers_file
+echo tracking remote flow in $rx_flow_snapnumbers_file, local flow  in $tx_flow_snapnumbers_file
 
 trap catch_trap TERM INT KILL BUS FPE 2 CHLD
 trap child_trap CHLD
 
-snapshot_now () {
-	#XX parameterise and armour
-	##xxx we might not shoot a snap untill unless there are no snaps to send or 
-	# resumable replication can proceed
-	nowsnapname="${lfs}@$mytag.${thedate}"
-	zfs snapshot $nowsnapname || exit -10
+# create a snapshot on the tx host that falls within the flow
+snapshot_now() {
+	nowsnapname="${tx_fs}@${flowtag_prefix}.${start_unixtime}"
+	$rsh $tx_user_name@$tx_host "zfs snapshot -r $nowsnapname " || exit -111
+	## XXX lock the snapshot https://docs.oracle.com/cd/E19253-01/819-5461/gjdfk/index.html
+	$rsh $tx_user_name@$tx_host "zfs hold -r $flowtag_prefix $nowsnapname " || exit -112
 	#update the local snapshot flow catalog
-	get_lfs_snaps
+	get_tx_snaps
+}
+
+get_rx_snaps() {
+	# parameters @$rfs , $flowtag_prefix
+	# an exist snap indicates that the replication can continue via incremental ( Not resumable! ) replication.
+	# side effect updates rx_snap_count
+	echo rx snapshots in flow:
+	$rsh $rx_user_name@$rx_host "zfs list -Hr -t snapshot -o name ${rx_fs} | grep ${rx_fs}@${flowtag_prefix} | cut -s -f2 -d@ " >  $rx_flow_snapnumbers_file
+	cat $rx_flow_snapnumbers_file
+	rx_snap_count=`wc -l $rx_flow_snapnumbers_file | cut -s -f2 -w`
+}
+
+get_rx_resume_token() {
+	resume_token=`$rsh $rx_user_name@$rx_host "zfs get -H -o value receive_resume_token $rx_fs"`
+	if [ $resume_token ]; then 
+		echo "resume token from $rx_user_name@$rx_host:$rx_fs = $resume_token"
+	else
+	fi 
+}
+
+get_tx_snaps() {
+	echo tx snapshots:
+	$rsh $tx_user_name@$tx_host "zfs list -Hr -t snapshot -o name ${lfs} | grep ${rx_fs}@${flowtag_prefix} |  cut -f2 -d@ " > $tx_flow_snapnumbers_file
+	cat $tx_flow_snapnumbers_file
 }
 
 
-get_rfs_snaps () {
-	# parameters @$rfs , $mytag
-	# side effect updates rfscount
-	echo remote snapshots in flow:
-	$rsh $rhost "zfs list -Hr  -t all -o name ${rfs}" | grep $mytag | cut -f2 -d@ >  $remote_flow_snapnumbers_file
-	cat $remote_flow_snapnumbers_file
-	rfscount=`wc -l $remote_flow_snapnumbers_file | cut -b1-8`
-}
+get_rx_snaps
+get_tx_snaps 
 
-get_rfs_resume_token (){
-	in_host=$1
-	in_remote_dataset=$2
-	resume_token=`$rsh $in_host "zfs get -H -o value receive_resume_token $in_remote_dataset"`
-	echo resume token from $in_host:$in_remote_dataset = $resume_token
-}
-
-get_lfs_snaps() {
-	echo local snapshots:
-	zfs list -Hr -t all -o name  ${lfs}  | grep $mytag |  cut -f2 -d@ > $local_flow_snapnumbers_file
-	cat $local_flow_snapnumbers_file
-}
-
-get_lfs_snaps
-get_rfs_snaps 
+#kill -FPE $$ 
+exit -1
 
 if [ $rfscount -eq 0 ]; then
-	echo "no remote snapshots found for $rhost: $rfs full  initial bulk tx from $lfs@$nowsnapname to $rfs "
+	echo "no remote snapshots found for $rhost: $rfs full initial bulk tx from $lfs@$nowsnapname to $rfs "
 	echo "checking for existing token $resume_token"  
-	get_rfs_resume_token  $rhost $rfs	
-	##XXXXresume_token=`$rsh $rhost "zfs get -H -o value receive_resume_token $rfs"`
+	get_rfs_resume_token 
 	if [ ${#resume_token} -le 30 ]; then 
 		arg_resume_token=""
 		echo "no token found we shall need a new initial transmit snapshot"
@@ -173,28 +209,28 @@ if  [ $rfscount -eq 0 ]; then
 fi 
 
 echo "joining local and remote snaps"
-join $local_flow_snapnumbers_file $remote_flow_snapnumbers_file
+join $tx_flow_snapnumbers_file $rx_flow_snapnumbers_file
 
 echo  -n "last common snapshot in flow:"
-lastcommon=`join $local_flow_snapnumbers_file $remote_flow_snapnumbers_file | tail -1`
+lastcommon=`join $tx_flow_snapnumbers_file $rx_flow_snapnumbers_file | tail -1`
 echo $lastcommon
 
 
 expire_local() {
 	echo -n "expire local versions before $frs $lastcommon"
-	ln=`grep -n  "$lastcommon" $local_flow_snapnumbers_file | cut -d: -f1`
+	ln=`grep -n  "$lastcommon" $tx_flow_snapnumbers_file | cut -d: -f1`
 	ln=$(($ln - 1))
 	echo line $ln is the event horizon
 	if [ $ln -eq 0 ]; then
 		echo not enough snapshots not found,  
 		echo should be at least two snaps in the mag always, mabe unless restartability is working
 	fi
-	head -$ln $local_flow_snapnumbers_file
+	head -$ln $tx_flow_snapnumbers_file
 	########################## delete  old local  versions
 	if [ $ln >  6 ]; then
 		# destroy them 4 a time; to avoid buildup
 		# XX not clear if we ever need to kill 2 because we have restartable trasmits. 
-		for i in `head -$ln $local_flow_snapnumbers_file | head -4  `; do
+		for i in `head -$ln $tx_flow_snapnumbers_file | head -4  `; do
 			echo "  $lfs@$i"
 			# -d is a defferable destroy to avoid stalling replication 
 			zfs destroy -d $lfs@$i
@@ -206,11 +242,11 @@ expire_local() {
 expire_remote () {
 	echo  expire needs $rfs, $lastcommon 
 	###########################delete old remote versions
-	rln=`grep -n  "$lastcommon" $remote_flow_snapnumbers_file | cut -d: -f1`
+	rln=`grep -n  "$lastcommon" $rx_flow_snapnumbers_file | cut -d: -f1`
 	rln=$(($rln - 1))
 	echo "old remote versions:"
 	if [ $rln >  6 ]; then
-		for  i in `head -$rln $remote_flow_snapnumbers_file | head -4  `; do
+		for  i in `head -$rln $rx_flow_snapnumbers_file | head -4  `; do
 			echo "   "$rfs@$i
 			# -d is a defferable destroy to avoid stalling replication 
 			$rsh $rhost "zfs destroy  -d $rfs@$i"
@@ -219,12 +255,12 @@ expire_remote () {
 }
 
 echo "newer local versions after $lastcommon"
-len=`wc -l $local_flow_snapnumbers_file | cut -b1-8`
+len=`wc -l $tx_flow_snapnumbers_file | cut -b1-8`
 ln=$(($len - $ln  -1 ))
-tail -$ln $local_flow_snapnumbers_file
+tail -$ln $tx_flow_snapnumbers_file
 
 
-latestlocal=`tail -1 $local_flow_snapnumbers_file`
+latest_tx=`tail -1 $tx_flow_snapnumbers_file`
 echo " tx with common baselimne:  $lfs@$lastcommon with delta $lfs@$latestlocal" 
 get_rfs_resume_token $rhost $rfs
 if [ ${#resume_token} -le 30 ]; then 
@@ -242,4 +278,3 @@ expire_remote
 expire_local
 lockfile_cleanup
 logger "replication done ${lfs} to ${rhost}:$rfs@$nowsnapname for flow $mytag"
-
