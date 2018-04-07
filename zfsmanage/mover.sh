@@ -7,9 +7,9 @@ Shared with no implied warranty or suitability for purpose. This will probably l
 # aeria zfs mover 
 # ash@aeria.net
 # 
-# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   pipe           rxuser@mal.a.aeria.net:trinity/dozer-target  
-# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   ssh            rxuser@mal.a.aeria.net:trinity/dozer-target  
-#             (transmithost):(source file system)   (transport)    (receive host):(destination file system)
+# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   rxuser@mal.a.aeria.net:trinity/dozer-target  
+# ./mover.sh  txuser@kaylee.a.aeria.net:dozer/var   rxuser@mal.a.aeria.net:trinity/dozer-target  
+#             (transmithost):(source file system)   (receive host):(destination file system)
 #
 # reference: https://www.slideshare.net/MatthewAhrens/openzfs-send-and-receive
 # ealier version: https://github.com/agokhale/cantrips/blob/d3df2e2468427aaf6f607cbd0fa493af5f4e7ad0/zfsmanage/mover.sh
@@ -23,15 +23,14 @@ Each flow is rentrant safe.  Feel free to schedule it in a tight loop or from cr
 
 HOOOEY
 }
-if [ $# -lt 3 ]; then 
+if [ $# -lt 2 ]; then 
 	usage 
 	exit  0
 fi
 
 
 txspec=${1}
-transport=${2}
-rxspec=${3}
+rxspec=${2}
 start_unixtime=`date +"%s"`
 
 send_verbose_arg="    "
@@ -39,7 +38,7 @@ send_verbose_arg=" -v "
 
 ## XX use ipqos, nopasswd,  controlpersist
 ssh_patience="5"
-rsh=" ssh -o ConnectTimeout=$ssh_patience "  
+rsh=" ssh -o ConnectTimeout=$ssh_patience  -o ControlMaster=yes -o ControlPersist=yes"  
 
 # input:  $1 is txuser@kaylee.a.aeria.net:dozer/va
 # output: ousername,ohostname,ofspart
@@ -101,8 +100,46 @@ rx_fs=$ofspart
 # allowable snapshot names: 
 # the old approach may have confused ppl 
 # https://docs.oracle.com/cd/E26505_01/html/E37384/gbcpt.html
+#XXX these have to be configurable
+
 flowtag_prefix=`echo "$tx_host:$tx_fs-_-$rx_host:$rx_fs" | tr '/' '-'`
-echo $flowtag_prefix
+
+#this will be the best port number we can pull out of a hat!
+#and possibly the a conflicted one
+vm_portnum=$((64000 - ( `od /dev/random | head -1 | cut -f3 -w` % 4000 ) )) 
+tx_pipe="viamillipede tx $rx_host $vm_portnum verbose 5"
+rx_pipe="viamillipede rx $vm_portnum verbose 5"
+
+
+#use $transport to get a pipe from host tx_host to host rx_host
+#construct the agents to live on the destination
+#install them and start them to run in the background
+orchestrate_rxtx() { 
+
+	#ratscript remote agents that persist while the transfer is runnning
+	txratscript=`mktemp /tmp/moverproto-tx$flowtag_prefix.XXX`
+	rxratscript=`mktemp /tmp/moverproto-rx$flowtag_prefix.XXX`
+
+	echo " #!/bin/sh -x " > $txratscript
+	echo " $zfs_send_operation | $tx_pipe >> /tmp/txratout 2>&1 & " >> $txratscript
+
+	echo " #!/bin/sh -x " > $rxratscript
+	echo "$rx_pipe | $zfs_recv_operation >> /tmp/rxratout  2>&1 &" >> $rxratscript
+	#XXX should delete the rat after success?
+
+	#install the ratscripts
+	remote_txratscript=`$rsh $tx_user_name@$tx_host "mktemp  /tmp/moverrat-tx$flowtag_prefix.XXX"`
+	remote_rxratscript=`$rsh $rx_user_name@$rx_host "mktemp  /tmp/moverrat-rx$flowtag_prefix.XXX"`
+	scp $txratscript  $tx_user_name@$tx_host:$remote_txratscript
+	scp $rxratscript  $rx_user_name@$rx_host:$remote_rxratscript
+	
+	#launch the rx, then the tx scripts
+	#ignore detaches
+	$rsh -n $rx_user_name@$rx_host "sh $remote_rxratscript &" &
+	$rsh -n $tx_user_name@$tx_host "sh $remote_txratscript &" &
+	echo "awaiting  dispatched jobs"
+	exit 0 
+}
 
 
 lockfile_cleanup() {
@@ -111,7 +148,7 @@ lockfile_cleanup() {
 
 catch_trap() {
 	echo "caught trap pid $$  $* for $mytag -  cleaning up locks and dying"
-	lockfile_cleanup
+	
 	exit -99
 }
 child_trap() {
@@ -148,7 +185,7 @@ get_rx_snaps() {
 	# an exist snap indicates that the replication can continue via incremental ( Not resumable! ) replication.
 	# side effect updates rx_snap_count
 	echo rx snapshots in flow:
-	$rsh $rx_user_name@$rx_host "zfs list -Hr -t snapshot -o name ${rx_fs} | grep ${rx_fs}@${flowtag_prefix} | cut -s -f2 -d@ " >  $rx_flow_snapnumbers_file
+	$rsh ${rx_user_name}@${rx_host} "zfs list -Hr -t snapshot -o name ${rx_fs} | grep ${rx_fs}@${flowtag_prefix} | cut -s -f2 -d@ || echo -n ''  " >  $rx_flow_snapnumbers_file
 	cat $rx_flow_snapnumbers_file
 	rx_snap_count=`wc -l $rx_flow_snapnumbers_file | cut -s -f2 -w`
 }
@@ -163,7 +200,7 @@ get_rx_resume_token() {
 
 get_tx_snaps() {
 	echo tx snapshots:
-	$rsh $tx_user_name@$tx_host "zfs list -Hr -t snapshot -o name ${lfs} | grep ${rx_fs}@${flowtag_prefix} |  cut -f2 -d@ " > $tx_flow_snapnumbers_file
+	$rsh $tx_user_name@$tx_host "zfs list -Hr -t snapshot -o name ${tx_fs} | grep ${tx_fs}@${flowtag_prefix} |  cut -s -f2 -d@ || echo -n '' " > $tx_flow_snapnumbers_file
 	cat $tx_flow_snapnumbers_file
 }
 
@@ -172,18 +209,22 @@ get_rx_snaps
 get_tx_snaps 
 
 #kill -FPE $$ 
-exit -1
 
-if [ $rfscount -eq 0 ]; then
-	echo "no remote snapshots found for $rhost: $rfs full initial bulk tx from $lfs@$nowsnapname to $rfs "
-	echo "checking for existing token $resume_token"  
-	get_rfs_resume_token 
+if [ $rx_snap_count -eq 0 ]; then
+	echo "no rx snapshots found at $rx_host:$rx_fs. Performing full initial bulk tx from $tx_host:$tx_fs"
+	echo "checking for existing token $resume_token during inital bulk stage"  
+	get_rx_resume_token 
 	if [ ${#resume_token} -le 30 ]; then 
 		arg_resume_token=""
 		echo "no token found we shall need a new initial transmit snapshot"
 		snapshot_now
-		## side effecct generates $nowsnapname
-		zfs send $send_verbose_arg ${nowsnapname}  | $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
+		## side effect generates $nowsnapname
+		zfs_send_operation="zfs send -R $send_verbose_arg ${nowsnapname}"
+		zfs_recv_operation="zfs recv  -sF $rx_fs "
+		orchestrate_rxtx  	
+		echo wating for godot
+		exit 0
+		#XXXXzfs send $send_verbose_arg ${nowsnapname}  | $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
 	else # resume token processing
 		arg_resume_token="-t $resume_token"
 		#zfs send $send_verbose_arg $arg_resume_token  | zstreamdump
@@ -191,7 +232,12 @@ if [ $rfscount -eq 0 ]; then
 		#we don't use nowsnap; but rather the old snapshot; which we really hope is around because 
 		# we have no idea about it's name apriori from the token data
 		# so please never delete our flowtag snaphots unless you are willing to give up replication
-		zfs send $send_verbose_arg $arg_resume_token    | $rsh $rhost " $zfs_recv_buffer zfs recv  -sF $rfs"
+		zfs_send_operation="zfs send $send_verbose_arg $arg_resume_token  "
+		zfs_recv_operation="zfs recv  -sF $rx_fs "
+		orchestrate_rxtx  	
+		echo wating for godot
+		exit 0 
+		#XXXXXzfs send $send_verbose_arg $arg_resume_token  | $rsh $rhost " $zfs_recv_buffer zfs recv  -sF $rfs"
 	fi 
 else 
 	echo remote snapshots exist
@@ -240,11 +286,13 @@ expire_local() {
 
 
 expire_remote () {
-	echo  expire needs $rfs, $lastcommon 
+	echo  expire needs $rx_fs, $lastcommon 
 	###########################delete old remote versions
+	#XXX this is not going to work anymore
 	rln=`grep -n  "$lastcommon" $rx_flow_snapnumbers_file | cut -d: -f1`
 	rln=$(($rln - 1))
 	echo "old remote versions:"
+	exit -444
 	if [ $rln >  6 ]; then
 		for  i in `head -$rln $rx_flow_snapnumbers_file | head -4  `; do
 			echo "   "$rfs@$i
@@ -261,18 +309,18 @@ tail -$ln $tx_flow_snapnumbers_file
 
 
 latest_tx=`tail -1 $tx_flow_snapnumbers_file`
-echo " tx with common baselimne:  $lfs@$lastcommon with delta $lfs@$latestlocal" 
+echo " tx with common baseline:  $rx_fs@$lastcommon with delta $rx_fs@$latest_tx" 
 get_rfs_resume_token $rhost $rfs
 if [ ${#resume_token} -le 30 ]; then 
 	echo incremental proceeding
-	zfs send  $send_verbose_arg -i  $lfs@$lastcommon $lfs@$latestlocal  |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
+	#XXXXXXzfs send  $send_verbose_arg -i  $rx_fs@$lastcommon $rx_fs@$latest_tx  |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
 else
 	echo resume proceeding
 	arg_resume_token="-t $resume_token"
-	#incremental zfs send -i  $lfs@$lastcommon $lfs@$latestlocal |sh  $rhost "zfs recv -sF $rfs"
+	#incremental zfs send -i  $lfs@$lastcommon $lfs@$latest_tx |sh  $rhost "zfs recv -sF $rfs"
 	#bulk with token revivifivcaiotn zfs send $send_verbose_arg $arg_resume_token  | $rsh $rhost "zfs recv -sF $rfs"
 	#blend the strengths!
-	zfs send $send_verbose_arg $arg_resume_token |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
+	##XXXXXzfs send $send_verbose_arg $arg_resume_token |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
 fi
 expire_remote 
 expire_local
