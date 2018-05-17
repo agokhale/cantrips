@@ -1,4 +1,4 @@
-set ashrcversion = "10.2.6.1"
+set ashrcversion = "10.2.6.2"
 #"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 #1999 - 2017 Ash
 #BSD license
@@ -315,7 +315,8 @@ if ( $?prompt ) then
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
-		set ssh_agent_report=`source ${HOME}/.tmp/ssh-agent.csh; echo "";  ssh-add -l`
+		source ${HOME}/.tmp/ssh-agent.csh >  /dev/null
+		set ssh_agent_report=`ssh-add -l `
 		#what could possibly wrong with picking up a random file?
 	endif
 	alias df	df -k
