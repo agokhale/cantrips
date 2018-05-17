@@ -1,9 +1,10 @@
 #!/usr/sbin/dtrace  -qs
-
 #pragma D option quiet
 
-dtrace:::BEGIN {} 
-syscall::execve:return /curpsinfo->pr_psargs!=0/
-	{ 
-	printf ("pid:%i %S\n",pid, curpsinfo->pr_psargs)
-	} 
+syscall::execve:return /curpsinfo->pr_psargs!=0/ { 
+printf ("pid:%i	%s\n",pid, curpsinfo->pr_psargs)
+} 
+
+/*
+dtrace -n 'fbt::kern_execve:entry { @e[curpsinfo->pr_psargs]=count(); } tick-3s {printa(@e); trunc(@e);}'
+*/
