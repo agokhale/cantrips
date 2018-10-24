@@ -7,7 +7,7 @@ BEGIN
 syscall:::return
 {
 this->str_retc=lltostr(arg1);
-this->startseq="^[[48;5;";
+this->startseq="[48;5;";
 this->endseq="m";
 this->ostr=strjoin (this->startseq, this->str_retc);
 this->ostr=strjoin (this->ostr, this->endseq);
