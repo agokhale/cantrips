@@ -6,6 +6,9 @@
 '
 #pragma D option bufsize=264M
 #pragma D option aggsize=264M
+#pragma D option switchrate=1009hz
+#pragma D option dynvarsize=1009M
+
 #pragma D option aggrate=1009hz
 
 /* 
@@ -19,9 +22,9 @@ syscall:::entry  /execname == "'$1'"/
 	self->starttime = timestamp;
 	}
 
-syscall:::return  /execname == "'$1'"/ 
+syscall:::return  /execname == "'$1'" && self->starttime / 
 	{
-	@["delta(ns)",probefunc]  =  quantize ( timestamp - self->starttime); 
+	@["delta(us)",probefunc]  =  quantize ( (timestamp - self->starttime) / 1000); 
 	self->starttime = 0 ; 
 	}
 '
