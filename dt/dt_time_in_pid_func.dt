@@ -1,19 +1,18 @@
 #!/usr/sbin/dtrace -s
-#pragma D option quiet
 #pragma D option dynvarsize=16m
 /*
 dynvarsize=>16m due to high timestamp update rates.
 
-#dtrace -s dtprofile.is_in_path.dt `top -b | head -10 | tail -1 | chomp | cut -w -f1` is_in_path 
+use with -p `pgrep  tcsh`
 
 */
 BEGIN { printf("thinking, hit control-c when you are tired of it");}
 
-pid$1::$2:entry 
+pid$target::$1:entry 
         { self->st= timestamp; }
-pid$1::$2:return  / self->st /
+pid$target::$1:return  / self->st /
         { 
-        @[execname,"delta(ns)" ] = quantize(  timestamp - self->st);
+        @[execname,probefunc,"delta(ns)" ] = quantize(  timestamp - self->st);
         self->st = 0;
         }
  
