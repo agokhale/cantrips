@@ -40,10 +40,9 @@ end #foreach pathroot_candidates
 
 #let cygwin off the hook for expensive fs/stat/hash stuff
 if ( ${OSTYPE} == "cygwin" ) then
-        #echo bad zoot $pathroot_candidates
         set pathroot_candidates = " "
         set path_roots = "/usr/i686-pc-cygwin/ "
-        #echo bader zoot $pathroot_candidates
+	setenv PATH /cygdrive/c/Windows/System32/:${PATH}
 endif
 
 
@@ -97,6 +96,7 @@ if ( $?prompt ) then
 	alias usage  "du -sxk * | sort -rn > usage; less usage"
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
+	alias ess	'\!-1 | less'
 	alias p[        pushd
 	alias p]        popd
 	alias p[]       "dirs -v"
@@ -144,7 +144,7 @@ if ( $?prompt ) then
 	set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`)
     # populate multiple idents for ssh -i 
  
-    
+   	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
 	complete sudo  'p/1/( tcsh bash port fink )/'
@@ -233,7 +233,7 @@ if ( $?prompt ) then
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
-	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty sqick foo)/' 'p/*/$tdterms/'
+	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
 	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
@@ -243,6 +243,7 @@ if ( $?prompt ) then
 	complete td 'p/1/( -i )/' 'p/2/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete ifconfig  'p/1/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s1500 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
+	complete dtrace 'p/1/(-n)/' "n/-n/(syscall pid entry proc io)/" n/pid/p/  'n/-o/f/' 'n/-p/p/' 
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
