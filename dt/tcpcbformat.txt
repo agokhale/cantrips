@@ -1,0 +1,72 @@
+[2J
+  sshd                                                state-change                                                      4
+  intr                                                accept-established                                                7
+  intr                                                connect-established                                               7
+  intr                                                debug-user                                                        7
+  ssh                                                 connect-request                                                   7
+  unbound                                             send                                                              7
+  ssh                                                 state-change                                                     11
+  intr                                                receive-autoresize                                               24
+  intr                                                state-change                                                     37
+  intr                                                debug-output                                                     51
+  intr                                                send                                                             51
+  sshd                                                debug-output                                                     75
+  sshd                                                send                                                             75
+  ssh                                                 debug-output                                                     95
+  ssh                                                 send                                                            102
+  intr                                                debug-input                                                     228
+  intr                                                receive                                                         232
+  sshd                                                debug-user                                                      438
+  ssh                                                 debug-user                                                      452
+connection map -------------------------  tx
+  intr                                                127.0.0.1                                                      2248
+  sshd                                                127.0.0.1                                                     20466
+  ssh                                                 127.0.0.1                                                     84438
+connection map -------------------------  rx
+  intr                                                127.0.0.1                                                    107056
+du map -------------------------  rx
+  ssh                                                        27539640
+  sshd                                                       28193280
+
+[2J
+  kernel                                              receive-autoresize                                                1
+  ssh                                                 connect-request                                                   1
+  unbound                                             send                                                              1
+  kernel                                              debug-input                                                       2
+  kernel                                              receive                                                           2
+  sshd                                                state-change                                                      2
+  ssh                                                 state-change                                                      3
+  ssh                                                 debug-output                                                     16
+  sshd                                                debug-output                                                     16
+  sshd                                                send                                                             16
+  viamillipede                                        connect-request                                                  16
+  intr                                                accept-established                                               17
+  intr                                                connect-established                                              17
+  intr                                                debug-user                                                       17
+  ssh                                                 send                                                             17
+  viamillipede                                        state-change                                                     17
+  intr                                                state-change                                                     59
+  sshd                                                debug-user                                                       72
+  ssh                                                 debug-user                                                       73
+  intr                                                receive-autoresize                                               78
+  viamillipede                                        debug-output                                                   6950
+  viamillipede                                        send                                                           6950
+  intr                                                debug-output                                                   8882
+  intr                                                send                                                           8882
+  viamillipede                                        debug-user                                                    10885
+  intr                                                receive                                                       15848
+  intr                                                debug-input                                                   15878
+connection map -------------------------  tx
+  sshd                                                192.168.1.54                                                     56
+  ssh                                                 127.0.0.1                                                      3118
+  sshd                                                127.0.0.1                                                      3238
+  intr                                                127.0.0.1                                                  64589468
+  viamillipede                                        127.0.0.1                                                  93704840
+connection map -------------------------  rx
+  kernel                                              192.168.1.54                                                     76
+  intr                                                127.0.0.1                                                 158283788
+du map -------------------------  rx
+  ssh                                                         4167720
+  sshd                                                        4233420
+  viamillipede                                              447335280
+
