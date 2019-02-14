@@ -18,7 +18,6 @@ dmidecode
 dtrace-toolkit
 exmh
 firefox
-firefox
 fluxbox
 freeipmi
 geda
@@ -50,7 +49,7 @@ thunderbird
 tig
 trafshow
 trojita
-uverilog
+iverilog
 wget
 wireshark
 x48
