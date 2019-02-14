@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.0.0"
+set ashrcversion = "10.3.0.1"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -141,7 +141,11 @@ if ( $?prompt ) then
 	set hosts=(`cat /etc/hosts | sed -e 's/#.*//' | uniq` \
 		`cat ${HOME}/.ssh/known_hosts | sed -e 's/#.*//' | sed -E 's/\[(.*)\]/\1/g' | cut -f1 -d ' ' | tr "," ' '` \
 	 	`grep -s "Host "  ${HOME}/.ssh/config | cut -b5-50 | uniq`   )
-	set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`)
+	if ( ${OSTYPE} != "cygwin" ) then 
+		set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`) 
+	else
+		set interface = "soory"
+	endif
     # populate multiple idents for ssh -i 
  
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
