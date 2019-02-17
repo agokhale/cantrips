@@ -270,7 +270,6 @@ if ( $?prompt ) then
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
 	alias keydsaold 	'cat ~/.ssh/id_[rd]sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys2; chmod 600 .ssh/authorized_keys2"'
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub     | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
-	alias fixcshrc 'mv -f ~/.cshrc /tmp/oldcshrc; scp xpi@aeria.net:.cshrc ~/'
 	complete keydsa  'p/1/$hosts/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'

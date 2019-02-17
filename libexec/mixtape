@@ -1,0 +1,22 @@
+#!/bin/sh 
+indexfile=$1
+outfile=$2
+
+if [ $# -eq 1 ]; then
+	echo status: $indexfile
+	echo sizes
+	cat $indexfile | tr  '\n' '\0' | \
+		 xargs -0  -L1 -J% du -s -k "%"
+	echo size total
+	cat $indexfile | tr '\n' '\0' |  \
+		xargs -0  -L1 -J% du -s -k "%" | cut -f1 -w  | \
+		awk 'BEGIN { a=10;} // {  a=($1 + a); printf( " %d   ->     %d\n",$1,a);} END{print a/1024; print "MiB";}'
+
+elif [ $# -eq 2 ]; then 
+	cat $indexfile | tr '\n' '\0' |  \
+		xargs  -t -0  tar -cf $outfile
+else
+	echo "usage: mixtape-add.sh	 <indexfile> DirToAdd/thing      - adds a dir to the mixtape plan "
+	echo "usage: mixtape.sh	 <indexfile>  	- get sizing for the mixtap "
+	echo "usage: mixtape.sh	 <indexfile> <outfile| - >  generate tarball or tar stream "
+fi

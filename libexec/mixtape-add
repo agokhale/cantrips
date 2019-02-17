@@ -1,0 +1,7 @@
+#!/bin/sh -x
+
+fil=$1
+car=$2
+echo adding $car to $fil
+
+printf "$car\n" >> $fil
