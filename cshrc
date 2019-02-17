@@ -237,6 +237,7 @@ if ( $?prompt ) then
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
+	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
@@ -290,7 +291,7 @@ if ( $?prompt ) then
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	set nobeep
-    set correct = cmd
+	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
 	set fignore=( .o .a .bak ~ , .v .bad .old .syms .dylib .lst .ld .so .org .virg. .tmp .pyc .oo .al .exe .dll .obj . .1 .svn CVS )
 	set symlinks=expand
