@@ -1,0 +1,14 @@
+#!/usr/sbin/dtrace -s
+#pragma D option bufsize=264M
+#pragma D option aggsize=264M
+#pragma D option aggrate=1009hz
+#pragma D option switchrate=1009hz
+#pragma D option dynvarsize=1009M
+
+pid$target:libc*:__*:entry { self->t = timestamp; }
+pid$target:libc*:__*:return /self->t/
+{ 
+@["delta",probefunc]= quantize ((timestamp - self->t)/100000 );
+self->t=0;
+}
+

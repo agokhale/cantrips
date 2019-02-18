@@ -1,15 +1,11 @@
-set ashrcversion = "10.2.6"
-#"$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
-#1999 - 2017 Ash
-#BSD license
-#General disclaimer about damages real or causal resulting in teh use of this
+set ashrcversion = "10.3.0.1"
+# "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
+# 1999 - 2017 Ash
+# BSD license
+# General disclaimer about damages real or causal resulting in teh use of this
 #"software"
 #___________________________________core paths_________________________________
 set notify
-if ( $?prompt ) then
-  #diagnostic P to indicate pathmangling
-  printf "P"
-endif #prompt
 #allow local paths to override  global ones
 if ( -f /etc/skel/.chsrc ) then
 	source /etc/skel/.cshrc	
@@ -41,6 +37,14 @@ foreach pathroot_candidate ( `ls /usr/local `)
 		set path_roots = ( $path_roots /usr/local/$pathroot_candidate )
 	endif #is a directory
 end #foreach pathroot_candidates
+
+#let cygwin off the hook for expensive fs/stat/hash stuff
+if ( ${OSTYPE} == "cygwin" ) then
+        set pathroot_candidates = " "
+        set path_roots = "/usr/i686-pc-cygwin/ "
+	setenv PATH /cygdrive/c/Windows/System32/:${PATH}
+endif
+
 
 foreach pathroot ( $path_roots )
     if ( -d $pathroot/man ) then
@@ -88,11 +92,11 @@ if ( $?prompt ) then
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
 
-	printf "\b-"
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
 	alias usage  "du -sxk * | sort -rn > usage; less usage"
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
+	alias ess	'\!-1 | less'
 	alias p[        pushd
 	alias p]        popd
 	alias p[]       "dirs -v"
@@ -111,6 +115,7 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
+	alias vimsg 'v /var/log/messages'
 
 	set hunthome=${HOME}
 	alias hunting_ground 'set hunthome=`pwd`'
@@ -123,7 +128,7 @@ if ( $?prompt ) then
 	set listjobs="long"
 	set autologout="0  1"
 	set promptchars="#&"
-	set rprompt=":%B`whoami | cut -c 1-4`%b:%c2:%P:%\!%S%m%s"
+	set rprompt=":%B`whoami`%b:%c5:%P:%\!%S%m%s"
 	set complete="enhance"
 	set matchbeep="never"
 	if ( ! -f ${HOME}/.ssh/known_hosts ) then
@@ -136,10 +141,14 @@ if ( $?prompt ) then
 	set hosts=(`cat /etc/hosts | sed -e 's/#.*//' | uniq` \
 		`cat ${HOME}/.ssh/known_hosts | sed -e 's/#.*//' | sed -E 's/\[(.*)\]/\1/g' | cut -f1 -d ' ' | tr "," ' '` \
 	 	`grep -s "Host "  ${HOME}/.ssh/config | cut -b5-50 | uniq`   )
-	set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`)
+	if ( ${OSTYPE} != "cygwin" ) then 
+		set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`) 
+	else
+		set interface = "soory"
+	endif
     # populate multiple idents for ssh -i 
  
-    
+   	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
 	complete sudo  'p/1/( tcsh bash port fink )/'
@@ -158,7 +167,7 @@ if ( $?prompt ) then
 			'c/-o/\"(Port )\"/' \
                         "c,*:,F:$HOME," \
                         'c/*@/$hosts/:/'
-	complete make 'p/1/`cat [Mm]akefile* | grep : | cut -d: -f1 `/'
+	complete make 'p/1/(`cat [Mm]akefile* | grep : | cut -d: -f1 ` install clean submodules) /'
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
@@ -188,8 +197,6 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/$pkgtgt/'
 			
-			
-
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
        'n/-exec/c/' 'n/-ok/c/' 'n/-user/u/' 'n/-group/g/' \
@@ -230,70 +237,24 @@ if ( $?prompt ) then
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
-	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty sqick foo)/' 'p/*/$tdterms/'
+	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
+	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
-	complete sc 'p/1/(-r) /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
-	alias  sa screen -r
-	complete sa  'p/1/`screen -ls | grep tached | sed "s/[ \t][0-9]*\.\([0-z]*\).*/\1/"`'
+	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
+	alias  sa screen 
+	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
+	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/' 'p/2/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete ifconfig  'p/1/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s1500 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
+	complete dtrace 'p/1/(-n)/' "n/-n/(syscall pid entry proc io)/" n/pid/p/  'n/-o/f/' 'n/-p/p/' 
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
-	complete dtrace 'p/1/(-s -n -l -q)/'   \
-			'n/-s/f/'
-	alias dt_providers  'dtrace -ln ":::" | chomp | cut -w -f2 | sort | uniq'
-	# based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
-
-	set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
-			log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
-
-	complete git          "p/1/(${gitcmds})/" \
-			'n/branch/`git-list all branches`/' \
-			'n/checkout/`git-list all branches tags`/' \
-			'n/clean/(-dXn -dXf)/' \
-			'n/diff/`git-list all branches tags`/' \
-			'n/fetch/`git-list repos`/' \
-			"n/help/(${gitcmds})/" \
-			'n/init/( --bare --template= )/' \
-			'n/merge/`git-list all branches tags`/' \
-			'n/push/`git-list repos`/' \
-			'N/remote/`git-list repos`/' \
-			'n/remote/( show add rm prune update )/' \
-			'n/show-branch/`git-list all branches`/' \
-			'n/stash/( apply branch clear drop list pop show )/' \
-			'n/submodule/( add foreach init status summary sync update )/'
-
-	complete gpart        'p/1/(add backup bootcode commit create delete destroy modify recover resize restore set show undo unset)/' \
-			'n/add/x:-t type [-a alignment] [-b start] [-s size] [-i index] [-l label] -f flags geom/' \
-			'n/backup/x:geom/' \
-			'n/bootcode/x:[-b bootcode] [-p partcode -i index] [-f flags] geom/' \
-			'n/commit/x:geom/' \
-			'n/create/x:-s scheme [-n entries] [-f flags] provider/' \
-			'n/delete/x:-i index [-f flags] geom/' \
-			'n/destroy/x:[-F] [-f flags] geom/' \
-			'n/modify/x:-i index [-l label] [-t type] [-f flags] geom/' \
-			'n/recover/x:[-f flags] geom/' \
-			'n/resize/x:-i index [-a alignment] [-s size] [-f flags] geom/' \
-			'n/restore/x:[-lF] [-f flags] provider [...]/' \
-			'n/set/x:-a attrib -i index [-f flags] geom/' \
-			'n/show/x:[-l | -r] [-p] [geom ...]/' \
-			'n/undo/x:geom/' \
-                        'n/unset/x:-a attrib -i index [-f flags] geom/'
-
 	complete cu 'p/1/( -l )/' 'n^-l^`ls /dev/{cu,tty}*[0-9]*`^' 'n/-s/( 9600 115200 38400 )/'
-
-	if ( -f /etc/printcap ) then
-		set printers=(`sed -n -e "/^[^      #].*:/s/:.*//p" /etc/printcap`)
-		complete lpr        'c/-P/$printers/'   
-		complete lpq        'c/-P/$printers/'
-		complete lprm       'c/-P/$printers/'
-	endif
-	
-    alias tat 'cvs status | grep Stat | grep -v Up-to-date'
+    	alias tat 'cvs status | grep Stat | grep -v Up-to-date || git status ' 
 	set dunique
 	set colorcat
 	set prompt2="loop%R>"
@@ -310,12 +271,12 @@ if ( $?prompt ) then
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
 	alias keydsaold 	'cat ~/.ssh/id_[rd]sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys2; chmod 600 .ssh/authorized_keys2"'
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub     | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
-	alias fixcshrc 'mv -f ~/.cshrc /tmp/oldcshrc; scp xpi@aeria.net:.cshrc ~/'
 	complete keydsa  'p/1/$hosts/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
-		set ssh_agent_report=`source ${HOME}/.tmp/ssh-agent.csh; echo "";  ssh-add -l`
+		source ${HOME}/.tmp/ssh-agent.csh >  /dev/null
+		set ssh_agent_report=`ssh-add -l `
 		#what could possibly wrong with picking up a random file?
 	endif
 	alias df	df -k
@@ -327,12 +288,10 @@ if ( $?prompt ) then
 	alias lf	ls -FA
 	alias ll	ls -lgsArtF
 	alias lr	ls -lgsAFR
-	alias netwtf 	'netstat -in; curl 'http://geoiplookup.wikimedia.org' &;  p tunnelclient; ping -c 1 -q 8.8.8.8 > /dev/null || echo "google unreachable" & ; ping -c1 -q aeria.net > /dev/null || echo "aeria unrch" &; '
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
-	alias lerg 'date >> ${HOME}/env/lerg; vi + ${HOME}/env/lerg'
-	alias mc  'mc -b'
+	alias mc  'mc -b' #no color please
 	set nobeep
-    set correct = cmd
+	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
 	set fignore=( .o .a .bak ~ , .v .bad .old .syms .dylib .lst .ld .so .org .virg. .tmp .pyc .oo .al .exe .dll .obj . .1 .svn CVS )
 	set symlinks=expand
@@ -347,7 +306,6 @@ if ( $?prompt ) then
 	umask 22
 	#version
 	set	dcmesg = ".cshrc> $ashrcversion ${gUNAME} "
-	printf "\b/"
 	# make help/ins key do something useful for a change, the loafy-bitch
 	bindkey -c ^[[2~ 'setenv eetmp `date +"%s"`.tcshtmp;  history > /tmp/${eetmp}; vi /tmp/${eetmp}'
 	#f13
@@ -378,7 +336,6 @@ if ( $?prompt ) then
 	bindkey -k down history-search-forward
 	
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
-		printf '\033]0;%s\033\' "xt:$user@${HOST} `date`" #title block settings
 		setenv Xgreenscreenopts '-bg black -fg green'
 		alias xterm xterm  ${Xgreenscreenopts}
 		set betterfont="-*-droid sans mono-*-*-*-*-*-*-*-*-*-*-*-*"
@@ -392,14 +349,16 @@ if ( $?prompt ) then
 			"-*-*-*-*-*-*-*-300-*-*-*-*-*-*" &'
 		alias xt40 'xterm -bg black -fg green -fn \\
 			"-*-*-*-*-*-*-*-400-*-*-*-*-*-*" &'
-		if ( $USER == "root" ) then 
-			printf "\b\n\033[31m\033[43m thou art root\n"
-		else
-			printf "\b\n\033[35m" #purple
+		#if ( $USER == "root" ) then 
+			#printf "\b\n\033[31m\033[43m thou art root\n"
+		#else
+			#https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+			#printf "\b\n\033[35m prp \033[91;40m 000  \n" #purple
+			#set rprompt=":`whoami | cut -c 1-4`:%c2:%P:%m"
 			#foreach i ( `jot 49` ) 
 			#	printf "\b\n\033[%sm %s" "$i" "$i"
 			#end
-		endif
+		#endif
 	endif #xterm specializations
 
 endif #prompt
@@ -429,7 +388,7 @@ endif #prompt
 endif #darwin
 #________________________________________________________________
 if ( ${gUNAME} == "FreeBSD" ) then
-	alias monstar 'tail -f /var/log/{messages,auth.log,mail.log}'
+	alias monstar 'tail -F /var/log/{messages,auth.log,mail.log}'
 	setenv REDCOL 0  #why is ps a mercurial flower?
 	complete redtide 'p/1/`ps -auxwww`/'
 	if ( -f /etc/csh.chsrc ) then
@@ -440,7 +399,7 @@ endif #freebsd
 #________________________________________________________________
 if ( ${gUNAME} == "SunOS" ) then
 	if ( $?prompt ) then
-		echo "SunOS environment - Illuminos?"
+		#echo "SunOS environment - Illuminos?"
 	endif #prompt 
 	alias monstar	'tail -f /var/adm/messages &;\
 			tail -f /var/log/syslog & '
@@ -459,23 +418,9 @@ setenv RSYNC_RSH `which ssh`
 setenv RSH `which ssh`	 #for rdist
 #________________________________________________________the last word locally
 #makes all things here mutable
-#let the local thing bollackup  my nice presets
+#let the local thing mutate  my nice presets
 if ( -r ${HOME}/.cshrc.local ) then
 	source ${HOME}/.cshrc.local
 endif 
 
-if ( $?prompt ) then
-	printf "\b\\"
-	if ( $user == "root" ) then 
-		set prompt="#"
-	else
-		set prompt="%"
-	endif
-		
-	printf "\b*\b\b"
-	echo  $dcmesg
-	if ( $?ssh_agent_report ) then 
-		echo $ssh_agent_report 
-	endif
-endif # if prompt
 
