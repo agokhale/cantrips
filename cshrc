@@ -115,7 +115,7 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
-	alias vimsg 'v /var/log/messages'
+	alias vimsg 'v +$ /var/log/messages'
 
 	set hunthome=${HOME}
 	alias hunting_ground 'set hunthome=`pwd`'
