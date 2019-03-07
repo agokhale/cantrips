@@ -1,4 +1,7 @@
 #!/bin/sh -x
+if [ $# -le  2 ]; then 
+	exit 1
+fi
 
 fil=$1
 car=$2
