@@ -1,0 +1,20 @@
+#!/bin/sh -x
+
+usage(){
+	echo "transcode_to mp3 *.wav"
+}
+
+destformat=$1
+
+if [ $# -le 1]; then
+	usage
+fi
+
+shift 
+
+while  $1
+do
+	stem=`sed -e "s/\.wav//"`
+	echo "sox  $stem.wav $stem.mp3"
+done
+echo destformat $destformat
