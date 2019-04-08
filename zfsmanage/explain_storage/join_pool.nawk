@@ -7,12 +7,12 @@
 	ldiskdev=splout[1]
 	#toss crypot
 	gsub (/.eli/ , "", ldiskdev);
-	grepsuccess="grep " ldiskdev  " infiles/glabel.out " | getline sesline
+	grepsuccess="grep " ldiskdev  " ${tmpd}/infiles/glabel.out " | getline sesline
 	if ( grepsuccess )  {
 		split (sesline, sessplit , " " ) 
 		rdiskdev=sessplit[3]
 		gsub (/p[0-9]/,"", rdiskdev);
-		print ( "/dev: " rdiskdev " " $0); 
+		print ( " dv:" rdiskdev " " $0); 
 		} else {
 			#print " 5: " $5 " 6: " $6 " 7: "$7;	
 			#resuce the gpid for a an offline disk 

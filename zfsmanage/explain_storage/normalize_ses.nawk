@@ -4,7 +4,7 @@ BEGIN {
 	}
 
 /ses/ { 
-	#print ( $1 " found");
+#	print ( $1 " found");
 	gsub ( /:/,  "", $1)
 	lses = $1
 	}
@@ -36,24 +36,36 @@ BEGIN {
 	FS=":"
 	ldesc = $2
  	}
+#        Element 6, Type: Device Slot
+/Device Slot/ { 
+	ldesc = $2
+	}
 
 	
 #                Device Names: da15,pass16
+#                Device Names: pass16,da15
 /Device Names/ {
 	FS=":"
-	split ( $2, splitout, "," ); 
-	if ( match( splitout[1], "da") > 0 )  {
-		print (" slot: " ldesc " status: " lstatus  " ses: " lses " disk: " splitout[1]);
-	} else {
-		print (" slot: " ldesc " status: " lstatus  " ses: " lses " empty: " $2);
+	if ( match ( $2 ,"pass" )) {
+		split ( $2, splitout, "," ); 
+		if ( match( splitout[1], "da") > 0 )  {
+			# peel the ,pass16 out 
+			diskname = splitout[1]
+		} 
+		if ( match ( splitout[2], "da")) {
+			diskname = splitout[2]
+			}
+ 	} else {
+		diskname = $2
 		}
-	
+	smcmd = " smartctl -a /dev/" diskname " | ./normalize_smart.nawk"
+	#print smcmd
+	smcmd | getline smartout
+	close ( smcmd ) 
+	print ("sl:" ldesc " sta:" lstatus " se:" lses " dv:" diskname " "  smartout);
 	}
-	
-	
 
 END  { 
-#print ( "byeo " NR " records found " ); 
 }
 #
 #ses0:
