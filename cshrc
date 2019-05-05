@@ -115,12 +115,12 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
-	alias vimsg 'v /var/log/messages'
+	alias vimsg 'v +$ /var/log/messages'
 
 	set hunthome=${HOME}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome'    
+	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied"'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
 	#go edit file with symbol $1 in filename matching $2
