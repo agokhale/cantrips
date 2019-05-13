@@ -77,7 +77,7 @@ foreach pathroot ( $path_roots )
                     #echo "found $pathroot/$pathcomponent redundant"
                 else
                     #echo "$pathroot/$pathcomponent found"
-                    setenv PATH "$pathroot/$pathcomponent":$PATH
+                    #setenv PATH "$pathroot/$pathcomponent":$PATH
                 endif
             endif
         endif #$pathcomponent exists
@@ -327,7 +327,7 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat cltmp >> ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
 	bindkey -c ^[OP 'echo "\!\!" > $HOME/tmp/cltmp; vi $HOME/tmp/cltmp'
 
