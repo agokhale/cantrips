@@ -26,7 +26,7 @@ set path_components = ( bin sbin libexec games tools )
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
 
 #now find more path_roots; 
