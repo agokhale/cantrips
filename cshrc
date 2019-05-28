@@ -26,7 +26,7 @@ set path_components = ( bin sbin libexec games tools )
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
 
 #now find more path_roots; 
@@ -77,7 +77,7 @@ foreach pathroot ( $path_roots )
                     #echo "found $pathroot/$pathcomponent redundant"
                 else
                     #echo "$pathroot/$pathcomponent found"
-                    setenv PATH "$pathroot/$pathcomponent":$PATH
+                    #setenv PATH "$pathroot/$pathcomponent":$PATH
                 endif
             endif
         endif #$pathcomponent exists
@@ -327,7 +327,7 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat cltmp >> ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
 	bindkey -c ^[OP 'echo "\!\!" > $HOME/tmp/cltmp; vi $HOME/tmp/cltmp'
 

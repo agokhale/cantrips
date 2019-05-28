@@ -5,7 +5,7 @@
 tpath=$1
 gigs=$2
 
-if [ $# -leq 2 ]; then
+if [ $# -ne 2 ]; then
         exit -4
 fi
 echo writing psurandom $tpath with $gigs G of payload
