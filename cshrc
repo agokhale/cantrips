@@ -31,12 +31,13 @@ setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
-foreach pathroot_candidate ( `ls /usr/local `) 
-	if ( -d /usr/local/$pathroot_candidate )  then
-		#echo $pathroot_candidate is a dir
-		set path_roots = ( $path_roots /usr/local/$pathroot_candidate )
-	endif #is a directory
-end #foreach pathroot_candidates
+#foreach pathroot_candidate ( `ls /usr/local `) 
+#	if ( -d /usr/local/$pathroot_candidate )  then
+#		#echo $pathroot_candidate is a dir
+#		set path_roots = ( $path_roots /usr/local/$pathroot_candidate )
+#	endif #is a directory
+#end #foreach pathroot_candidates
+#hunting through local might net you a cross compiler, don;t
 
 #let cygwin off the hook for expensive fs/stat/hash stuff
 if ( ${OSTYPE} == "cygwin" ) then
@@ -67,19 +68,12 @@ foreach pathroot ( $path_roots )
     #look for locations of binaries within a pathroot 
     foreach pathcomponent ( $path_components ) 
         if ( -d $pathroot/$pathcomponent ) then
-            if ( -e $pathroot/$pathcomponent/no_auto_path ) then
-                # permit skipping paths that would  conflict with 
-		# important things eg msp430/bin/cpp which clobbers ports builds 
-                # echo skipping $pathcomponent in path  due to no_auto_path file found
-		set pathskipped=($?pathskipped $pathroot/$pathcomponent)
-	    else
-                if ( $PATH =~ "*$pathroot/$pathcomponent*" ) then 
+               if ( $PATH =~ "*$pathroot/$pathcomponent*" ) then 
                     #echo "found $pathroot/$pathcomponent redundant"
                 else
                     #echo "$pathroot/$pathcomponent found"
                     #setenv PATH "$pathroot/$pathcomponent":$PATH
                 endif
-            endif
         endif #$pathcomponent exists
     end #foreach pathcomponent
 end # foreach pathroot
@@ -131,20 +125,14 @@ if ( $?prompt ) then
 	set rprompt=":%B`whoami`%b:%c5:%P:%\!%S%m%s"
 	set complete="enhance"
 	set matchbeep="never"
-	if ( ! -f ${HOME}/.ssh/known_hosts ) then
-		touch ${HOME}/.ssh/known_hosts
-	endif 	
-	if ( ! -f ${HOME}/.ssh/config ) then
-		touch ${HOME}/.ssh/config
-	endif 	
 
-	set hosts=(`cat /etc/hosts | sed -e 's/#.*//' | uniq` \
-		`cat ${HOME}/.ssh/known_hosts | sed -e 's/#.*//' | sed -E 's/\[(.*)\]/\1/g' | cut -f1 -d ' ' | tr "," ' '` \
-	 	`grep -s "Host "  ${HOME}/.ssh/config | cut -b5-50 | uniq`   )
-	if ( -x /sbin/ifconfig ) then 
-		set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`) 
-	else
-		set interface = "soory"
+	set hosts=(`awk '/^[0-9].*/ {sub("\#.*","",$0); print ($0, "\n");}  NR==254  { print (NR,"truncated");exit(0)}' /etc/hosts`)
+	if ( -f ${HOME}/.ssh/known_hosts ) then
+		set hostskn=(`awk '// {gsub ("[\\[\\]]","",$1); print ($1,"\n")}    NR==254  { print (NR,"truncated");exit(0)} ' ${HOME}/.ssh/known_hosts `)
+		set hosts=($hosts $hostskn)
+	endif
+	if ( -f ${HOME}/.ssh/config ) then
+		set hosts=($hosts `awk '/Host/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
 	endif
     # populate multiple idents for ssh -i 
  
@@ -167,11 +155,11 @@ if ( $?prompt ) then
 			'c/-o/\"(Port )\"/' \
                         "c,*:,F:$HOME," \
                         'c/*@/$hosts/:/'
-	complete make 'p/1/(`cat [Mm]akefile* | grep : | cut -d: -f1 ` install clean submodules) /'
+	alias __maketargets 'getmaketargets.awk *akefile'
+	complete make 'p/1/`__maketargets`/'
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
-	complete netstat      'n/-I/`ifconfig -l`/' 
 	#pkg wb
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
@@ -231,7 +219,6 @@ if ( $?prompt ) then
 
 	complete cd 'C/*/d/'
 	complete kill 'c/-/S/' 'c/%/j/' 
-	alias interfaces  "ifconfig | cut -d: -f1 | cut -f1 | sort | grep -v lo  | uniq "
 	set tdterms = (proto tcp udp icmp ether fddi ip arp ip6 dir src dst inbound outbound port  portrange less greatergateway net and or host src dst broadcast multicast atalk ipx decnet on rulenum reason rset subrulenum action vlan mpls ppoed iso vpi  lane llc oam4s link slip icmp-echoreply icmp-unreach icmp-sourcequench  icmp-redirect icmp-echo icmp-routeradvert icmp-routersolicit icmp-timxceed icmp-paramprob icmp-tstamp icmp-tstam-preply icmp-ireq icmp-ireqreply icmp-maskreq icmp-maskreply tcp-fin tcp-syn tcp-rst tcp-push tcp-ack tcp-urg )
 	alias  td "sudo tcpdump -lvvnX -s200  -i "
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
@@ -246,15 +233,13 @@ if ( $?prompt ) then
 	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
-	complete td 'p/1/( -i )/' 'p/2/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s00 )/'
-	complete ifconfig  'p/1/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s1500 )/'
+	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
 	complete dtrace 'p/1/(-n)/' "n/-n/(syscall pid entry proc io)/" n/pid/p/  'n/-o/f/' 'n/-p/p/' 
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
 	complete cu 'p/1/( -l )/' 'n^-l^`ls /dev/{cu,tty}*[0-9]*`^' 'n/-s/( 9600 115200 38400 )/'
-    	alias tat 'cvs status | grep Stat | grep -v Up-to-date || git status ' 
 	set dunique
 	set colorcat
 	set prompt2="loop%R>"
@@ -269,8 +254,7 @@ if ( $?prompt ) then
 	set listflags="XaA"
 	alias v 	view
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
-	alias keydsaold 	'cat ~/.ssh/id_[rd]sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys2; chmod 600 .ssh/authorized_keys2"'
-	alias keydsa 		'cat ~/.ssh/id_*sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub     | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
+	alias keydsa 		'cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
 	complete keydsa  'p/1/$hosts/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
