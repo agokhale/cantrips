@@ -141,7 +141,7 @@ if ( $?prompt ) then
 	set hosts=(`cat /etc/hosts | sed -e 's/#.*//' | uniq` \
 		`cat ${HOME}/.ssh/known_hosts | sed -e 's/#.*//' | sed -E 's/\[(.*)\]/\1/g' | cut -f1 -d ' ' | tr "," ' '` \
 	 	`grep -s "Host "  ${HOME}/.ssh/config | cut -b5-50 | uniq`   )
-	if ( ${OSTYPE} != "cygwin" ) then 
+	if ( -x /sbin/ifconfig ) then 
 		set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`) 
 	else
 		set interface = "soory"
