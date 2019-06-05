@@ -53,6 +53,7 @@ case "$ftype" in
 	*"bzip"*) echo bzip2; unpack_bzip2;;
 	*"POSIX tar archive"*) echo bzip ; unpack_tar;;
 	*"Zip archive data"*) echo Zip ; unpack_zip;;
+	*"ASCII text"*) echo -n t ;;
 	*) echo no mactch for $ftype;;
 esac
 
