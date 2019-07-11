@@ -1,4 +1,13 @@
+bind-tools
+jq
+nmh
+webcamd
+cscope
+awscli
+obs
 ImageMagick7
+w3m
+ardour
 htop
 screen
 radare2
@@ -13,7 +22,6 @@ cdrtools
 chrome
 cups
 curl
-cvs
 cvs
 dbus
 dmidecode

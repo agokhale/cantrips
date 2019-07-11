@@ -135,7 +135,10 @@ if ( $?prompt ) then
 		set hosts=($hosts `awk '/Host/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
 	endif
     # populate multiple idents for ssh -i 
- 
+	complete aws 'n/ec2/`aws ec2 wat |& grep e`/' 'p/1/(ec2 s3 configure)/'  'n/terminate-instances/(--instance-ids )/' \
+		'n/--instance-ids/`awsinstanceids.sh`/' \
+		'n/stop-instances/(--instance-ids )/' \
+		'n/start-instances/(--instance-ids )/'  
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
@@ -235,7 +238,9 @@ if ( $?prompt ) then
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
-	complete dtrace 'p/1/(-n)/' "n/-n/(syscall pid entry proc io)/" n/pid/p/  'n/-o/f/' 'n/-p/p/' 
+	set dtraceprobes=( 'syscall:::entry' 'tick-3s' )
+ 	alias dtrace_update_probes '${HOME}/cantrips/libexec/dtraceprobes.sh > /tmp/dtrace.probes'
+	complete dtrace 'p/1/(-n -s)/' "n/-n/`cat /tmp/dtrace.probes` /" n/pid/p/  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
@@ -274,6 +279,7 @@ if ( $?prompt ) then
 	alias lr	ls -lgsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
+	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp4 "%"'
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
