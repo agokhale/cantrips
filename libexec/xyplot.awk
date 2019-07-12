@@ -13,10 +13,8 @@ BEGIN {
  ymin=bignum;
 
 points=0;
-cols=188;
-rows=50;
-grid_sparsity=((rows*cols)/1)
-
+cols=83;
+rows=10;
 
 }
 
@@ -34,10 +32,9 @@ grid_sparsity=((rows*cols)/1)
 
 
 function scale ( inmax, inmin, scalemax, scalemin, in_val) {
- scale_factor = ( scalemax - scalemin ) / ( inmax / inmin ) ;
-
+ scale_factor =( ( scalemax - scalemin ) / ( inmax - inmin )) ;
+ if ( scale_factor < 0 ) { scale_factor*=-1};
  out_val = scalemin + (  (in_val - inmin ) * scale_factor ) ; 
-
  return (int( out_val)) ;
 }
 
