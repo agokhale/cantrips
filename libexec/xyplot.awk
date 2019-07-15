@@ -1,8 +1,21 @@
 #!/usr/bin/awk -f
 #
-# takes a thing like:
-#   x y
-# 0	 34
+# takes a  a space deli mited tpule and acsigraphs it:
+# sinexx.awk | xyplot.awk                                                                                                                                                               :xpi:~/cantrips/libexec:12:56:24:248kaylee
+
+#ymax 1.000000
+#                                         .                                          |
+#                                        @@@                                         |
+#                                       @@ @@                                        |
+#                                       @   @                                        |
+#                                      @@   @@                                       |
+#                                      @     @                                       |
+#                                      @     @                                       |
+#                                     @@     @@                                      |
+#   @@@      @@@     @@@@    @@@@@    @       @    @@@@@    @@@@     @@@.     @@@    |
+#@@@@ @@@@@@@  @@@@@@@  @@@@@@   @@  @@   .   @@  @@   @@@@@@  @@@@@@@  @@@@@@@ @@@@.|
+#                                 @@@@         @@@@                                  |
+#ymin 0xmin -30---------------------------------------------------------count 27364 xmax 30#
 
 BEGIN {
 
@@ -13,12 +26,12 @@ BEGIN {
  ymin=bignum;
 
 points=0;
-cols=83;
-rows=10;
+cols=189;
+rows=50;
 
 }
 
-/[[:digit:][:space:]].*/ {
+/[[:digit:][:space:].].*/ {
 
  x = $1;
  y = $2;
@@ -27,13 +40,13 @@ rows=10;
  if (ymax < y ) { ymax = y; }
  if (ymin > y ) { ymin = y; }
  points ++;
- clust[points]=sprintf("%i\t%i", x,y);
+ clust[points]=sprintf("%f\t%f", x,y);
+#print ( clust[points]);
 }
 
 
 function scale ( inmax, inmin, scalemax, scalemin, in_val) {
  scale_factor =( ( scalemax - scalemin ) / ( inmax - inmin )) ;
- if ( scale_factor < 0 ) { scale_factor*=-1};
  out_val = scalemin + (  (in_val - inmin ) * scale_factor ) ; 
  return (int( out_val)) ;
 }
@@ -55,12 +68,11 @@ function dsymbol ( in_d) {
 }
 
 END {
-print ("xmax", xmax);
-print ( "xmin", xmin); 
-print ("ymax", ymax);
-print ( "ymin", ymin); 
-print ( "points", points); 
-print ("ymax", ymax);
+#print ("xmax", xmax);
+#print ( "xmin", xmin); 
+#print ("ymax", ymax);
+#print ( "ymin", ymin); 
+#print ("ymax", ymax);
 
 for ( rowcursor= 0; rowcursor<=rows; rowcursor++){
 	for ( cc=0; cc <= cols; cc++ ) {
@@ -72,7 +84,7 @@ for ( pointcursor =0; pointcursor <= points; pointcursor ++) {
   split ( clust[pointcursor], pt);
   xv =  scale(xmax, xmin, cols, 0 , pt[1]);
   yv =  scale(ymax, ymin, rows, 0 , pt[2]);
-  printf ( " %i ,  %i\n", xv, yv );
+  #printf ( " %i ,  %i\n", xv, yv );
   if ( raster[xv,yv] > 0 ) 
 	{ raster[xv,yv]++ }
   else 
@@ -89,9 +101,9 @@ for ( rowcursor= 0; rowcursor<=rows; rowcursor++) {
 	}
 printf ( "ymin %i", ymin)
 printf ( "xmin %i", xmin);
-for ( c = 11; c <= (cols - 9);  c++) {
+for ( c = 11; c <= (cols - 16);  c++) {
 	printf ("-");
 }
-print ( "xmax", xmax);
+printf ( "count %i xmax %i",points,  xmax);
 
 }
