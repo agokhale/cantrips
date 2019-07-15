@@ -53,16 +53,20 @@ function scale ( inmax, inmin, scalemax, scalemin, in_val) {
 
 function dsymbol ( in_d) {
 	outval = " ";
-	if ( in_d > 16 ) {
+	if ( in_d > 166 ) {
 		outval = "@";
+	} else if ( in_d > 32) { 
+		outval = "X";
+	} else if ( in_d > 16) { 
+		outval = "O";
 	} else if ( in_d > 8) { 
 		outval = "*";
 	} else if ( in_d > 4) { 
-		outval = "0";
+		outval = "=";
 	} else if ( in_d > 2) { 
-		outval = "o";
+		outval = "+";
 	} else if ( in_d > 0) { 
-		outval = ".";
+		outval = "-";
 	}
 	return ( outval);
 }
