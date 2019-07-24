@@ -240,7 +240,7 @@ if ( $?prompt ) then
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
 	set dtraceprobes=( 'syscall:::entry' 'tick-3s' )
  	alias dtrace_update_probes '${HOME}/cantrips/libexec/dtraceprobes.sh > /tmp/dtrace.probes'
-	complete dtrace 'p/1/(-n -s)/' "n/-n/`cat /tmp/dtrace.probes` /" n/pid/p/  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
+	complete dtrace 'p/1/(-n -s -p -v -l)/'  'n/pid/p/'  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
