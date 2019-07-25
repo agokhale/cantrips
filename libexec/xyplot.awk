@@ -19,15 +19,17 @@
 
 BEGIN {
 
- bignum=1000000;
+ bignum=100000000;
  xmax=-bignum;
  xmin=bignum;
  ymax=-bignum;
  ymin=bignum;
 
 points=0;
-cols=189;
-rows=50;
+"tput lines" | getline rows;
+"tput col" | getline cols;
+cols -= 3
+rows-= 6;
 
 }
 
@@ -53,7 +55,7 @@ function scale ( inmax, inmin, scalemax, scalemin, in_val) {
 
 function dsymbol ( in_d) {
 	outval = " ";
-	if ( in_d > 166 ) {
+	if ( in_d > 64 ) {
 		outval = "@";
 	} else if ( in_d > 32) { 
 		outval = "X";
@@ -72,11 +74,6 @@ function dsymbol ( in_d) {
 }
 
 END {
-#print ("xmax", xmax);
-#print ( "xmin", xmin); 
-#print ("ymax", ymax);
-#print ( "ymin", ymin); 
-#print ("ymax", ymax);
 
 for ( rowcursor= 0; rowcursor<=rows; rowcursor++){
 	for ( cc=0; cc <= cols; cc++ ) {
