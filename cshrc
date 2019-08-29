@@ -27,7 +27,7 @@ set path_components = ( bin sbin libexec games tools )
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
+setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
@@ -126,7 +126,7 @@ if ( $?prompt ) then
 	set complete="enhance"
 	set matchbeep="never"
 
-	set hosts=(`awk '/^[0-9].*/ {sub("\#.*","",$0); print ($0, "\n");}  NR==254  { print (NR,"truncated");exit(0)}' /etc/hosts`)
+	set hosts=(`awk '/^[0-9].*/ {sub("#.*","",$0); print ($0, "\n");}  NR==254  { print (NR,"truncated");exit(0)}' /etc/hosts`)
 	if ( -f ${HOME}/.ssh/known_hosts ) then
 		set hostskn=(`awk '// {gsub ("[\\[\\]]","",$1); print ($1,"\n")}    NR==254  { print (NR,"truncated");exit(0)} ' ${HOME}/.ssh/known_hosts `)
 		set hosts=($hosts $hostskn)
@@ -135,6 +135,10 @@ if ( $?prompt ) then
 		set hosts=($hosts `awk '/Host/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
 	endif
     # populate multiple idents for ssh -i 
+	
+	complete viamillipede 'p/1/(tx rx verbose threads prbs)/'  'n/tx/$hosts/' 'N/tx/( 1234 )/' \
+               'n/rx/( 1234 )/' 'n/verbose/( 4 )/' 'n/prbs/( 0xdead )/' 'N/verbose/( threads )/' \
+               'n/threads/( 4 )/'  'N/threads/( tx )/'
 	complete aws 'n/ec2/`aws ec2 wat |& grep e`/' 'p/1/(ec2 s3 configure)/'  'n/terminate-instances/(--instance-ids )/' \
 		'n/--instance-ids/`awsinstanceids.sh`/' \
 		'n/stop-instances/(--instance-ids )/' \
@@ -296,7 +300,7 @@ if ( $?prompt ) then
 	umask 22
 	#version
 	set	dcmesg = ".cshrc> $ashrcversion ${gUNAME} "
-	# make help/ins key do something useful for a change, the loafy-bitch
+	# make help/ins key do something useful for a change, the loafy
 	bindkey -c ^[[2~ 'setenv eetmp `date +"%s"`.tcshtmp;  history > /tmp/${eetmp}; vi /tmp/${eetmp}'
 	#f13
 	bindkey ^[[25~ vi-search-back
@@ -317,9 +321,9 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
-	bindkey -c ^[OP 'echo "\!\!" > $HOME/tmp/cltmp; vi $HOME/tmp/cltmp'
+	bindkey -c ^[OP '"\!\!" > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
 
 	#smart up key
 	bindkey -k up history-search-backward
