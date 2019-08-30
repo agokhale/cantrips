@@ -13,8 +13,12 @@ if [ $# -eq 1 ]; then
 		awk 'BEGIN { a=10;} // {  a=($1 + a); printf( " %d   ->     %d\n",$1,a);} END{print a/1024; print "MiB";}'
 
 elif [ $# -eq 2 ]; then 
-	cat $indexfile | tr '\n' '\0' |  \
-		xargs  -t -0  tar -cf $outfile
+	cat $indexfile | \
+		tr '\n' '\0' |  \
+		xargs -0 -n1 -I% find % -type f | \
+		sort -dn | \
+		tr '\n' '\0' |  \
+		xargs  -t -0 tar -cf $outfile
 else
 	echo "usage: mixtape-add.sh	 <indexfile> DirToAdd/thing      - adds a dir to the mixtape plan "
 	echo "usage: mixtape.sh	 <indexfile>  	- get sizing for the mixtap "
