@@ -322,17 +322,21 @@ if ( $?prompt ) then
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
 		setenv Xgreenscreenopts '-bg black -fg green'
 		alias xterm xterm  ${Xgreenscreenopts}
-		set betterfont="-*-droid sans mono-*-*-*-*-*-*-*-*-*-*-*-*"
-		alias xt 'xterm ${Xgreenscreenopts} \\
-			-fn "$betterfont" &'
+		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
+		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
+		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"
+		set betterfont10="-*-courier-*-r-*-*-10-*-*-*-*-*-*-*"
+		set betterfont8="-*-courier-*-r-*-*-8-*-*-*-*-*-*-*"
+		set betterfont="-*-courier-*-r-*-*-12-*-*-*-*-*-*-*"
+		alias xt 'xterm ${Xgreenscreenopts}  &'
 		alias xt8 'xterm ${Xgreenscreenopts} \\
-			-fn "-*-*-*-*-*-*-*-80-*-*-*-*-*-*" &'
+			-fn "$betterfont8" &'
 		alias xt20 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-200-*-*-*-*-*-*" &'
+			"$betterfont20" &'
 		alias xt30 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-300-*-*-*-*-*-*" &'
+			"$betterfont30" &'
 		alias xt40 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-400-*-*-*-*-*-*" &'
+			"$betterfont40" &'
 		#if ( $USER == "root" ) then 
 			#printf "\b\n\033[31m\033[43m thou art root\n"
 		#else
