@@ -1,8 +1,7 @@
 #!/usr/bin/awk -f
 #
 # takes a  a space deli mited tpule and acsigraphs it:
-# sinexx.awk | xyplot.awk                                                                                                                                                               :xpi:~/cantrips/libexec:12:56:24:248kaylee
-
+# sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15]
 #ymax 1.000000
 #                                         .                                          |
 #                                        @@@                                         |
@@ -27,8 +26,12 @@ BEGIN {
 	ysum=0;
 
 	points=0;
-	"tput lines" | getline rows;
-	"tput col"   | getline cols;
+	if ( ! cols )
+		"tput col"   | getline cols;
+	if ( ! rows )
+		"tput lines" | getline rows;
+
+
 	cols -= 3
 	rows -= 6;
 }
