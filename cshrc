@@ -233,6 +233,7 @@ if ( $?prompt ) then
 	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
+	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
 	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
