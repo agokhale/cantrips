@@ -85,6 +85,7 @@ if ( $?prompt ) then
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
+	alias viamilliclobber 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit 0x1000 threads 6 > /dev/null '
 
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
 	alias usage  "du -sxk * | sort -rn > usage; less usage"

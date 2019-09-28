@@ -17,7 +17,7 @@
 #ymin 0xmin -30---------------------------------------------------------count 27364 xmax 30#
 
 BEGIN {
-	bignum=100000000;
+	bignum=2^63;
 	xmax=-bignum;
 	xmin=bignum;
 	ymax=-bignum;
@@ -39,6 +39,10 @@ BEGIN {
 /[[:digit:][:space:].].*/ {
 	 x = $1;
 	 y = $2;
+	if  ( ( x > bignum ) || ( x < -bignum) || (y < -bignum) || (y > bignum) || (nan == x) || ( nan == y)) {
+		printf ("row: %i range error\n\", NR); 
+		next;
+	}
 	 xsum+= x;
 	 ysum+= y;
 	 if (xmax < x ) { xmax = x; }
