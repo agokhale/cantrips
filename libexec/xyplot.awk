@@ -30,19 +30,21 @@ BEGIN {
 		"tput col"   | getline cols;
 	if ( ! rows )
 		"tput lines" | getline rows;
-
-
 	cols -= 3
 	rows -= 6;
 }
 
+function rangeck( i ) {
+	if ( i > bignum || i < -bignum || i == nan ) {
+		printf ("row: %i range error %i\n", NR, i); 
+		return 1
+	}
+	return  0
+}
 /[[:digit:][:space:].].*/ {
 	 x = $1;
 	 y = $2;
-	if  ( ( x > bignum ) || ( x < -bignum) || (y < -bignum) || (y > bignum) || (nan == x) || ( nan == y)) {
-		printf ("row: %i range error\n\", NR); 
-		next;
-	}
+	if (rangeck( x ) || rangeck( y)) next;
 	 xsum+= x;
 	 ysum+= y;
 	 if (xmax < x ) { xmax = x; }
