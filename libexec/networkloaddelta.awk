@@ -5,7 +5,7 @@
 # -v select=rx
 
 function bpscal ( t2 ,t1 , bytes2, bytes1 ) {
-	return ( bytes2 - bytes1 )  / ( t2 - t1);
+	return (( bytes2 - bytes1 )  / ( t2 - t1)/1000000);
 }
 
 // {  
