@@ -1,6 +1,7 @@
 #!/usr/bin/awk -f
 #
-# takes a  a space deli mited tpule and acsigraphs it:
+# takes a  a space delimited n-tupule and acsigraphs it:
+# input format: x	y1	y2 ....
 # sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15]
 #ymax 1.000000
 #                                         .                                          |
@@ -41,18 +42,21 @@ function rangeck( i ) {
 	}
 	return  0
 }
+
 /[[:digit:][:space:].].*/ {
-	 x = $1;
-	 y = $2;
-	if (rangeck( x ) || rangeck( y)) next;
-	 xsum+= x;
-	 ysum+= y;
-	 if (xmax < x ) { xmax = x; }
-	 if (xmin > x ) { xmin = x; }
-	 if (ymax < y ) { ymax = y; }
-	 if (ymin > y ) { ymin = y; }
-	 points ++;
-	 clust[points]=sprintf("%f\t%f", x,y);
+	x = $1;
+	for ( yfield = 2; yfield <= NF ; yfield ++ ) { 
+		y = $yfield;
+		if (rangeck( x ) || rangeck( y)) next;
+		xsum+= x;
+		ysum+= y;
+		if (xmax < x ) { xmax = x; }
+		if (xmin > x ) { xmin = x; }
+		if (ymax < y ) { ymax = y; }
+		if (ymin > y ) { ymin = y; }
+		points ++;
+		clust[points]=sprintf("%f\t%f\y%i", x,y,yfield);
+	}
 }
 
 
@@ -62,7 +66,7 @@ function scale ( inmax, inmin, scalemax, scalemin, in_val) {
 	return (int( out_val)) ;
 }
 
-function dsymbol ( in_d) {
+function dsymbol ( in_d, yfield) {
 	outval = " ";
 	if ( in_d > 64 ) {
 		outval = "@";
@@ -91,7 +95,6 @@ END {
 			raster[rowcursor, cc] =0; 
 		}
 	}
-
 	for ( pointcursor =0; pointcursor <= points; pointcursor ++) {
 		split ( clust[pointcursor], pt);
 		xv =  scale(xmax, xmin, cols, 0 , pt[1]);
