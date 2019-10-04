@@ -3,7 +3,6 @@
 # netstat -i -b |  networkloadhistorypoint.awk  -v iface=lo0 >> net.history
 # ooutput:    epocktime		rxbytes	txbytes
 BEGIN {
-	print iface;
 }
 
 
