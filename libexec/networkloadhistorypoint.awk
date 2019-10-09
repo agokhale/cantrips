@@ -1,9 +1,14 @@
 #!/usr/bin/awk -f 
 
-# netstat -i -b |  networkloadhistorypoint.awk  >> net.history
+# netstat -i -b |  networkloadhistorypoint.awk  -v iface=lo0 >> net.history
 # ooutput:    epocktime		rxbytes	txbytes
+BEGIN {
+}
 
-// { rxbytes+= $8; txbytes += $11}  
+
+$0 ~ iface  { 
+	rxbytes+= $8; txbytes += $11;
+}  
 
 END{ 
 	"date +'%s'"| getline epochtime ; 
