@@ -1,0 +1,40 @@
+#!/usr/local/bin/python3
+
+import paramiko
+import os
+import sys
+
+def setup():
+  c = paramiko.SSHClient()
+  c.set_missing_host_key_policy ( paramiko.AutoAddPolicy)
+  print ( inpassword)
+  c.connect ( inhost,username=inuser, password=inpassword );
+  return c
+
+def runcmd (client, incmd): 
+  print ( incmd)
+  outval= client.exec_command( incmd)
+  return outval
+
+def loadfile ( filename):
+  fl=os.open (filename, os.O_RDONLY)
+  return os.read(fl,1111110)
+  os.close( fl)
+
+
+if __name__ == "__main__":
+	if ( len(sys.argv) != 5) :
+		print ("paramiexec host user password commandfile"); 
+		sys.exit (-1) 
+
+	inhost = sys.argv[1]
+	inuser = sys.argv[2]
+	inpassword = sys.argv[3]
+	incmdfile = sys.argv[4]
+	pcli=setup()
+	sti, sto, ste = runcmd ( pcli,loadfile ( incmdfile ))
+	print (sto.read())
+	print (ste.read())
+
+
+

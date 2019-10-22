@@ -26,17 +26,18 @@ set path_components = ( bin sbin libexec games tools )
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:
-setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
-foreach pathroot_candidate ( `ls /usr/local `) 
-	if ( -d /usr/local/$pathroot_candidate )  then
-		#echo $pathroot_candidate is a dir
-		set path_roots = ( $path_roots /usr/local/$pathroot_candidate )
-	endif #is a directory
-end #foreach pathroot_candidates
+#foreach pathroot_candidate ( `ls /usr/local `) 
+#	if ( -d /usr/local/$pathroot_candidate )  then
+#		#echo $pathroot_candidate is a dir
+#		set path_roots = ( $path_roots /usr/local/$pathroot_candidate )
+#	endif #is a directory
+#end #foreach pathroot_candidates
+#hunting through local might net you a cross compiler, don;t
 
 #let cygwin off the hook for expensive fs/stat/hash stuff
 if ( ${OSTYPE} == "cygwin" ) then
@@ -67,19 +68,12 @@ foreach pathroot ( $path_roots )
     #look for locations of binaries within a pathroot 
     foreach pathcomponent ( $path_components ) 
         if ( -d $pathroot/$pathcomponent ) then
-            if ( -e $pathroot/$pathcomponent/no_auto_path ) then
-                # permit skipping paths that would  conflict with 
-		# important things eg msp430/bin/cpp which clobbers ports builds 
-                # echo skipping $pathcomponent in path  due to no_auto_path file found
-		set pathskipped=($?pathskipped $pathroot/$pathcomponent)
-	    else
-                if ( $PATH =~ "*$pathroot/$pathcomponent*" ) then 
+               if ( $PATH =~ "*$pathroot/$pathcomponent*" ) then 
                     #echo "found $pathroot/$pathcomponent redundant"
                 else
                     #echo "$pathroot/$pathcomponent found"
-                    setenv PATH "$pathroot/$pathcomponent":$PATH
+                    #setenv PATH "$pathroot/$pathcomponent":$PATH
                 endif
-            endif
         endif #$pathcomponent exists
     end #foreach pathcomponent
 end # foreach pathroot
@@ -91,6 +85,7 @@ if ( $?prompt ) then
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
+	alias viamilliclobber 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit 0x1000 threads 6 > /dev/null '
 
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
 	alias usage  "du -sxk * | sort -rn > usage; less usage"
@@ -120,7 +115,7 @@ if ( $?prompt ) then
 	set hunthome=${HOME}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or"'    
+	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied"'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
 	#go edit file with symbol $1 in filename matching $2
@@ -131,23 +126,24 @@ if ( $?prompt ) then
 	set rprompt=":%B`whoami`%b:%c5:%P:%\!%S%m%s"
 	set complete="enhance"
 	set matchbeep="never"
-	if ( ! -f ${HOME}/.ssh/known_hosts ) then
-		touch ${HOME}/.ssh/known_hosts
-	endif 	
-	if ( ! -f ${HOME}/.ssh/config ) then
-		touch ${HOME}/.ssh/config
-	endif 	
 
-	set hosts=(`cat /etc/hosts | sed -e 's/#.*//' | uniq` \
-		`cat ${HOME}/.ssh/known_hosts | sed -e 's/#.*//' | sed -E 's/\[(.*)\]/\1/g' | cut -f1 -d ' ' | tr "," ' '` \
-	 	`grep -s "Host "  ${HOME}/.ssh/config | cut -b5-50 | uniq`   )
-	if ( ${OSTYPE} != "cygwin" ) then 
-		set interfaces = (`ifconfig | cut -d: -f1 | cut -f1 | sort | uniq`) 
-	else
-		set interface = "soory"
+	set hosts=(`awk '/^[0-9].*/ {sub("#.*","",$0); print ($0, "\n");}  NR==254  { print (NR,"truncated");exit(0)}' /etc/hosts`)
+	if ( -f ${HOME}/.ssh/known_hosts ) then
+		set hostskn=(`awk '// {gsub ("[\\[\\]]","",$1); print ($1,"\n")}    NR==254  { print (NR,"truncated");exit(0)} ' ${HOME}/.ssh/known_hosts `)
+		set hosts=($hosts $hostskn)
+	endif
+	if ( -f ${HOME}/.ssh/config ) then
+		set hosts=($hosts `awk '/Host/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
 	endif
     # populate multiple idents for ssh -i 
- 
+	
+	complete viamillipede 'p/1/(tx rx verbose threads prbs)/'  'n/tx/$hosts/' 'N/tx/( 1234 )/' \
+               'n/rx/( 1234 )/' 'n/verbose/( 4 )/' 'n/prbs/( 0xdead )/' 'N/verbose/( threads )/' \
+               'n/threads/( 4 )/'  'N/threads/( tx )/'
+	complete aws 'n/ec2/`aws ec2 wat |& grep e`/' 'p/1/(ec2 s3 configure)/'  'n/terminate-instances/(--instance-ids )/' \
+		'n/--instance-ids/`awsinstanceids.sh`/' \
+		'n/stop-instances/(--instance-ids )/' \
+		'n/start-instances/(--instance-ids )/'  
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
@@ -167,11 +163,11 @@ if ( $?prompt ) then
 			'c/-o/\"(Port )\"/' \
                         "c,*:,F:$HOME," \
                         'c/*@/$hosts/:/'
-	complete make 'p/1/(`cat [Mm]akefile* | grep : | cut -d: -f1 ` install clean submodules) /'
+	alias __maketargets 'getmaketargets.awk *akefile'
+	complete make 'p/1/`__maketargets`/'
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
-	complete netstat      'n/-I/`ifconfig -l`/' 
 	#pkg wb
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
@@ -231,7 +227,6 @@ if ( $?prompt ) then
 
 	complete cd 'C/*/d/'
 	complete kill 'c/-/S/' 'c/%/j/' 
-	alias interfaces  "ifconfig | cut -d: -f1 | cut -f1 | sort | grep -v lo  | uniq "
 	set tdterms = (proto tcp udp icmp ether fddi ip arp ip6 dir src dst inbound outbound port  portrange less greatergateway net and or host src dst broadcast multicast atalk ipx decnet on rulenum reason rset subrulenum action vlan mpls ppoed iso vpi  lane llc oam4s link slip icmp-echoreply icmp-unreach icmp-sourcequench  icmp-redirect icmp-echo icmp-routeradvert icmp-routersolicit icmp-timxceed icmp-paramprob icmp-tstamp icmp-tstam-preply icmp-ireq icmp-ireqreply icmp-maskreq icmp-maskreply tcp-fin tcp-syn tcp-rst tcp-push tcp-ack tcp-urg )
 	alias  td "sudo tcpdump -lvvnX -s200  -i "
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
@@ -239,6 +234,7 @@ if ( $?prompt ) then
 	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
+	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	alias sc screen
 	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
@@ -246,15 +242,15 @@ if ( $?prompt ) then
 	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
-	complete td 'p/1/( -i )/' 'p/2/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s00 )/'
-	complete ifconfig  'p/1/`ifconfig | cut -d: -f1 | cut -f1 | sort  | uniq `/' 'p/*/( -v -x -X -wfile -rfile -s1500 )/'
+	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
-	complete dtrace 'p/1/(-n)/' "n/-n/(syscall pid entry proc io)/" n/pid/p/  'n/-o/f/' 'n/-p/p/' 
+	set dtraceprobes=( 'syscall:::entry' 'tick-3s' )
+ 	alias dtrace_update_probes '${HOME}/cantrips/libexec/dtraceprobes.sh > /tmp/dtrace.probes'
+	complete dtrace 'p/1/(-n -s -p -v -l)/'  'n/pid/p/'  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
 	complete sysctl 'n/*/`sysctl -aN`/'
 	complete kldload 'p|1|`ls /boot/modules`|'
 	complete umount 'p^1^`mount | cut -w -f3`^'
 	complete cu 'p/1/( -l )/' 'n^-l^`ls /dev/{cu,tty}*[0-9]*`^' 'n/-s/( 9600 115200 38400 )/'
-    	alias tat 'cvs status | grep Stat | grep -v Up-to-date || git status ' 
 	set dunique
 	set colorcat
 	set prompt2="loop%R>"
@@ -269,8 +265,7 @@ if ( $?prompt ) then
 	set listflags="XaA"
 	alias v 	view
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
-	alias keydsaold 	'cat ~/.ssh/id_[rd]sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys2; chmod 600 .ssh/authorized_keys2"'
-	alias keydsa 		'cat ~/.ssh/id_*sa.pub ; sleep 3; cat ~/.ssh/id_*sa.pub     | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
+	alias keydsa 		'cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
 	complete keydsa  'p/1/$hosts/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
@@ -290,6 +285,7 @@ if ( $?prompt ) then
 	alias lr	ls -lgsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
+	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp4 "%"'
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
@@ -306,7 +302,7 @@ if ( $?prompt ) then
 	umask 22
 	#version
 	set	dcmesg = ".cshrc> $ashrcversion ${gUNAME} "
-	# make help/ins key do something useful for a change, the loafy-bitch
+	# make help/ins key do something useful for a change, the loafy
 	bindkey -c ^[[2~ 'setenv eetmp `date +"%s"`.tcshtmp;  history > /tmp/${eetmp}; vi /tmp/${eetmp}'
 	#f13
 	bindkey ^[[25~ vi-search-back
@@ -327,9 +323,9 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat cltmp >> ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
-	bindkey -c ^[OP 'echo "\!\!" > $HOME/tmp/cltmp; vi $HOME/tmp/cltmp'
+	bindkey -c ^[OP '"\!\!" > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
 
 	#smart up key
 	bindkey -k up history-search-backward
@@ -338,17 +334,21 @@ if ( $?prompt ) then
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
 		setenv Xgreenscreenopts '-bg black -fg green'
 		alias xterm xterm  ${Xgreenscreenopts}
-		set betterfont="-*-droid sans mono-*-*-*-*-*-*-*-*-*-*-*-*"
-		alias xt 'xterm ${Xgreenscreenopts} \\
-			-fn "$betterfont" &'
+		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
+		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
+		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"
+		set betterfont10="-*-courier-*-r-*-*-10-*-*-*-*-*-*-*"
+		set betterfont8="-*-courier-*-r-*-*-8-*-*-*-*-*-*-*"
+		set betterfont="-*-courier-*-r-*-*-12-*-*-*-*-*-*-*"
+		alias xt 'xterm ${Xgreenscreenopts}  &'
 		alias xt8 'xterm ${Xgreenscreenopts} \\
-			-fn "-*-*-*-*-*-*-*-80-*-*-*-*-*-*" &'
+			-fn "$betterfont8" &'
 		alias xt20 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-200-*-*-*-*-*-*" &'
+			"$betterfont20" &'
 		alias xt30 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-300-*-*-*-*-*-*" &'
+			"$betterfont30" &'
 		alias xt40 'xterm -bg black -fg green -fn \\
-			"-*-*-*-*-*-*-*-400-*-*-*-*-*-*" &'
+			"$betterfont40" &'
 		#if ( $USER == "root" ) then 
 			#printf "\b\n\033[31m\033[43m thou art root\n"
 		#else
