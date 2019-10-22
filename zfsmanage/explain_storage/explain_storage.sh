@@ -2,12 +2,14 @@
 
 
 tmpd=`mktemp -dt explainstorage`
+export tmpd=$tmpd
 echo $tmpd >> /tmp/explainstorage.junk
 echo $tmpd 
 mkdir -p  $tmpd/tempfiles
 mkdir -p $tmpd/infiles
 
 glabel status > $tmpd/infiles/glabel.out
+gmultipath status >> $tmpd/infiles/glabel.out
 sesutil map > $tmpd/infiles/ses.out
 zpool status > $tmpd/infiles/zpool.out
 

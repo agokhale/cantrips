@@ -34,7 +34,7 @@
 
 ($0 ~ /^write/  ) {
 	ldelaywrite = $3
-	print (ldev " " lmo ":" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
+	print ("mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
 	}
 
 
