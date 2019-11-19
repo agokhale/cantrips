@@ -35,6 +35,10 @@ BEGIN {
 	rows -= 6;
 }
 
+function numbersonly ( i ) {
+	gsub ("[^-.[:digit:]]","",i); 
+	return ( i );
+}
 function rangeck( i ) {
 	if ( i > bignum || i < -bignum || i == nan ) {
 		printf ("row: %i range error %i\n", NR, i); 
@@ -44,9 +48,9 @@ function rangeck( i ) {
 }
 
 /[[:digit:][:space:].].*/ {
-	x = $1;
+	x = numbersonly($1);
 	for ( yfield = 2; yfield <= NF ; yfield ++ ) { 
-		y = $yfield;
+		y = numbersonly($yfield);
 		if (rangeck( x ) || rangeck( y)) next;
 		xsum+= x;
 		ysum+= y;
