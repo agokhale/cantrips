@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/awk -f 
 #
 # takes a  a space delimited n-tupule and acsigraphs it:
 # input format: x	y1	y2 ....
@@ -41,7 +41,7 @@ function numbersonly ( i ) {
 }
 function rangeck( i ) {
 	if ( i > bignum || i < -bignum || i == nan ) {
-		printf ("row: %i range error %i\n", NR, i); 
+		printf ("row: %i range error %i ($0)\n", NR, i); 
 		return 1
 	}
 	return  0
@@ -65,12 +65,16 @@ function rangeck( i ) {
 
 
 function scale ( inmax, inmin, scalemax, scalemin, in_val) {
+        if (( inmax - inmin) == 0) {
+            printf("divbyzeroerror:(%s) row:%i \n", $0, NR);
+            return (0);
+	}
 	scale_factor =( ( scalemax - scalemin ) / ( inmax - inmin )) ;
 	out_val = scalemin + (  (in_val - inmin ) * scale_factor ) ; 
 	return (int( out_val)) ;
 }
 
-function dsymbol ( in_d, yfield) {
+function dsymbol ( in_d) {
 	outval = " ";
 	if ( in_d > 64 ) {
 		outval = "@";
