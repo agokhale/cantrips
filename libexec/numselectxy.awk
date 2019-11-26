@@ -1,4 +1,6 @@
 #!/usr/bin/awk -f
+#nuselect.awk -v x=1 -v y=7
+# no args to list columns with col nmumbers
 
 function numbersonly ( i ) {
         gsub ("[^ -.[:digit:]]","",i);
@@ -15,7 +17,11 @@ function numbersonly ( i ) {
 			printf ( "%s	%s\n" , $x, $y);
 		
 	} else {
-		print $0
+		for ( i=1; i< NF; i++) {
+			printf (" %d:%s\t", i,  $i);
+		}
+		print ("");
+
 	}
 
 } 
