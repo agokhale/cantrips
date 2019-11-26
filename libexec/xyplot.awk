@@ -2,7 +2,7 @@
 #
 # takes a  a space delimited n-tupule and acsigraphs it:
 # input format: x	y1	y2 ....
-# sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15]
+# sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15  -v f[xy]=[log,sin,cos,sqrt,exp] -v verbose=1
 #ymax 1.000000
 #                                         .                                          |
 #                                        @@@                                         |
@@ -35,22 +35,62 @@ BEGIN {
 	rows -= 6;
 }
 
-function numbersonly ( i ) {
+
+function fltr(fn_name, i) {
+#filer refn_name ( value)
+#awk's heart yearns for eval()?
+	if ( fn_name == "" ) {
+ 		print ("funtion error"); 
+        } else if ( fn_name == "log" ) {
+		a = log(i)
+        } else if ( fn_name == "sin" ) {
+		a = sin(i)
+        } else if ( fn_name == "cos" ) {
+		a = cos(i)
+        } else if ( fn_name == "sqrt" ) {
+		a = sqrt(i)
+        } else if ( fn_name == "exp" ) {
+		a = exp(i)
+        } else if ( fn_name == "rand" ) {
+		a = rand();
+        } else if ( fn_name == "" ) {
+		a = log(i)
+        } else if ( fn_name == "" ) {
+		a = log(i)
+        } else if ( fn_name == "" ) {
+		a = log(i)
+        } else if ( fn_name == "" ) {
+		a = log(i)
+        } else if ( fn_name == "" ) {
+		a = log(i)
+        } else if ( fn_name == "" ) {
+	}
+	return (a); 
+}
+
+# invoke the filters if they are  -v fx=log
+function numbersonly(col_nm, i ) {
 	gsub ("[^-.[:digit:]]","",i); 
+	if ( col_nm == "x" &&  fx != ""  ) {
+		i = fltr( fx  , i );  
+	} else if ( col_nm == "y" &&  fy != ""  ) {
+		i = fltr( fy , i );  
+	}
 	return ( i );
 }
 function rangeck( i ) {
 	if ( i > bignum || i < -bignum || i == nan ) {
-		printf ("row: %i range error %i ($0)\n", NR, i); 
+		if ( verbose ) printf ("row: %i range error %i ($0)\n", NR, i); 
 		return 1
 	}
 	return  0
 }
 
 /[[:digit:][:space:].].*/ {
-	x = numbersonly($1);
+
+	x = numbersonly("x",$1);
 	for ( yfield = 2; yfield <= NF ; yfield ++ ) { 
-		y = numbersonly($yfield);
+		y = numbersonly("y",$yfield);
 		if (rangeck( x ) || rangeck( y)) next;
 		xsum+= x;
 		ysum+= y;
@@ -66,7 +106,7 @@ function rangeck( i ) {
 
 function scale ( inmax, inmin, scalemax, scalemin, in_val) {
         if (( inmax - inmin) == 0) {
-            printf("divbyzeroerror:(%s) row:%i \n", $0, NR);
+            if ( verbose ) printf("divbyzeroerror:(%s) row:%i \n", $0, NR);
             return (0);
 	}
 	scale_factor =( ( scalemax - scalemin ) / ( inmax - inmin )) ;
