@@ -4,6 +4,7 @@
 
 function numbersonly ( i ) {
         gsub ("[^ -.[:digit:]]","",i);
+        gsub ("[()]","",i);
         return ( i );
 }
 
