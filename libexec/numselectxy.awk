@@ -18,7 +18,7 @@ function numbersonly ( i ) {
 			printf ( "%s	%s\n" , $x, $y);
 		
 	} else {
-		for ( i=1; i< NF; i++) {
+		for ( i=1; i<= NF; i++) {
 			printf (" %d:%s\t", i,  $i);
 		}
 		print ("");
