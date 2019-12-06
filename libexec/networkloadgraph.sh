@@ -1,5 +1,5 @@
-#!/bin/sh -x
-#grapt  [rows] [cols] points
+#!/bin/sh
+#networkloadgraph.sh  [rows] [cols] [npoints]
 
 trpp() {
 echo bye
@@ -12,7 +12,7 @@ sc_rows=`tput lines`
 sc_col=`tput cols`
 ros=${1:-15}
 col=${2:-80}
-histdepth=${2:-120}
+histdepth=${3:-120}
 
 while true
 do
