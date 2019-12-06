@@ -1,10 +1,10 @@
 #!/usr/bin/awk -f
-#nuselect.awk -v x=1 -v y=7
+#nuselect.awk -v x=1 -v y=7 [-vy1=23]
 # no args to list columns with col nmumbers
 
 function numbersonly ( i ) {
+        gsub ("[():]"," ",i);
         gsub ("[^ -.[:digit:]]","",i);
-        gsub ("[()]","",i);
         return ( i );
 }
 
@@ -22,7 +22,5 @@ function numbersonly ( i ) {
 			printf (" %d:%s\t", i,  $i);
 		}
 		print ("");
-
 	}
-
 } 

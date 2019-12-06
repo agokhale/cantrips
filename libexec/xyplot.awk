@@ -135,7 +135,7 @@ function dsymbol ( in_d) {
 }
 
 END {
-
+	if (points == 0 ) { exit (-4);}
 	xmean = xsum / points;
 	ymean = ysum / points;
 	for ( rowcursor= 0; rowcursor<=rows; rowcursor++){
