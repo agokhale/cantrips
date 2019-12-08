@@ -215,7 +215,7 @@ END {
 	xmin_s = sprintf ("{xmn:%2.2f}",xmin);
 	overlay( fbuf, xmin_s , rows-1, 0, 0 ); 
 
-	xmax_s = sprintf ("{xmx:%2.2f}",xmin);
+	xmax_s = sprintf ("{xmx:%2.2f}",xmax);
 	overlay( fbuf, xmax_s , rows-1, cols, "reverse" ); 
 	xd_s = sprintf ("{xd:%2.2f}",xmax-xmin);
 	overlay( fbuf, xd_s , rows-1, cols/2, "reverse" ); 

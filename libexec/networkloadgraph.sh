@@ -31,7 +31,7 @@ do
 			#echo $iface_c$d_c
 			tail -$histdepth /tmp/networkload.history \
 				| networkloaddelta.awk -v select=$d_c -v iface=$iface_c \
-				| xyplot.awk -v rows=$ros -v cols=$col -v title=$iface_c$d_c\(MiBps\)
+				| xyplot.awk -v rows=$ros -v cols=$col  -v title=$iface_c$d_c\(MiBps\)
 		done
 	done
 	sleep 1
