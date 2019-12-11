@@ -210,7 +210,9 @@ END {
 	overlay( fbuf, xmean_s , rows, int(cols*((xmean-xmin) / (xmax-xmin) )) , "reverse"); 
 
 	ymean_s = sprintf ("{yme:%f}",ymean);
-	overlay( fbuf,ymean_s ,  rows - int(  rows *( (ymean-ymin) / (ymax - ymin) )  ), cols, "reverse"); 
+	ymloc =  ( rows - int(  rows *( (ymean-ymin) / (ymax - ymin) ))  );
+	if ( ymloc > rows -2) ymloc-=2;
+	overlay( fbuf,ymean_s ,  ymloc  , cols, "reverse"); 
 
 	xmin_s = sprintf ("{xmn:%2.2f}",xmin);
 	overlay( fbuf, xmin_s , rows-1, 0, 0 ); 
