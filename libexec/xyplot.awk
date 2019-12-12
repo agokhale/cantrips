@@ -152,6 +152,12 @@ END {
 			fbuf[rowcursor, cc] =" "; 
 		}
 	}
+# raster/fbuf layout:
+# (0,0) ........    (cols,0)
+# ...
+# ...
+# (rows,0) ......(cols,rows)
+
 	for ( pointcursor =0; pointcursor <= points; pointcursor ++) {
 		split ( clust[pointcursor], pt);
 		xv =  scale(xmax, xmin, cols, 0 , pt[1]);
@@ -211,7 +217,8 @@ END {
 
 	ymean_s = sprintf ("{yme:%f}",ymean);
 	ymloc =  ( rows - int(  rows *( (ymean-ymin) / (ymax - ymin) ))  );
-	if ( ymloc > rows -2) ymloc-=2;
+	#push this out of the margin if it will hit the label
+	if ( ymloc > rows-2) ymloc-=1; 
 	overlay( fbuf,ymean_s ,  ymloc  , cols, "reverse"); 
 
 	xmin_s = sprintf ("{xmn:%2.2f}",xmin);
