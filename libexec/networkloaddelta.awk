@@ -7,7 +7,7 @@
 # -v iface=bge0
 
 function bpscal ( t2 ,t1 , bytes2, bytes1 ) {
-	return (( bytes2 - bytes1 )  / ( t2 - t1)/1000000);
+	return (( bytes2 - bytes1 )  / ( t2 - t1)/(2 ^20));
 }
 BEGIN {
 	if ( iface == "" ) { print ( "need -v iface"); exit (-1); }
