@@ -134,51 +134,114 @@ function dsymbol ( in_d) {
 	return ( outval);
 }
 
+function overlay( fb, instr, ro, co, reverse ) {
+	for ( i=1; i <= length(instr); i++ ) {
+		if ( reverse == "reverse") 
+			left_bump=length (instr);
+		else left_bump =0; 
+		fb [int(ro),int(i+co-left_bump-1)] = substr(instr, i,1);  
+	}
+}
 END {
 	if (points == 0 ) { exit (-4);}
 	xmean = xsum / points;
 	ymean = ysum / points;
 	for ( rowcursor= 0; rowcursor<=rows; rowcursor++){
 		for ( cc=0; cc <= cols; cc++ ) {
-			raster[rowcursor, cc] =0; 
+			raster_count[rowcursor, cc] =0; 
+			fbuf[rowcursor, cc] =" "; 
 		}
 	}
+# raster/fbuf layout:
+# (0,0) ........    (cols,0)
+# ...
+# ...
+# (rows,0) ......(cols,rows)
+
 	for ( pointcursor =0; pointcursor <= points; pointcursor ++) {
 		split ( clust[pointcursor], pt);
 		xv =  scale(xmax, xmin, cols, 0 , pt[1]);
 		yv =  scale(ymax, ymin, rows, 0 , pt[2]);
 		#printf ( " %i ,  %i\n", xv, yv );
-		if ( raster[xv,yv] > 0 ) 
-			{ raster[xv,yv]++ }
+		if ( raster_count[xv,yv] > 0 ) 
+			{ raster_count[xv,yv]++ }
 		else 
-			{ raster[xv,yv] =1; }
+			{ raster_count[xv,yv] =1; }
 	}
 	xvmean =  scale(xmax, xmin, cols, 0 , xmean);
 	yvmean =  scale(ymax, ymin, rows, 0 , ymean);
 
-	print ("ymax", ymax);
+
+	## main raster output grid
 	for ( rowcursor= 0; rowcursor<=rows; rowcursor++) {
 		for ( cc=0; cc <= cols; cc++ ) {
-			sym = dsymbol(  raster[ cc, rows - rowcursor] );
-			printf ( "%c" , sym );
+			sym = dsymbol(  raster_count[ cc, rows - rowcursor] );
+			fbuf[ rowcursor, cc]= sym;
+			#printf ( "%c" , sym );
 		}
 		#end of row 
 		if (  yvmean == rows - rowcursor ) {
-			printf ("=\n");
+			#printf ("=\n");
+			fbuf[ rowcursor, cols]= "=";
 		} else 
-		{ printf( "|\n"); }
-	}
-	for ( c = 0; c <= (cols );  c++) {
-		if ( xvmean ==  c ) {
-			printf ("|");
-		} else {
-			printf ("-");
+		{ 
+			#printf( "|\n"); 
+			fbuf[  rowcursor,cols]= "|";
 		}
 	}
-	printf ("\n");
-	printf ( "ymin %f ", ymin)
-	printf ( "xmin %f ", xmin);
-	printf ( "count %i xmax %i ",points,  xmax);
-	printf ( "xmean %f ymean  %f\n",xmean,  ymean);
+	# bottom scale with pips 
+	for ( c = 0; c <= (cols);  c++) {
+		if ( xvmean ==  c ) {
+			#printf ("|");
+			fbuf[ rows,c]= "|";
+		} else {
+			#printf ("-");
+			fbuf[ rows,c]= "-";
+		}
+	}
+	#printf ("\n"); printf ( "ymin %f ", ymin) printf ( "xmin %f ", xmin); printf ( "count %i xmax %i ",points,  xmax); printf ( "xmean %f ymean  %f\n",xmean,  ymean);
 
+	ymax_s = sprintf ("{ymx:%s}", ymax);
+	overlay( fbuf, ymax_s , 0,0);
+	ymin_s = sprintf ("{ymin:%f}", ymin);
+	overlay( fbuf, ymin_s , rows, 0);
+
+	yd_s = sprintf ("{yd:%2.2f}",ymax-ymin);
+	overlay( fbuf, yd_s , int(rows/2), 0, 0 ); 
+
+	count_s=sprintf ("{ct:%i}",points);
+	overlay( fbuf, count_s , rows, cols, "reverse"); 
+
+	xmean_s = sprintf ("{xme:%f}",xmean);
+	overlay( fbuf, xmean_s , rows, int(cols*((xmean-xmin) / (xmax-xmin) )) , "reverse"); 
+
+	ymean_s = sprintf ("{yme:%f}",ymean);
+	ymloc =  ( rows - int(  rows *( (ymean-ymin) / (ymax - ymin) ))  );
+	#push this out of the margin if it will hit the label
+	if ( ymloc > rows-2) ymloc-=1; 
+	overlay( fbuf,ymean_s ,  ymloc  , cols, "reverse"); 
+
+	xmin_s = sprintf ("{xmn:%2.2f}",xmin);
+	overlay( fbuf, xmin_s , rows-1, 0, 0 ); 
+
+	xmax_s = sprintf ("{xmx:%2.2f}",xmax);
+	overlay( fbuf, xmax_s , rows-1, cols, "reverse" ); 
+	xd_s = sprintf ("{xd:%2.2f}",xmax-xmin);
+	overlay( fbuf, xd_s , rows-1, cols/2, "reverse" ); 
+	
+	if ( title ) 
+		{tit_s = sprintf ("{t:%s}",title);
+		overlay( fbuf, tit_s , 0, cols/2, "" ); 
+ 		}
+	
+		
+	
+
+	##dump the fraebuffer
+	for ( rowcursor= 0; rowcursor<=rows; rowcursor++) {
+		for ( cc=0; cc <= cols; cc++ ) {
+			printf ( "%c", fbuf[rowcursor,cc]);
+		}
+		printf ( "\n"); 
+	}
 }

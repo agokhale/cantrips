@@ -20,6 +20,7 @@ abcde
 audacity
 avahi
 bsdstats
+binwalk
 cdparanoia
 cdrtools
 chrome
@@ -65,6 +66,7 @@ trojita
 iverilog
 wget
 wireshark
+vpnc
 x48
 xpdf
 xv
