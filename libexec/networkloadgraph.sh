@@ -3,7 +3,7 @@
 
 trpp() {
 echo bye
-echo networkloadgraph.sh   [rows] [cols] [npoints] [iface]
+echo networkloadgraph.sh   [rows] [cols] [npoints] [iface] [tx/rx]
 exit 0;
 }
 trap trpp KILL INT TERM

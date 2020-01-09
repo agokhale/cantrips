@@ -213,13 +213,16 @@ END {
 	overlay( fbuf, count_s , rows, cols, "reverse"); 
 
 	xmean_s = sprintf ("{xme:%f}",xmean);
-	overlay( fbuf, xmean_s , rows, int(cols*((xmean-xmin) / (xmax-xmin) )) , "reverse"); 
+	if ((xmax - xmin) > 0 )
+		overlay( fbuf, xmean_s , rows, int(cols*((xmean-xmin) / (xmax-xmin) )) , "reverse"); 
 
 	ymean_s = sprintf ("{yme:%f}",ymean);
-	ymloc =  ( rows - int(  rows *( (ymean-ymin) / (ymax - ymin) ))  );
-	#push this out of the margin if it will hit the label
-	if ( ymloc > rows-2) ymloc-=1; 
-	overlay( fbuf,ymean_s ,  ymloc  , cols, "reverse"); 
+	if ((ymax - ymin) > 0 ){
+		ymloc =  ( rows - int(  rows *( (ymean-ymin) / (ymax - ymin) ))  );
+		#push this out of the margin if it will hit the label
+		if ( ymloc > rows-2) ymloc-=1; 
+		overlay( fbuf,ymean_s ,  ymloc  , cols, "reverse"); 
+	}
 
 	xmin_s = sprintf ("{xmn:%2.2f}",xmin);
 	overlay( fbuf, xmin_s , rows-1, 0, 0 ); 
