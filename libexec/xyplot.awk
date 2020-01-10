@@ -80,7 +80,7 @@ function numbersonly(col_nm, i ) {
 }
 function rangeck( i ) {
 	if ( i > bignum || i < -bignum || i == nan ) {
-		if ( verbose ) printf ("row: %i range error %i ($0)\n", NR, i); 
+		if ( verbose ) printf ("row: %i range error %s ($0)  %i %i %i\n", NR,i , i > bignum , i < -bignum , i == nan); 
 		return 1
 	}
 	return  0
