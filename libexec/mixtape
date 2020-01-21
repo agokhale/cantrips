@@ -3,6 +3,7 @@ indexfile=$1
 outfile=$2
 
 if [ $# -eq 1 ]; then
+	#calculate sizing
 	echo status: $indexfile
 	echo sizes
 	cat $indexfile | tr  '\n' '\0' | \
@@ -13,6 +14,7 @@ if [ $# -eq 1 ]; then
 		awk 'BEGIN { a=10;} // {  a=($1 + a); printf( " %d   ->     %d\n",$1,a);} END{print a/1024; print "MiB";}'
 
 elif [ $# -eq 2 ]; then 
+	#push this out as a tarball or - as stdout
 	cat $indexfile | \
 		tr '\n' '\0' |  \
 		xargs -0 -n1 -I% find % -type f | \
