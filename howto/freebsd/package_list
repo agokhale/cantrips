@@ -1,4 +1,6 @@
 bind-tools
+dfu-util
+icestorm
 jq
 nmh
 webcamd
