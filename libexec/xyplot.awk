@@ -2,7 +2,7 @@
 #
 # takes a  a space delimited n-tupule and acsigraphs it:
 # input format: x	y1	y2 ....
-# sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15  -v f[xy]=[log,sin,cos,sqrt,exp] -v verbose=1
+# sinexx.awk | xyplot.awk  [-v rows=34 -v cols=15  -v f[xy]=[log,sin,cos,sqrt,exp] -v verbose=1 -vnooverlay=1
 #ymax 1.000000
 #                                         .                                          |
 #                                        @@@                                         |
@@ -80,12 +80,16 @@ function numbersonly(col_nm, i ) {
 }
 function rangeck( i ) {
 	if ( i > bignum || i < -bignum || i == nan ) {
+		if ( num == 0 ) return 0;
 		if ( verbose ) printf ("row: %i range error %s ($0)  %i %i %i\n", NR,i , i > bignum , i < -bignum , i == nan); 
 		return 1
 	}
 	return  0
 }
 
+/#.*/ {
+
+}
 /[[:digit:][:space:].].*/ {
 
 	x = numbersonly("x",$1);
@@ -100,6 +104,7 @@ function rangeck( i ) {
 		if (ymin > y ) { ymin = y; }
 		points ++;
 		clust[points]=sprintf("%f\t%f\y%i", x,y,yfield);
+		if (verbose > 2 ) print (points,  clust[points]);
 	}
 }
 
@@ -135,6 +140,7 @@ function dsymbol ( in_d) {
 }
 
 function overlay( fb, instr, ro, co, reverse ) {
+	if ( nooverlay ) { return 0;}
 	for ( i=1; i <= length(instr); i++ ) {
 		if ( reverse == "reverse") 
 			left_bump=length (instr);
@@ -158,11 +164,11 @@ END {
 # ...
 # (rows,0) ......(cols,rows)
 
-	for ( pointcursor =0; pointcursor <= points; pointcursor ++) {
+	for ( pointcursor =1; pointcursor <= points; pointcursor ++) {
 		split ( clust[pointcursor], pt);
 		xv =  scale(xmax, xmin, cols, 0 , pt[1]);
 		yv =  scale(ymax, ymin, rows, 0 , pt[2]);
-		#printf ( " %i ,  %i\n", xv, yv );
+		if (verbose > 3) printf ( "scaled %f,%f   to  %i ,  %i\n",pt[1], pt[2], xv, yv );
 		if ( raster_count[xv,yv] > 0 ) 
 			{ raster_count[xv,yv]++ }
 		else 
@@ -177,20 +183,19 @@ END {
 		for ( cc=0; cc <= cols; cc++ ) {
 			sym = dsymbol(  raster_count[ cc, rows - rowcursor] );
 			fbuf[ rowcursor, cc]= sym;
-			#printf ( "%c" , sym );
+			if (verbose>2 && sym != " " ) printf ( "symbol %f %f %c \n" ,cc, rows - rowcursor, sym );
 		}
 		#end of row 
-		if (  yvmean == rows - rowcursor ) {
+		if (  yvmean == rows - rowcursor && !nooverlay ) {
 			#printf ("=\n");
 			fbuf[ rowcursor, cols]= "=";
-		} else 
-		{ 
+		} else if ( ! nooverlay) { 
 			#printf( "|\n"); 
 			fbuf[  rowcursor,cols]= "|";
 		}
 	}
 	# bottom scale with pips 
-	for ( c = 0; c <= (cols);  c++) {
+	for ( c = 0; c <= (cols) && ( !nooverlay) ;  c++) {
 		if ( xvmean ==  c ) {
 			#printf ("|");
 			fbuf[ rows,c]= "|";
@@ -199,7 +204,13 @@ END {
 			fbuf[ rows,c]= "-";
 		}
 	}
-	#printf ("\n"); printf ( "ymin %f ", ymin) printf ( "xmin %f ", xmin); printf ( "count %i xmax %i ",points,  xmax); printf ( "xmean %f ymean  %f\n",xmean,  ymean);
+	if ( verbose ) { 
+		printf ("\n"); 
+		printf ( "ymin %f ", ymin);
+		printf ( "xmin %f ", xmin); 
+		printf ( "count %i xmax %i ",points,  xmax); 
+		printf ( "xmean %f ymean  %f\n",xmean,  ymean);
+	}
 
 	ymax_s = sprintf ("{ymx:%s}", ymax);
 	overlay( fbuf, ymax_s , 0,0);
