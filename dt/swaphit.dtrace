@@ -1,0 +1,14 @@
+#!/usr/sbin/dtrace -qws
+
+BEGIN 
+	{swaphit=0;} 
+
+fbt::swapgeom_done:entry / swaphit==0/ 
+	{  system ("sysctl dev.acpi_ibm.0.mic_led=1"); } 
+
+tick-22s 
+	{ 
+	if (swaphit ==1) 
+		{system("sysctl dev.acpi_ibm.0.mic_led=0");} 
+	swaphit=0;
+	}
