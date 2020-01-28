@@ -251,7 +251,7 @@ if ( $?prompt ) then
  	alias dtrace_update_probes '${HOME}/cantrips/libexec/dtraceprobes.sh > /tmp/dtrace.probes'
 	complete dtrace 'p/1/(-n -s -p -v -l)/'  'n/pid/p/'  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
 	complete sysctl 'n/*/`sysctl -aN`/'
-	complete kldload 'p|1|`ls /boot/modules`|'
+	complete kldload 'p|1|`ls /boot/modules /boot/kernel `|' #use | as a delimeter to deconflict /path
 	complete umount 'p^1^`mount | cut -w -f3`^'
 	complete cu 'p/1/( -l )/' 'n^-l^`ls /dev/{cu,tty}*[0-9]*`^' 'n/-s/( 9600 115200 38400 )/'
 	set dunique

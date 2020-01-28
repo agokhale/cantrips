@@ -32,7 +32,7 @@ BEGIN {
 	if ( ! rows )
 		"tput lines" | getline rows;
 	cols -= 3
-	rows -= 6;
+	rows -= 3;
 }
 
 
