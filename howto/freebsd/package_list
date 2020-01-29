@@ -1,4 +1,5 @@
 bind-tools
+rust
 dfu-util
 icestorm
 jq
