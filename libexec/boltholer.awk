@@ -28,5 +28,7 @@ for (i=0; i < (count * overcount); i++ ) {
 	if( logspiralize) {radius += log ( logspiralize); }
 	printf ("%f %f \n", ret[0], ret[1] );
 	}
+
+
 exit 0;
 }
