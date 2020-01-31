@@ -233,7 +233,6 @@ if ( $?prompt ) then
 	alias  td "sudo tcpdump -lvvnX -s200  -i "
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
-	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 

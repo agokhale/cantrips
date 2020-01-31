@@ -1,4 +1,6 @@
 bind-tools
+yosys
+icestorm
 rust
 dfu-util
 icestorm
