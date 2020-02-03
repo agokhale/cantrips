@@ -3,8 +3,9 @@
 
 #  pool: zdb-test
 ($1 ~ /pool:/) {
+	lvdv="";
 	lpool = $2;
-	print ("gotpool: " $2);
+	print ("pool:" $2);
 	}
 
 #cache and log aren't ONLINE; the sadists that wrote zpool status didn't see this coming
@@ -14,7 +15,7 @@
 	if (match ( $1, "multipath/*") ||  match ( $1, "gptid") || match ($1, "[a]*da[0-9]") || match ($1, "diskid") || match ($2, "OFFLINE") )  {
 	#            gptid/13377042-b351-11e7-8040-0007432ba650  ONLINE       0     0     0
 	# get device ^^^^^^^^                      and      status^^^^
-		print ( "disk:" $1  " st:"  $2  " vdv:" lvdv " pool:" lpool " ax:" $5 $6 $7); 
+		print ( "  disk:" $1  " st:"  $2  " vdv:" lvdv " pool:" lpool " ax:" $5 $6 $7); 
 	} else if (match($1,"spares") ||match ($1, "mirror") || match ($1, "log") || match ( $1, "cache") || match ($1, "raidz") ){
 	#          mirror-0                                      ONLINE       0     0     0
 	# pick  vdev ^^^^^

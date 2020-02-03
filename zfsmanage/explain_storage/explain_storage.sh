@@ -18,7 +18,14 @@ cat $tmpd/infiles/zpool.out | ./normalize_pool.nawk | tee $tmpd/tempfiles/pool.n
 cat $tmpd/tempfiles/ses.normal | ./join_ses.nawk   | tee $tmpd/ses.out
 cat $tmpd/tempfiles/pool.normal | ./join_pool.nawk | tee $tmpd/pool.out
 
+# disks:
+disks=$(ls /dev/*da* )
+for dev in $disks; do
+	echo  "$dev " >> $tmpd/smart.raw
+	smartctl -a $dev  >> $tmpd/smart.raw
+done
 
+cat $tmpd/smart.raw | normalize_smart.nawk   | tee  $tmpdir/smart.out
 
 ls -l $tmpd
 echo $tmpd 

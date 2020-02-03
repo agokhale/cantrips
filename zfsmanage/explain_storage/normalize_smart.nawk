@@ -10,17 +10,23 @@
 
 #  
 #/dev/da9
-($1 ~ /\/dev/) {
+($0 ~ /\/dev/) {
 	ldev = $1;
 	#print ("gotdec: " $1);
 	}
 
 ($0 ~ /Product/  ) {
 	lmo = $2
+	#nope have to wait for sn model[
 	#print ("model" lmo)
 	}
 ($0 ~ /^Serial/  ) {
 	lsn = $3
+	pathcount[lsn] ++;
+	serials[lsn]=lsn;
+	paths[lsn]= sprintf ( "%s %s", paths[lsn], ldev);
+	model[lsn]=lmo;
+
 	#print ("sn" lsn)
 	}
 
@@ -34,8 +40,14 @@
 
 ($0 ~ /^write/  ) {
 	ldelaywrite = $3
-	print ("mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
+	print ("dev:" ldev " mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
 	}
+
+END {
+	for (sn in serials) {
+		printf ("sn:%s mo:%s pathcount:%s paths:%s\n",sn,model[sn],pathcount[sn], paths[sn] );
+	}
+}
 
 
 	
