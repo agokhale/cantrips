@@ -10,7 +10,7 @@ if [ $# -ne 1 ]; then
         exit -4
 fi
 echo writing psurandom $tpath with $gigs G of payload
-sleep 0.3
-dd if=/dev/zero bs=1G count=$gigs | openssl enc -aes-128-cbc -k swordfiiish`date +"%s"`
+
+dd if=/dev/zero bs=1G count=$gigs | openssl enc -aes-128-cbc -k swordfiiish`date +"%s"` -S 5A
 
 
