@@ -116,7 +116,7 @@ if ( $?prompt ) then
 	set hunthome=${HOME}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied"'
+	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
 	#go edit file with symbol $1 in filename matching $2
@@ -233,11 +233,11 @@ if ( $?prompt ) then
 	alias  td "sudo tcpdump -lvvnX -s200  -i "
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
-	alias screenshotX11window 'xwd | convert - jpeg:- > \!\!:1.jpeg'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
+	complete screenlet 'p/1/c/' #commands for screenlet
 	alias sc screen
 	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
 	alias  sa screen 
@@ -250,7 +250,7 @@ if ( $?prompt ) then
  	alias dtrace_update_probes '${HOME}/cantrips/libexec/dtraceprobes.sh > /tmp/dtrace.probes'
 	complete dtrace 'p/1/(-n -s -p -v -l)/'  'n/pid/p/'  'n/-o/f/' 'n/-p/p/'  'p/1/-s'
 	complete sysctl 'n/*/`sysctl -aN`/'
-	complete kldload 'p|1|`ls /boot/modules`|'
+	complete kldload 'p|1|`ls /boot/modules /boot/kernel `|' #use | as a delimeter to deconflict /path
 	complete umount 'p^1^`mount | cut -w -f3`^'
 	complete cu 'p/1/( -l )/' 'n^-l^`ls /dev/{cu,tty}*[0-9]*`^' 'n/-s/( 9600 115200 38400 )/'
 	set dunique

@@ -1,4 +1,9 @@
 bind-tools
+yosys
+icestorm
+rust
+dfu-util
+icestorm
 jq
 nmh
 webcamd

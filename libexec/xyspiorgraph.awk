@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
-BEGIN {
 
+BEGIN {
 w=30.1
 d=0.0122
 srand()
