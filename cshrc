@@ -327,7 +327,7 @@ if ( $?prompt ) then
 	#f2
 	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
-	bindkey -c ^[OP '"\!\!" > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
+	bindkey -c ^[OP 'history > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
 
 	#smart up key
 	bindkey -k up history-search-backward
@@ -357,10 +357,12 @@ if ( $?prompt ) then
 			#https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 			#printf "\b\n\033[35m prp \033[91;40m 000  \n" #purple
 			#set rprompt=":`whoami | cut -c 1-4`:%c2:%P:%m"
-			#foreach i ( `jot 49` ) 
-			#	printf "\b\n\033[%sm %s" "$i" "$i"
+			#colorswatch 
+			#foreach i ( `jot 49` )
+			#	 printf "\b\n\033[%sm %s" "$i" "$i"
 			#end
 		#endif
+		alias beepcmd 'printf "\033[35mbeep?\033[39;49m\b\b\b\b\b"'
 	endif #xterm specializations
 
 endif #prompt
