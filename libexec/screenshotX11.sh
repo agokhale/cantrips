@@ -1,6 +1,14 @@
 #!/bin/sh -x
 
-xwd > ${1}.xwd
-convert ${1}.xwd ${1}.jpeg
-xv ${1}.jpeg
+
+if [ $# -lt 1 ] ; then
+	echo  usage: $0 output_name
+	exit 1
+fi
+dir=${HOME}/tmp/screenshorts/
+filstem=${dir}/${1}
+mkdir -p ${HOME}/tmp/screenshorts/
+xwd > ${filstem}.xwd
+convert ${filstem}.xwd ${filstem}.jpeg
+xv ${filstem}.jpeg
 
