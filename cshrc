@@ -46,6 +46,10 @@ if ( ${OSTYPE} == "cygwin" ) then
 	setenv PATH /cygdrive/c/Windows/System32/:${PATH}
 endif
 
+if (   $?VIRTUAL_ENV ) then 
+	setenv PATH ${VIRTUAL_ENV}/bin:${PATH}
+endif
+	
 
 foreach pathroot ( $path_roots )
     if ( -d $pathroot/man ) then
@@ -56,6 +60,7 @@ foreach pathroot ( $path_roots )
             setenv MANPATH "$pathroot/man":$MANPATH
         endif
     endif
+
      if ( -d $pathroot/share/man ) then
         if ( $MANPATH =~ "*$pathroot/share/man*" ) then 
             #echo "found redundant man $pathroot/share"
