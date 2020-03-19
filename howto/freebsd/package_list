@@ -1,4 +1,6 @@
 bind-tools
+mosh
+unrar
 yosys
 icestorm
 rust

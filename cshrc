@@ -24,6 +24,9 @@ set path_roots = ( $path_roots /opt/local /usr/share /sw /opt/X11 /usr/X11 )
 #path_components are places to look for binaries inside path_roots
 set path_components = ( bin sbin libexec games tools ) 
 
+#mosh-client needs a UTF-8 native locale to ruh-client needs a UTF-8 native locale to run.
+setenv LC_ALL en_US.UTF-8.
+
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -161,6 +164,7 @@ if ( $?prompt ) then
 	complete ping  'p/*/$hosts/' 
 	complete dig 'p/*/$hosts/' 
 	complete ssh  'c/*@/$hosts/' 'p/1/u/@'
+	complete mosh  'c/*@/$hosts/' 'p/1/u/@'
 	complete scp          "c,*:/,F:/," \
 			'c/-o/\"(Port )\"/' \
                         "c,*:,F:$HOME," \
@@ -342,7 +346,7 @@ if ( $?prompt ) then
 		set betterfont10="-*-courier-*-r-*-*-10-*-*-*-*-*-*-*"
 		set betterfont8="-*-courier-*-r-*-*-8-*-*-*-*-*-*-*"
 		set betterfont="-*-courier-*-r-*-*-12-*-*-*-*-*-*-*"
-		alias xt 'xterm ${Xgreenscreenopts}  &'
+		alias xt 'xterm -u8  ${Xgreenscreenopts}  &'
 		alias xt8 'xterm ${Xgreenscreenopts} \\
 			-fn "$betterfont8" &'
 		alias xt20 'xterm -bg black -fg green -fn \\
