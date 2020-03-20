@@ -25,7 +25,7 @@ set path_roots = ( $path_roots /opt/local /usr/share /sw /opt/X11 /usr/X11 )
 set path_components = ( bin sbin libexec games tools ) 
 
 #mosh-client needs a UTF-8 native locale to ruh-client needs a UTF-8 native locale to run.
-setenv LC_ALL en_US.UTF-8.
+#setenv LC_ALL en_US.UTF-8.
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
