@@ -1,4 +1,6 @@
 bind-tools
+vlc
+py37-virtualenv
 yosys
 icestorm
 rust
