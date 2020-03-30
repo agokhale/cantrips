@@ -1,6 +1,8 @@
 bind-tools
 vlc
 py37-virtualenv
+mosh
+unrar
 yosys
 icestorm
 rust
