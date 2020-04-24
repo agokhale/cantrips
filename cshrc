@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.0.1"
+set ashrcversion = "10.3.0.2"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -119,6 +119,7 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
+	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 
 	set hunthome=${HOME}
@@ -305,7 +306,7 @@ if ( $?prompt ) then
 	#set filec ##// tcsh implicit complettion 
 	set nokanji
 	set histdup erase
-	set implicitcd=verbose
+	#set implicitcd=verbose
 	#set savedirs  ##/annoying rentrant behaviours
 	set listmax = 120
 	set history = 1000
@@ -436,4 +437,7 @@ if ( -r ${HOME}/.cshrc.local ) then
 	source ${HOME}/.cshrc.local
 endif 
 
-
+#BitchX
+setenv IRCNICK nopenpoe
+setenv IRCNAME  "user is much too lame "
+setenv IRCSERVER  irc.freenode.net
