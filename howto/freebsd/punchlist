@@ -1,0 +1,73 @@
+#!/bin/sh -x 
+pkg -y
+pkg install -y git
+pkg install -y screen
+pkg install -y nmap
+
+#bootstrap cantrips
+git clone https://github.com/agokhale/cantrips
+cd cantrips
+make install
+#- fix ssh host keys
+#- fix sshd root login
+sed -i .v  's/#PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i .v  's/#GatewayPorts no/GatewayPorts yes/' /etc/ssh/sshd_config
+service sshd configtest && service sshd restart
+
+#zfs
+sysrc zfsd_enable=yes
+service start zfsd
+
+#crontabs for locate are .. important to me
+## min   hour    daym    month   dayw
+#16      8       11       *      *  zpool scrub dozer
+#6      */2     *        *      *  /usr/libexec/locate.updatedb
+#46      */6     *        *      *  /usr/local/bin/nmap -O 192.168.1.0/24 >> /var/log/nmap/finger-192.168.24.0.print
+
+#smart
+pkg install -y  smartmontools
+echo 'smartd_enable="YES"' >> /etc/rc.conf
+echo 'DEVICESCAN' >> /usr/local/etc/smartd.conf
+
+#add rando swaps to /etc/fstab
+swapon -a
+
+#ipmi
+pkg install -y ipmitool
+pkg install -y openipmi
+
+#dbus - yeah
+sysrc dbus_enable=yes
+service dbus start
+
+#avahi,zeroconf,bonjour, 
+pkg install -y avahi
+echo 'avahi_daemon_enable="YES"' >> /etc/rc.conf
+sed -I v 's/^hosts.*/hosts: files mdns_minimal [NOTFOUND=return] mdns  dns/' /etc/nsswitch.conf
+
+#never again: 
+echo 'resolvconf=no' > /etc/resolvconf.conf
+
+#fix sudoers
+#%wheel ALL=(ALL) NOPASSWD: ALL
+
+pkg install -y gcc-arm-embedded
+setenv PATH ${PATH}:/usr/local/gcc-arm-embedded/bin
+
+pkg install -y  chromium
+
+pkg install -y dosunix
+pkg install -y stlink
+
+
+#https://docs.freebsd.org/doc/7.3-RELEASE/usr/share/doc/en/articles/compiz-fusion/nvidia-setup.html
+
+pkg install -y nvidia-dia-xconfigdriver
+echo linux_enable="YES" > /boot/loader.conf
+echo nvidia_load="YES" > /boot/loader.conf
+pkg install -y nvidia-xconfig
+pkg install -y nvidia-settings
+
+rehash
+nvidia-xconfig
+
