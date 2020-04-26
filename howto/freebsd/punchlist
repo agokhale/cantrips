@@ -1,13 +1,15 @@
 #!/bin/sh -x 
-pkg -y
-pkg install -y git
-pkg install -y screen
-pkg install -y nmap
+bootstrap(){
+	#pkg -y
+	#pkg install -y git
+	#pkg install -y screen
 
-#bootstrap cantrips
-git clone https://github.com/agokhale/cantrips
-cd cantrips
-make install
+	#bootstrap cantrips
+	#git clone https://github.com/agokhale/cantrips
+	#cd cantrips
+	make install
+}
+
 #- fix ssh host keys
 #- fix sshd root login
 sed -i .v  's/#PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
@@ -26,7 +28,7 @@ service start zfsd
 
 #smart
 pkg install -y  smartmontools
-echo 'smartd_enable="YES"' >> /etc/rc.conf
+##echo 'smartd_enable="YES"' >> /etc/rc.conf
 echo 'DEVICESCAN' >> /usr/local/etc/smartd.conf
 
 #add rando swaps to /etc/fstab
@@ -42,11 +44,11 @@ service dbus start
 
 #avahi,zeroconf,bonjour, 
 pkg install -y avahi
-echo 'avahi_daemon_enable="YES"' >> /etc/rc.conf
+#XXXecho 'avahi_daemon_enable="YES"' >> /etc/rc.conf
 sed -I v 's/^hosts.*/hosts: files mdns_minimal [NOTFOUND=return] mdns  dns/' /etc/nsswitch.conf
 
 #never again: 
-echo 'resolvconf=no' > /etc/resolvconf.conf
+#XXXecho 'resolvconf=no' > /etc/resolvconf.conf
 
 #fix sudoers
 #%wheel ALL=(ALL) NOPASSWD: ALL
@@ -62,9 +64,9 @@ pkg install -y stlink
 
 #https://docs.freebsd.org/doc/7.3-RELEASE/usr/share/doc/en/articles/compiz-fusion/nvidia-setup.html
 
-pkg install -y nvidia-dia-xconfigdriver
-echo linux_enable="YES" > /boot/loader.conf
-echo nvidia_load="YES" > /boot/loader.conf
+pkg install -y nvidia-ddriver
+#echo linux_enable="YES" > /boot/loader.conf
+#echo nvidia_load="YES" > /boot/loader.conf
 pkg install -y nvidia-xconfig
 pkg install -y nvidia-settings
 
