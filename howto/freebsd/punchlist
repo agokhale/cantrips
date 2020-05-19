@@ -73,3 +73,21 @@ pkg install -y nvidia-settings
 rehash
 nvidia-xconfig
 
+#needs to kldload nvidia
+#needs to kldload nvidia-modeset
+
+sysrc rpcbind_enable="YES"
+
+#nfs server 
+sysrc nfs_server_enable="YES"
+sysrc nfs_server_flags="-t -u -n 8"
+#sysrc nfsv4_server_enable="YES"
+#sysrc nfsuserd_enable="YES"
+
+sysrc mountd_enable="YES"
+sysrc nfs_client_enable="YES"
+sysrc rpc_lockd_enable="YES"
+sysrc amd_enable="YES"
+sysrc nfsd_enable="YES"
+
+
