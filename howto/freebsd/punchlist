@@ -10,10 +10,14 @@ bootstrap(){
 	make install
 }
 
+#fix terrible keyboards
+sysrc keymap="us.ctrl.kbd"
+
 #- fix ssh host keys
 #- fix sshd root login
 sed -i .v  's/#PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i .v  's/#GatewayPorts no/GatewayPorts yes/' /etc/ssh/sshd_config
+sysrc sshd_enable=yes
 service sshd configtest && service sshd restart
 
 #zfs
