@@ -1,5 +1,5 @@
 #!/bin/sh  
-#set -x
+set -x
 if [ $# -ne 2 ]; then
 	echo usage:  bkuperator death /etc
 	exit 22; 
