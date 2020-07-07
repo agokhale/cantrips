@@ -1,4 +1,5 @@
-#!/bin/sh 
+#!/bin/sh  
+set -x
 if [ $# -ne 2 ]; then
 	echo usage:  bkuperator death /etc
 	exit 22; 
@@ -11,9 +12,19 @@ source_path=$2
 
 
 # settings and tunables
-rsync_flags="--bwlimit=1m -azv  --delete" 
-zfs_top_dataset="zz/bk"
-#zfs_top_dataset="zz/bkxx" # bad ds for test
+rsync_flags="--bwlimit=10m  --one-file-system --force-uchange --force-schange -azv  --delete" 
+
+if [ -z "${bkupratr_log}" ]; then
+	echo error no  env bkuperatr_log
+	exit 1
+fi 
+
+zfs_top_dataset=${bkupratr_top_dataset}
+if [ -z "$zfs_top_dataset" ]; then
+	echo error no  env bkupratr_top_dataset
+	exit 1
+fi
+logbyhost="${bkupratr_log}/${source_host}"
 
 
 
@@ -26,19 +37,26 @@ if [ -z "$tst" ]; then
 	exit 1; 
 fi
 
+#does the source exist?
+tst=`ssh $source_host "file $source_path"`
+if [  "$tst" !=  "$source_path: directory" ]; then
+	echo ${source_host}:${source_path}  is a $tst , should be a directory
+fi 
+
 host_dataset=$zfs_top_dataset/$source_host
 tst=`zfs list $host_dataset | grep $host_dataset`
 if [ -z "$tst" ]; then
 	echo warnng: no host dataset:  $host_dataset	, creating in 5s.. 
-	sleep 5 
+	sleep 5
 	zfs create $host_dataset
-	echo host dataset:  $host_dataset	, created
+	echo host dataset:  $host_dataset created
 fi
 
+
 mkdir -p /$host_dataset/$source_path
-date  >> logbyhost/$source_host
-vmstat  >> logbyhost/$source_host
-uptime  >> logbyhost/$source_host
-rsync $rsync_flags $source_host:$source_path/ /$host_dataset/$source_path/  | tee -a logbyhost/$source_host
+date  >> $logbyhost
+vmstat  >> $logbyhost
+uptime  >> $logbyhost
+rsync $rsync_flags $source_host:$source_path/ /$host_dataset/$source_path/  | tee -a $logbyhost
 sleep 3
 

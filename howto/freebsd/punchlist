@@ -10,10 +10,14 @@ bootstrap(){
 	make install
 }
 
+#fix terrible keyboards
+sysrc keymap="us.ctrl.kbd"
+
 #- fix ssh host keys
 #- fix sshd root login
 sed -i .v  's/#PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 sed -i .v  's/#GatewayPorts no/GatewayPorts yes/' /etc/ssh/sshd_config
+sysrc sshd_enable=yes
 service sshd configtest && service sshd restart
 
 #zfs
@@ -80,3 +84,21 @@ nvidia-xconfig
 sysrc -f /boot/loader.conf linux_load="YES"
 sysrc -f /boot/loader.conf nvidia_load="YES"
 sysrc -f /boot/loader.conf nvidia-modeset_load="YES"
+#needs to kldload nvidia
+#needs to kldload nvidia-modeset
+
+sysrc rpcbind_enable="YES"
+
+#nfs server 
+sysrc nfs_server_enable="YES"
+sysrc nfs_server_flags="-t -u -n 8"
+#sysrc nfsv4_server_enable="YES"
+#sysrc nfsuserd_enable="YES"
+
+sysrc mountd_enable="YES"
+sysrc nfs_client_enable="YES"
+sysrc rpc_lockd_enable="YES"
+sysrc amd_enable="YES"
+sysrc nfsd_enable="YES"
+
+
