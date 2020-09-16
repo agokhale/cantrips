@@ -73,3 +73,6 @@ pkg install -y nvidia-settings
 rehash
 nvidia-xconfig
 
+#needs to kldload nvidia
+#needs to kldload nvidia-modeset
+
