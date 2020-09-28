@@ -335,7 +335,7 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s - %+ " >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
 	bindkey -c ^[OP 'history > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
 
