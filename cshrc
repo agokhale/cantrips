@@ -180,6 +180,7 @@ if ( $?prompt ) then
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
+	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
 	#pkg wb
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
@@ -297,7 +298,7 @@ if ( $?prompt ) then
 	alias lr	ls -lgsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
-	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp4 "%"'
+	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
