@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.0.2"
+set ashrcversion = "10.3.1.2"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -165,7 +165,6 @@ if ( $?prompt ) then
 	complete R 'p/1/$hosts/'
 	complete p 'p/1/`p . | space2tab | cut -f1,4 `/'
 	complete S 'p/1/$hosts/'
-	complete git 'p/1/( pull commit push status branch diff checkout )/'  'p/*/f/' 
 	complete cvs 'p/1/(  status commit checkout )/' 
 	complete ping  'p/*/$hosts/' 
 	complete dig 'p/*/$hosts/' 
@@ -205,6 +204,27 @@ if ( $?prompt ) then
 			'n/which/`__pkg-which-opts`/' \
 			'N/which/`__pkgs`/' \
 			'n/install/$pkgtgt/'
+
+
+	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
+  	set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
+                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+
+	complete git          "p/1/(${gitcmds})/" \
+                        'n/branch/`git-list all branches`/' \
+                        'n/checkout/`git-list all branches tags`/' \
+                        'n/clean/(-dXn -dXf)/' \
+                        'n/diff/`git-list all branches tags`/' \
+                        'n/fetch/`git-list repos`/' \
+                        "n/help/(${gitcmds})/" \
+                        'n/init/( --bare --template= )/' \
+                        'n/merge/`git-list all branches tags`/' \
+                        'n/push/`git-list repos`/' \
+                        'N/remote/`git-list repos`/' \
+                        'n/remote/( show add rm prune update )/' \
+                        'n/show-branch/`git-list all branches`/' \
+                        'n/stash/( apply branch clear drop list pop show )/' \
+                        'n/submodule/( add foreach init status summary sync update )/'
 			
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
