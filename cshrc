@@ -211,18 +211,18 @@ if ( $?prompt ) then
                         log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
-                        'n/branch/`git-list all branches`/' \
-                        'n/checkout/`git-list all branches tags`/' \
+                        'n/branch/`git branch -a`/' \
+                        'p/2/checkout/`git branch -a `' \
                         'n/clean/(-dXn -dXf)/' \
-                        'n/diff/`git-list all branches tags`/' \
-                        'n/fetch/`git-list repos`/' \
+                        'n/diff/`git branch -a`/' \
+                        'n/fetch/`git branch -r`/' \
                         "n/help/(${gitcmds})/" \
                         'n/init/( --bare --template= )/' \
                         'n/merge/`git-list all branches tags`/' \
-                        'n/push/`git-list repos`/' \
-                        'N/remote/`git-list repos`/' \
+                        'n/push/( origin `git branch -a`)/' \
+                        'N/remote/`git branch -r`/' \
                         'n/remote/( show add rm prune update )/' \
-                        'n/show-branch/`git-list all branches`/' \
+                        'n/show-branch/`git branch -a`/' \
                         'n/stash/( apply branch clear drop list pop show )/' \
                         'n/submodule/( add foreach init status summary sync update )/'
 			
@@ -304,8 +304,10 @@ if ( $?prompt ) then
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
 		source ${HOME}/.tmp/ssh-agent.csh >  /dev/null
-		set ssh_agent_report=`ssh-add -l `
-		#what could possibly wrong with picking up a random file?
+		#if there is actually a control socket read the keylist
+		if ( -f $SSH_AUTH_SOCK ) then
+			set ssh_agent_report=`ssh-add -l `
+		endif
 	endif
 	alias df	df -k
 	alias du	du -xk
@@ -401,6 +403,7 @@ endif #prompt
 
 #________________________________________________________________
 if ( ${gUNAME} == "Linux" ) then
+setenv REDCOL 1  #why is ps a mercurial flower?
 if ( $?prompt ) then
 	unalias ls
 	unalias vi
