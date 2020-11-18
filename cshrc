@@ -91,6 +91,7 @@ if ( $?prompt ) then
 #______________________________________________________interactive 
 	setenv gTODAY `date +"%Y%m%d"`
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
+	alias rt 	'sudo tcsh'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
 	alias prbsgen 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit \!\!:1 threads 4'
