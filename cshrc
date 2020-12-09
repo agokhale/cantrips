@@ -214,6 +214,7 @@ if ( $?prompt ) then
        ctime depth inum ls mtime nogroup nouser perm print prune \
        size xdev)/' \
        'p/*/d/'	
+	alias finddaterange 'find log/ -newermt "Nov 10, 2020 23:59:59" ! -newermt "Nov 26, 2020 23:59:59"'
 
 	#zfs
 	complete zfs 'p/1/(get set list destroy snapshot create clone promote send recv hold )/' \
