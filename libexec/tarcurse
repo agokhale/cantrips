@@ -1,46 +1,78 @@
-#!/bin/sh
+#!/bin/sh -x
+set -x
 
+####################################################
 # unpack_skel 
-unpack_skel()
-{
-skeldir="cursed_$in_archive"
-skeldir=$skeldir".d" #appen thing 
-mkdir $skeldir || exit 2
-echo now in `realpath $skeldir`
-cd $skeldir
+unpack_skel() {
+	skeldir="cursed_$in_archive"
+	skeldir=$skeldir".d" #appen thing 
+	mkdir $skeldir || exit 2
+	echo now in `realpath $skeldir`
+	cd $skeldir
 }
 
-unpack_bzip2() 
-{
-unpack_skel
-bunzip2 -c  $frealpath > payload
-tarcurse payload
+####################################################
+unpack_bzip2() {
+	unpack_skel
+	bunzip2 -c  $frealpath > payload
+	tarcurse payload
 }
-unpack_gzip() 
-{
-unpack_skel
-gunzip -fk --to-stdout  $frealpath > payload
-tarcurse payload
+unpack_gzip() {
+	unpack_skel
+	gunzip -fk --to-stdout  $frealpath > payload
+	tarcurse payload
 }
-unpack_tar()
-{
-unpack_skel
-tar -xf $frealpath
-# now recurse on things in the archive
-find . -print0  | xargs  -0 -n1 tarcurse
+unpack_tar() {
+	unpack_skel
+	tar -xf $frealpath
+	# now recurse on things in the archive
+	find . -print0  | xargs  -0 -n1 tarcurse
 }
-unpack_zip()
-{
-unpack_skel
-unzip $frealpath
-# now recurse on things in the archive
-find . -print0  | xargs -0  -n1 tarcurse
+unpack_zip() {
+	unpack_skel
+	unzip $frealpath
+	# now recurse on things in the archive
+	find . -print0  | xargs -0  -n1 tarcurse
 }
 ####################################################
+recurse() {
+	r_target=`basename $1` 	#relaitive path eg some.thing.to_crack
+	r_dstroot=$2	#absolute path where to put the cracked files
+
+	#what are you
+	if [ $r_target == "." ]; then 
+		echo nope, will not operate on . , inception  not permitted; exit -35; fi
+	ftyp=`file -b $r_target`
+	fstyp=`fstyp $r_target`
+	case "$ftyp" in
+		*"uuencoded"*) echo is $ftyp;;
+		*"gzip"*) echo is $ftyp;;
+		*"bzip2"*) echo is $ftyp ;;
+		"directory") echo is $ftyp;;
+		"POSIX tar"*) echo is $ftyp;;
+		*) echo what is a \"$ftyp\"? ; exit -55;;
+	esac
+	
+	#setup directory
+	$r_destroot
+	
+	
+	
+	
+	
+}
+recurse $1 $2
+exit  0
+
+####################################################
+main () { 
 in_archive=$1
 
+in_dir=`dirname  $in_archive`
+in_base=`basename  $in_archive`
+
 if [ $# -lt 1 ] ; then
-        echo "args: filename.wathever "
+        echo "args: filename.watevert
 	exit 1
 fi
 
@@ -51,11 +83,12 @@ echo "$in_archive .. is  a  $ftype"
 case "$ftype" in
 	*"gzip"*) echo gzp; unpack_gzip ;;
 	*"bzip"*) echo bzip2; unpack_bzip2;;
-	*"POSIX tar archive"*) echo bzip ; unpack_tar;;
-	*"Zip archive data"*) echo Zip ; unpack_zip;;
+	*"POSIX tar archive"*) echo tar ; unpack_tar;;
+	*"Zip archive data"*) echo zip ; unpack_zip;;
 	*"ASCII text"*) echo -n t ;;
 	*) echo no mactch for $ftype;;
 esac
+}
 
 
 

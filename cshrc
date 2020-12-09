@@ -271,10 +271,8 @@ if ( $?prompt ) then
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	complete screenlet 'p/1/c/' #commands for screenlet
-	alias sc screen
+	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
 	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
-	alias  sa screen 
-	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
