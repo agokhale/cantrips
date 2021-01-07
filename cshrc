@@ -274,7 +274,7 @@ if ( $?prompt ) then
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	complete screenlet 'p/1/c/' #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | cut -f2'
+	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
 	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
