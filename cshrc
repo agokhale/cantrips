@@ -209,14 +209,16 @@ if ( $?prompt ) then
 
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
+	alias _gitobjs 'git branch -ar; ls'
+	alias _gitcommitish 'git rev-list --all '
   	set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
                         log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
                         'n/branch/`git branch -a`/' \
-                        'p/2/checkout/`git branch -a `' \
+                        'n/checkout/`_gitobjs`/' \
                         'n/clean/(-dXn -dXf)/' \
-                        'n/diff/`git branch -a`/' \
+                        'n/diff/`_gitobjs`/' \
                         'n/fetch/`git branch -r`/' \
                         "n/help/(${gitcmds})/" \
                         'n/init/( --bare --template= )/' \
@@ -273,7 +275,8 @@ if ( $?prompt ) then
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	complete screenlet 'p/1/c/' #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
+	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
