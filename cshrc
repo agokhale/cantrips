@@ -208,9 +208,9 @@ if ( $?prompt ) then
 
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
-	alias _gitobjs 'git branch -ar; ls'
+	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
-  	set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
+  set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
                         log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
@@ -249,6 +249,11 @@ if ( $?prompt ) then
 		'n/get/`zfs get all  | cut -w -f2 | sort | uniq`/' \
 		'n/set/`zfs get all  | cut -w -f2 | sort | uniq`/=' 'N/set/`zfs list | cut -w -f1`/' \
 	
+  set _npmcmds=(ci install run)
+  alias _npmruntargets 'cat package.json | jq ".scripts | keys"' 
+  complete npm  "p/1/(${_npmcmds})/" \
+      'n/run/`_npmruntargets`/'
+  
 	# groups
 	complete chgrp 'p/1/g/'
 	# users
