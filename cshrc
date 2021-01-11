@@ -170,11 +170,10 @@ if ( $?prompt ) then
 	complete ping  'p/*/$hosts/' 
 	complete dig 'p/*/$hosts/' 
 	complete ssh  'c/*@/$hosts/' 'p/1/u/@'
-	complete mosh  'c/*@/$hosts/' 'p/1/u/@'
-	complete scp          "c,*:/,F:/," \
-			'c/-o/\"(Port )\"/' \
-                        "c,*:,F:$HOME," \
-                        'c/*@/$hosts/:/'
+	# simple push scp
+	complete scp  'p/1/( -r )/'  \
+			'p/2/`ls  `/' \
+                        'p/3/$hosts/'
 	alias __maketargets 'getmaketargets.awk *akefile'
 	complete make 'p/1/`__maketargets`/'
 	complete man 'p/1/c/'
