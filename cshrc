@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.1.2"
+set ashrcversion = "10.3.2"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -170,11 +170,10 @@ if ( $?prompt ) then
 	complete ping  'p/*/$hosts/' 
 	complete dig 'p/*/$hosts/' 
 	complete ssh  'c/*@/$hosts/' 'p/1/u/@'
-	complete mosh  'c/*@/$hosts/' 'p/1/u/@'
-	complete scp          "c,*:/,F:/," \
-			'c/-o/\"(Port )\"/' \
-                        "c,*:,F:$HOME," \
-                        'c/*@/$hosts/:/'
+	# simple push scp
+	complete scp  'p/1/( -r )/'  \
+			'p/2/`ls  `/' \
+                        'p/3/$hosts/'
 	alias __maketargets 'getmaketargets.awk *akefile'
 	complete make 'p/1/`__maketargets`/'
 	complete man 'p/1/c/'
@@ -185,6 +184,7 @@ if ( $?prompt ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
+	alias pkgsch	'set pkgtgt=`pkg search "-" | cut  -w -f1`; echo $pkgtgt' 
 	
 
 	alias __pkgs  'pkg info -q'
@@ -204,7 +204,7 @@ if ( $?prompt ) then
 			'N/info/`__pkgs`/' \
 			'n/which/`__pkg-which-opts`/' \
 			'N/which/`__pkgs`/' \
-			'n/install/$pkgtgt/'
+			'n/install/`pkgsch`/'
 
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
