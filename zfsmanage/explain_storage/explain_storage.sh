@@ -25,7 +25,7 @@ for dev in $disks; do
 	smartctl -a $dev  >> $tmpd/smart.raw
 done
 
-cat $tmpd/smart.raw | normalize_smart.nawk   | tee  $tmpdir/smart.out
+cat $tmpd/smart.raw | ./normalize_smart.nawk   | tee  $tmpdir/smart.out
 
 ls -l $tmpd
 echo $tmpd 
