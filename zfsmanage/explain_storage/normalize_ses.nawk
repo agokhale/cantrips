@@ -1,4 +1,5 @@
 #!/usr/bin/nawk -f
+#sesutil map | ./normalize_ses.awk
 BEGIN { 
 #	print ( "hellowworld" ); 
 	}
@@ -45,9 +46,10 @@ BEGIN {
 #                Device Names: da15,pass16
 #                Device Names: pass16,da15
 /Device Names/ {
+        #        Device Names: da3,pass3 
 	FS=":"
 	if ( match ( $2 ,"pass" )) {
-		split ( $2, splitout, "," ); 
+		split ( $2, splitout, "," ); #
 		if ( match( splitout[1], "da") > 0 )  {
 			# peel the ,pass16 out 
 			diskname = splitout[1]
