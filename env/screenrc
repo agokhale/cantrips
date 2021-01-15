@@ -1,0 +1,19 @@
+startup_message off
+nethack on 
+bell_message 'peeping in %n'"
+autorefresh 9
+defscrollback 15000
+blanker on
+blankerprg cmatrix
+compacthist on
+defgr on
+defflow on
+defslowpaste 5
+mousetrack off
+wrap on
+hardstatus alwayslastline
+hardstatus string '%{mk}%S %l[%= %{wk}%?%-Lw%?%{=b kR}(%{g}%n*%f %t%?(%u)%?%{=b kR})%{= kw}%?%+Lw%?%?%= %{g}]%{=w C}%m/%d %c.%s%{gk}'
+vbell no
+shell -$SHELL
+logtstamp on
+logtstamp after 1

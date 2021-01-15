@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.0.2"
+set ashrcversion = "10.3.2"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -91,6 +91,7 @@ if ( $?prompt ) then
 #______________________________________________________interactive 
 	setenv gTODAY `date +"%Y%m%d"`
 	alias gTODAY  'setenv gTODAY  `date +"%Y%m%d"`; echo ${gTODAY}'
+	alias rt 	'sudo tcsh'
 	alias gNOW  'setenv gNOW  `date +"%s"`; echo ${gNOW}'
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
 	alias prbsgen 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit \!\!:1 threads 4'
@@ -165,25 +166,25 @@ if ( $?prompt ) then
 	complete R 'p/1/$hosts/'
 	complete p 'p/1/`p . | space2tab | cut -f1,4 `/'
 	complete S 'p/1/$hosts/'
-	complete git 'p/1/( pull commit push status branch diff checkout )/'  'p/*/f/' 
 	complete cvs 'p/1/(  status commit checkout )/' 
 	complete ping  'p/*/$hosts/' 
 	complete dig 'p/*/$hosts/' 
 	complete ssh  'c/*@/$hosts/' 'p/1/u/@'
-	complete mosh  'c/*@/$hosts/' 'p/1/u/@'
-	complete scp          "c,*:/,F:/," \
-			'c/-o/\"(Port )\"/' \
-                        "c,*:,F:$HOME," \
-                        'c/*@/$hosts/:/'
+	# simple push scp
+	complete scp  'p/1/( -r )/'  \
+			'p/2/`ls  `/' \
+                        'p/3/$hosts/'
 	alias __maketargets 'getmaketargets.awk *akefile'
 	complete make 'p/1/`__maketargets`/'
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
+	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
 	#pkg wb
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
+	alias pkgsch	'set pkgtgt=`pkg search "-" | cut  -w -f1`; echo $pkgtgt' 
 	
 
 	alias __pkgs  'pkg info -q'
@@ -203,7 +204,30 @@ if ( $?prompt ) then
 			'N/info/`__pkgs`/' \
 			'n/which/`__pkg-which-opts`/' \
 			'N/which/`__pkgs`/' \
-			'n/install/$pkgtgt/'
+			'n/install/`pkgsch`/'
+
+
+	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
+	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
+	alias _gitcommitish 'git rev-list --all '
+  set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
+                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+
+	complete git          "p/1/(${gitcmds})/" \
+                        'n/branch/`git branch -a`/' \
+                        'n/checkout/`_gitobjs`/' \
+                        'n/clean/(-dXn -dXf)/' \
+                        'n/diff/`_gitobjs`/' \
+                        'n/fetch/`git branch -r`/' \
+                        "n/help/(${gitcmds})/" \
+                        'n/init/( --bare --template= )/' \
+                        'n/merge/`git-list all branches tags`/' \
+                        'n/push/( origin `git branch -a`)/' \
+                        'N/remote/`git branch -r`/' \
+                        'n/remote/( show add rm prune update )/' \
+                        'n/show-branch/`git branch -a`/' \
+                        'n/stash/( apply branch clear drop list pop show )/' \
+                        'n/submodule/( add foreach init status summary sync update )/'
 			
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
@@ -213,6 +237,7 @@ if ( $?prompt ) then
        ctime depth inum ls mtime nogroup nouser perm print prune \
        size xdev)/' \
        'p/*/d/'	
+	alias finddaterange 'find log/ -newermt "Nov 10, 2020 23:59:59" ! -newermt "Nov 26, 2020 23:59:59"'
 
 	#zfs
 	complete zfs 'p/1/(get set list destroy snapshot create clone promote send recv hold )/' \
@@ -224,6 +249,11 @@ if ( $?prompt ) then
 		'n/get/`zfs get all  | cut -w -f2 | sort | uniq`/' \
 		'n/set/`zfs get all  | cut -w -f2 | sort | uniq`/=' 'N/set/`zfs list | cut -w -f1`/' \
 	
+  set _npmcmds=(ci install run)
+  alias _npmruntargets 'cat package.json | jq ".scripts | keys"' 
+  complete npm  "p/1/(${_npmcmds})/" \
+      'n/run/`_npmruntargets`/'
+  
 	# groups
 	complete chgrp 'p/1/g/'
 	# users
@@ -248,10 +278,9 @@ if ( $?prompt ) then
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
 	complete screenlet 'p/1/c/' #commands for screenlet
-	alias sc screen
-	complete sc 'p/1/(-dr) S /' 'p/2/`screen -ls | grep tached | space2tab | cut -f2 | cut -f2 -d.`/' 
-	alias  sa screen 
-	complete sa 'p/1/(-dr)/' 'p/2/`screen -ls | grep tached | cut -w -f2 | cut -f2 -d. `/'
+	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
+	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
@@ -283,8 +312,10 @@ if ( $?prompt ) then
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
 		source ${HOME}/.tmp/ssh-agent.csh >  /dev/null
-		set ssh_agent_report=`ssh-add -l `
-		#what could possibly wrong with picking up a random file?
+		#if there is actually a control socket read the keylist
+		if ( -f $SSH_AUTH_SOCK ) then
+			set ssh_agent_report=`ssh-add -l `
+		endif
 	endif
 	alias df	df -k
 	alias du	du -xk
@@ -297,7 +328,7 @@ if ( $?prompt ) then
 	alias lr	ls -lgsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
-	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp4 "%"'
+	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
@@ -335,7 +366,7 @@ if ( $?prompt ) then
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
-	bindkey -c ^[OQ 'date +"%s" >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
+	bindkey -c ^[OQ 'date +"%s - %+ " >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
 	bindkey -c ^[OP 'history > $HOME/.tmp/cledittmp; vi $HOME/.tmp/cledittmp'
 
@@ -380,6 +411,7 @@ endif #prompt
 
 #________________________________________________________________
 if ( ${gUNAME} == "Linux" ) then
+setenv REDCOL 1  #why is ps a mercurial flower?
 if ( $?prompt ) then
 	unalias ls
 	unalias vi
