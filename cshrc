@@ -162,6 +162,7 @@ if ( $?prompt ) then
 	complete sudo  'p/1/( tcsh bash port fink )/'
 	complete r 'p/1/$hosts/'
 	complete s 'p/1/$hosts/'
+	complete sftp 'p/1/$hosts/'
 	complete S 'p/1/$hosts/'
 	complete R 'p/1/$hosts/'
 	complete p 'p/1/`p . | space2tab | cut -f1,4 `/'
