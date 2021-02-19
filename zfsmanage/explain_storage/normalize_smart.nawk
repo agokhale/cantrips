@@ -15,6 +15,14 @@
 	#print ("gotdec: " $1);
 	}
 
+####User Capacity:        6,001,175,126,016 bytes [6.00 TB]
+($0 ~ /^User Capacity/  ) {
+	s_st = index( $0,"[");
+	s_end = index( $0,"]");
+	lsize=  substr ( $0,s_st,s_end);
+	gsub(  / /,"",lsize) #lose spaces
+	gsub(  /[\[\]]/,"",lsize) #because i hate you
+	}  
 ($0 ~ /Product/  ) {
 	lmo = $2
 	#nope have to wait for sn model[
@@ -40,12 +48,14 @@
 
 ($0 ~ /^write/  ) {
 	ldelaywrite = $3
-	print ("dev:" ldev " mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
+	#print ("dev:" ldev " mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
 	}
+
 
 END {
 	for (sn in serials) {
-		printf ("sn:%s mo:%s pathcount:%s paths:%s\n",sn,model[sn],pathcount[sn], paths[sn] );
+		printf ("sn:%s siz:%s mo:%s pathcount:%s paths:%s temp:%s dwrite:%s dread:%s  \n",
+			sn,lsize,model[sn],pathcount[sn], paths[sn], ltemp, ldelaywrite, ldelayread );
 	}
 }
 

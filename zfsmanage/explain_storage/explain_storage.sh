@@ -34,6 +34,7 @@ wc -l $tmpd/pool.out
 sepline smart
 disks=$(ls /dev/*da* )
 for dev in $disks; do
+	echo -n " $dev "
 	echo  "$dev " >> $tmpd/smart.raw
 	smartctl -a $dev  >> $tmpd/smart.raw
 done
