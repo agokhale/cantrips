@@ -2,7 +2,6 @@
 
 
 /* substript to paint probes */
-/*
 syscall::fstatat:entry /execname == "stat"/ { self->traceme=1;}
 syscall:::entry,
 fbt:::
@@ -10,6 +9,7 @@ fbt:::
 	{
 	@probes[probefunc] = count(); 
 	}
+/*
 */
 
 fbt::biofinish:entry /  arg2==9/ 

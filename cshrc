@@ -123,7 +123,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 
-	set hunthome=${HOME}
+	set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
 	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
@@ -207,7 +207,7 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
-
+	alias gitreallybranchpush 'git checkout -b \!\!:1 && git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
@@ -318,6 +318,9 @@ if ( $?prompt ) then
 			set ssh_agent_report=`ssh-add -l `
 		endif
 	endif
+	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       login     package  plugin  port   powershell  provision  push      rdp      reload  resume  snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
+	complete vagrant 'p/1/$vag_topcommands/'
+	
 	alias df	df -k
 	alias du	du -xk
 	alias h		'history -r | more'
@@ -417,6 +420,7 @@ if ( $?prompt ) then
 	unalias ls
 	unalias vi
 	alias p		"ps -efwww | grep -v grep | grep "
+	alias aptimemo 'echo memoinstall \!\!:1; sleep 2; apt install -y \!\!:1 && echo \!\!:1 >> ~/memo_apt_list ; tail apt_list'
 	complete p 'p/1/`ps -efwww | cut -b39-120 `/'
 	complete kill 'c/-/S/' 'c/%/j/' 'p/1/`ps -ef | cut -b10-15 `/'
 	alias monstar	'tail -f /var/log/messages &;\
