@@ -105,7 +105,7 @@ if ( $?prompt ) then
 	alias p[        pushd
 	alias p]        popd
 	alias p[]       "dirs -v"
-	alias p		"ps -axwww | grep -v grep | grep "
+	alias p		"ps -axwww | grep -v grep | grep " #put the pid in the first column
 	setenv REDSIG	2
 	setenv REDCOL	1
 	alias redpids  "sed -E 's/^ +//' | sed -E 's/ +/	/g' | cut -f${REDCOL} " 
@@ -416,7 +416,6 @@ setenv REDCOL 1  #why is ps a mercurial flower?
 if ( $?prompt ) then
 	unalias ls
 	unalias vi
-	alias p		"ps -efwww | grep -v grep | grep "
 	complete p 'p/1/`ps -efwww | cut -b39-120 `/'
 	complete kill 'c/-/S/' 'c/%/j/' 'p/1/`ps -ef | cut -b10-15 `/'
 	alias monstar	'tail -f /var/log/messages &;\
