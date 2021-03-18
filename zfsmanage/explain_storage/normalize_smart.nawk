@@ -1,51 +1,103 @@
 #!/usr/bin/nawk -f
-#%./fixsmart.nawk dump.txt
-#/dev/da5 WD4001FYYG-01SL3:WMC1F1958436 C:22 w:30417 r:39936
-#/dev/da4 WD4001FYYG-01SL3:WMC1F1959175 C:23 w:19381 r:22836
-#/dev/da3 WD4001FYYG-01SL3:WMC1F1958433 C:23 w:21 r:26
-#/dev/da2 WD4001FYYG-01SL3:WMC1F1958134 C:23 w:33637 r:61495
-#/dev/da1 WD4001FYYG-01SL3:WMC1F1990828 C:22 w:30015 r:66206
-#/dev/da0 ZeusRAM:STM0001955F1 C:27 w:0 r:0
 
-
-#  
-#/dev/da9
-($0 ~ /\/dev/) {
-	ldev = $1;
-	#print ("gotdec: " $1);
+function formem ( objtype, value ) {
+	#printf ("\n memosize: sn: %s typ :%s val:%s \n", lsn, objtype, value);
+	if ( lsn == "" ) {
+		#print ("no sn, memodize", objtype, value )
+		localmemo[objtype] = value
+	} else {
+	#	#print ("final memo for:" , lsn, objtype, value);
+		finalmemo[lsn,objtype]=value
 	}
+}
+
+function commitmem () {
+	#print ("commit", lsn);
+	for (i in localmemo) {
+		#printf ("\t%s=%s\n", i, localmemo[i]); 
+		formem( i, localmemo[i]);
+	}
+	delete localmemo
+	lsn = ""
+}
+
+#xpln-start-of /dev/da8
+#these tage probvided statically by parent script
+($0 ~ /^xpln-start-of \/dev/) {
+	ldev = $2;
+	formem("dev", ldev); 
+	}
+
+#xpln-end-of /dev/da8
+($0 ~ /^xpln-end-of \/dev/) {
+	ldev="nomnom"
+	commitmem();
+}
+
+
+####User Capacity:        6,001,175,126,016 bytes [6.00 TB]
+## -> 6.00TB
+function extractbrace ( instring ) {
+	s_st = index( instring,"[");
+	s_end = index( instring,"]");
+	ilsize=  substr ( instring, s_st,s_end);
+	gsub(  / /,"",ilsize) #lose spaces
+	gsub(  /[\[\]]/,"",ilsize) #because i hate you
+	return (ilsize);
+	
+}
+####User Capacity:        6,001,175,126,016 bytes [6.00 TB]
+($0 ~ /^User Capacity/  ) {
+	lsize = extractbrace( $0 );
+	formem("size", lsize)
+	}  
+###Total NVM Capacity:                 500,107,862,016 [500 GB]
+/^Total NVM Capacity/  {
+	lsize = extractbrace( $0 );
+	formem("size", lsize)
+}
+
 
 ($0 ~ /Product/  ) {
 	lmo = $2
-	#nope have to wait for sn model[
-	#print ("model" lmo)
+	formem( "model", lmo)
 	}
 ($0 ~ /^Serial/  ) {
 	lsn = $3
+	formem("serial", lsn);
 	pathcount[lsn] ++;
 	serials[lsn]=lsn;
-	paths[lsn]= sprintf ( "%s %s", paths[lsn], ldev);
-	model[lsn]=lmo;
 
-	#print ("sn" lsn)
+	paths[lsn]= sprintf ( "%s %s", paths[lsn], ldev);
+	formem( "paths", sprintf( "%s %s", finalmemo[lsn,"paths"], ldev));
 	}
 
-($0 ~ /^Current/  ) {
-	ltemp = $4
+( /^Current|^Temprature/  ) {
+	formem( "temp", $4)
 	}
 
 ($0 ~ /^read/  ) {
-	ldelayread = $3
+	formem("delayread", $3)
 	}
 
 ($0 ~ /^write/  ) {
-	ldelaywrite = $3
-	print ("dev:" ldev " mo:" lmo " sn:" lsn " C:" ltemp " w:"  ldelaywrite " r:" ldelayread)
+	formem("delaywrite", $3)
 	}
+
 
 END {
 	for (sn in serials) {
-		printf ("sn:%s mo:%s pathcount:%s paths:%s\n",sn,model[sn],pathcount[sn], paths[sn] );
+		#printf ("sn:%s siz:%s mo:%s pathcount:%s paths:%s temp:%s dwrite:%s dread:%s  \n", sn,size[sn],model[sn],pathcount[sn], paths[sn], temp[sn], delaywrite[sn], delayread[sn] );
+		printf("sn: %s\t", finalmemo[sn,"serial"]);
+		printf("size: %s\t", finalmemo[sn,"size"]);
+		printf("model: %s\t", finalmemo[sn,"model"]);
+		printf("paths:%s\t", finalmemo[sn,"paths"]);
+		if ( finalmemo[sn,"delayread"] > 0 )
+			printf("dwread:%s ", finalmemo[sn,"delayread"]);
+		if ( finalmemo[sn,"delaywrite"] > 0 )
+			printf("dwrite:%s ", finalmemo[sn,"delaywrite"]);
+		printf("temp:%s\t", finalmemo[sn,"temp"]);
+		printf("\n"); 
 	}
 }
 
