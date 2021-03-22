@@ -12,7 +12,7 @@ function formem(sesid,  elt, elt_o_type, oval) {
 	memo[sesid"%%",  elt"%%", elt_o_type"%%"] = oval;
 }
 /^ses/ { 
-#	print ( $1 " found");
+	#	print ( $1 " found");
 	gsub ( /:/,  "", $1)
 	lses = $1
 	}
@@ -30,32 +30,30 @@ END {
 		seseltname = keyfields[2]
 		otype = keyfields[3]
 		distinct_ses[sesname]=1;
-		print ( "sesname",sesname);
-		print ( "elt",seseltname);
-		print ( "typ",otype);
-		print ("val", memo[i]);
+		#print ( "sesname",sesname); print ( "elt",seseltname); print ( "typ",otype); print ("val", memo[i]);
 		distinct_elt[seseltname]=1;
 		distinct_otype[otype]=1;
 	}
-	print ("enclosuers");
+	#print ("enclosuers");
 	for (sesn in distinct_ses) {
-		print(sesn);
+		#print(sesn);
 	}
-	print ("elements");
+	#print ("elements");
 	for (elt in distinct_elt) {
-		printf ("%s ",elt);
+		#printf ("%s ",elt);
 	}
-	print ("\ntypes");
+	#print ("\ntypes");
 	for (tt in distinct_otype) {
-		print("\t",tt);
-	
+		#print("\t",tt);
 	}
 	for (sesi in distinct_ses ){
 		printf ("ses: %s\n" , sesi); 
-		for ( sloti in distinct_elt) {
-			printf ("\t slot:%s \t", sloti);
+		for ( elti in distinct_elt) {
+			printf ("\t element:%s \t", elti);
 			for ( tt in distinct_otype ) {
-				printf ("type:%s val:%s ",  tt, memo[sesi"%%", sloti"%%", tt"%%"]);
+				memokey = sesi"%%"elti"%%"tt"%%";
+				#printf( "%s: ", memokey);
+				if ( memo[memokey] ) { printf ("type:%s val:%s ",  tt, memo[memokey]);}
 			}
 			printf ("\n");	
 		}
@@ -72,8 +70,9 @@ END {
 /Element/ {
 	FS=" "
 	lelt=$2; 
-	gsub ( /,/,"", lelt); # dump the ,
-	ltype=$4 $5 $6
+	sub ( /,/, "" , lelt);
+	match ($0, "Type: ")
+	ltype= substr ( RSTART +6, 44);
 	formem( lses, lelt, "elt_type", ltype)
 	}
 
@@ -96,6 +95,7 @@ END {
 #        Element 6, Type: Device Slot
 /Device Slot/ { 
 	ldesc = $2
+	sub ( /,/, "" , ldesc);
 	formem( lses, lelt, "devslot", ldesc)
 	}
 
@@ -104,20 +104,10 @@ END {
 #                Device Names: pass16,da15
 /Device Names/ {
         #        Device Names: da3,pass3 
-	FS=":"
-	if ( match ( $2 ,"pass" )) {
-		split ( $2, splitout, "," ); #
-		if ( match( splitout[1], "da") > 0 )  {
-			# peel the ,pass16 out 
-			diskname = splitout[1]
-		} 
-		if ( match ( splitout[2], "da")) {
-			diskname = splitout[2]
-			}
- 	} else {
-		diskname = $2
-		}
-	close ( smcmd ) 
+	diskname="noNE";
+	if (match($0,"da[0-9]*")  > 1 ) {
+		diskname = substr ( $0, RSTART,RLENGTH)
+	}
 	formem( lses, lelt, "devname", diskname)
 	}
 
