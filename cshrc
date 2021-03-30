@@ -322,7 +322,7 @@ if ( $?prompt ) then
 		login     package  plugin  port   powershell  provision  push      rdp      reload  resume  \
 		snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
 	complete vagrant 'p/1/$vag_topcommands/'
-	complete salt-call 'p/1/(sate.apply)/'
+	complete salt-call 'p/1/(state.apply)/'
 	
 	alias df	df -k
 	alias du	du -xk
