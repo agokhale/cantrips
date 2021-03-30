@@ -123,7 +123,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 
-	set hunthome=${PWD}
+	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
 	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
@@ -318,8 +318,11 @@ if ( $?prompt ) then
 			set ssh_agent_report=`ssh-add -l `
 		endif
 	endif
-	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       login     package  plugin  port   powershell  provision  push      rdp      reload  resume  snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
+	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       \
+		login     package  plugin  port   powershell  provision  push      rdp      reload  resume  \
+		snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
 	complete vagrant 'p/1/$vag_topcommands/'
+	complete salt-call 'p/1/(sate.apply)/'
 	
 	alias df	df -k
 	alias du	du -xk
@@ -333,6 +336,7 @@ if ( $?prompt ) then
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
+
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
@@ -367,6 +371,8 @@ if ( $?prompt ) then
 	bindkey ^]f backward-word
 	#f7
 	bindkey ^[[18~ backward-word
+	#f6
+	bindkey ^[[17~ vi-search-back
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2

@@ -1,5 +1,6 @@
 #!/bin/sh
 if [ $# -le  1 ]; then 
+	echo 'mixtape-add <playlistfile> <dir_to_add>'
 	exit 1
 fi
 
