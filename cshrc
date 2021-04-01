@@ -211,6 +211,7 @@ if ( ${gUNAME} == "FreeBSD" ) then
 
 #endif #freebsd
 	alias gitreallybranchpush 'git checkout -b \!\!:1 && git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+	complete gitreallybranchpush 'p/1/`git branch `/'
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
