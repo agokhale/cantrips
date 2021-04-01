@@ -216,7 +216,7 @@ if ( ${gUNAME} == "FreeBSD" ) then
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
   set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
-                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+                        log ls-files mergetool mv pull push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
                         'n/branch/`git branch -a`/' \
