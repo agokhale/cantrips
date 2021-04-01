@@ -182,6 +182,8 @@ if ( $?prompt ) then
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
 	#pkg wb
+
+if ( ${gUNAME} == "FreeBSD" ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
@@ -207,7 +209,9 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
+#endif #freebsd
 	alias gitreallybranchpush 'git checkout -b \!\!:1 && git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
