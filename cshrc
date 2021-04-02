@@ -123,7 +123,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 
-	set hunthome=${PWD}
+	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
 	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
@@ -182,6 +182,8 @@ if ( $?prompt ) then
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
 	#pkg wb
+
+if ( ${gUNAME} == "FreeBSD" ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
@@ -208,11 +210,14 @@ if ( $?prompt ) then
 			'n/install/`pkgsch`/'
 
 	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+#endif #freebsd
+	complete gitreallybranchpush 'p/1/`git branch `/'
+
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
   set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
-                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+                        log ls-files mergetool mv pull push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
                         'n/branch/`git branch -a`/' \
@@ -318,8 +323,11 @@ if ( $?prompt ) then
 			set ssh_agent_report=`ssh-add -l `
 		endif
 	endif
-	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       login     package  plugin  port   powershell  provision  push      rdp      reload  resume  snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
+	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       \
+		login     package  plugin  port   powershell  provision  push      rdp      reload  resume  \
+		snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
 	complete vagrant 'p/1/$vag_topcommands/'
+	complete salt-call 'p/1/(state.apply)/'
 	
 	alias df	df -k
 	alias du	du -xk
@@ -333,6 +341,7 @@ if ( $?prompt ) then
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
+
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
@@ -367,6 +376,8 @@ if ( $?prompt ) then
 	bindkey ^]f backward-word
 	#f7
 	bindkey ^[[18~ backward-word
+	#f6
+	bindkey ^[[17~ vi-search-back
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2

@@ -35,7 +35,6 @@ do_pools () {
 }
 do_pools
 
-
 do_smart () {
 	sepline smart
 	disks=$( geom disk status | sed -E 's/^ +//' |  cut -w -f1; cd /dev/ ; ls nvme* )
@@ -52,7 +51,6 @@ do_smart () {
 	cat $tmpd/smart.raw | ./normalize_smart.nawk   | tee  $tmpd/smart.out
 	wc -l $tmpd/smart.out
 }
-
 do_smart
 
 ## now create a reverse map from disks, mpaths back to pools
