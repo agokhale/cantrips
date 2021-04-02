@@ -207,7 +207,7 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
-	alias gitreallybranchpush 'git checkout -b \!\!:1 && git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
