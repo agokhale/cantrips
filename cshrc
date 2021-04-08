@@ -210,7 +210,7 @@ if ( ${gUNAME} == "FreeBSD" ) then
 			'n/install/`pkgsch`/'
 
 	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
-#endif #freebsd
+endif #freebsd
 	complete gitreallybranchpush 'p/1/`git branch `/'
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
@@ -281,11 +281,12 @@ if ( ${gUNAME} == "FreeBSD" ) then
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
-	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
-	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
-	complete screenlet 'p/1/c/' #commands for screenlet
+	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
+	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
+	complete screenlet 'p/1/c/' 
+  #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+  alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
 	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
