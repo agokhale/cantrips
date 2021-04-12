@@ -181,6 +181,7 @@ if ( $?prompt ) then
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
+  complete ntpdate 'p/1/( pool.ntp.org  ) / '
 	#pkg wb
 
 if ( ${gUNAME} == "FreeBSD" ) then
