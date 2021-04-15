@@ -1,18 +1,68 @@
 #!/usr/bin/nawk -f
 #sesutil map | ./normalize_ses.awk
-BEGIN { 
-#	print ( "hellowworld" ); 
-	}
+#        Element 12, Type: Device Slot
+#                Status: OK (0x11 0x0b 0x02 0x00)
+#                Device Names: da11,pass11
+#                Extra status:
+#                - Swapped
+#                - LED=locate
 
-/ses/ { 
-#	print ( $1 " found");
+
+function formem(sesid,  elt, elt_o_type, oval) {
+	memo[sesid"%%",  elt"%%", elt_o_type"%%"] = oval;
+}
+/^ses/ { 
+	#	print ( $1 " found");
 	gsub ( /:/,  "", $1)
 	lses = $1
 	}
+/- Swapped|- LED/ {
+	formem( lses, lelt, "extrastatus", $0)
+}
 
+
+END {
+	
+	for( i in  memo) { # ses0    1       devname
+		print( i, memo[i]);
+		split(i,  keyfields, "%%")
+		sesname = keyfields[1]
+		seseltname = keyfields[2]
+		otype = keyfields[3]
+		distinct_ses[sesname]=1;
+		#print ( "sesname",sesname); print ( "elt",seseltname); print ( "typ",otype); print ("val", memo[i]);
+		distinct_elt[seseltname]=1;
+		distinct_otype[otype]=1;
+	}
+	#print ("enclosuers");
+	for (sesn in distinct_ses) {
+		#print(sesn);
+	}
+	#print ("elements");
+	for (elt in distinct_elt) {
+		#printf ("%s ",elt);
+	}
+	#print ("\ntypes");
+	for (tt in distinct_otype) {
+		#print("\t",tt);
+	}
+	for (sesi in distinct_ses ){
+		printf ("ses: %s\n" , sesi); 
+		for ( elti in distinct_elt) {
+			printf ("\t element:%s \t", elti);
+			for ( tt in distinct_otype ) {
+				memokey = sesi"%%"elti"%%"tt"%%";
+				#printf( "%s: ", memokey);
+				if ( memo[memokey] ) { printf ("type:%s val:%s ",  tt, memo[memokey]);}
+			}
+			printf ("\n");	
+		}
+	}
+}
 /Enclosure Name/ { 
 	FS=":"; 
 	lencname=$2; 
+	formem( lses, 0, "encname", lencname)
 	#print ("  encname: " lencname ); 
 	}
 
@@ -20,8 +70,10 @@ BEGIN {
 /Element/ {
 	FS=" "
 	lelt=$2; 
-	gsub ( /,/,"", lelt); # dump the ,
-	ltype=$4 $5 $6
+	sub ( /,/, "" , lelt);
+	match ($0, "Type: ")
+	ltype= substr ( RSTART +6, 44);
+	formem( lses, lelt, "elt_type", ltype)
 	}
 
 #                Status: OK (0x01 0x00 0x00 0x00
@@ -30,16 +82,21 @@ BEGIN {
 	FS=":"
 	split ( $2, splitout, " " ); 
 	lstatus=splitout[1]
+	formem( lses, lelt, "status", lstatus)
 	}
 	
 #                Description: Disk #0F
 /Description/ { 
 	FS=":"
 	ldesc = $2
+	formem( lses, lelt, "desc", ldesc)
  	}
+
 #        Element 6, Type: Device Slot
 /Device Slot/ { 
 	ldesc = $2
+	sub ( /,/, "" , ldesc);
+	formem( lses, lelt, "devslot", ldesc)
 	}
 
 	
@@ -47,24 +104,11 @@ BEGIN {
 #                Device Names: pass16,da15
 /Device Names/ {
         #        Device Names: da3,pass3 
-	FS=":"
-	if ( match ( $2 ,"pass" )) {
-		split ( $2, splitout, "," ); #
-		if ( match( splitout[1], "da") > 0 )  {
-			# peel the ,pass16 out 
-			diskname = splitout[1]
-		} 
-		if ( match ( splitout[2], "da")) {
-			diskname = splitout[2]
-			}
- 	} else {
-		diskname = $2
-		}
-	smcmd = " smartctl -a /dev/" diskname " | ./normalize_smart.nawk"
-	#print smcmd
-	smcmd | getline smartout
-	close ( smcmd ) 
-	print ("sl:" ldesc " sta:" lstatus " se:" lses " dv:" diskname " "  smartout);
+	diskname="noNE";
+	if (match($0,"da[0-9]*")  > 1 ) {
+		diskname = substr ( $0, RSTART,RLENGTH)
+	}
+	formem( lses, lelt, "devname", diskname)
 	}
 
 END  { 

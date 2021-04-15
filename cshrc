@@ -105,7 +105,7 @@ if ( $?prompt ) then
 	alias p[        pushd
 	alias p]        popd
 	alias p[]       "dirs -v"
-	alias p		"ps -axwww | grep -v grep | grep "
+	alias p		"ps -axwww | grep -v grep | grep " #put the pid in the first column
 	setenv REDSIG	2
 	setenv REDCOL	1
 	alias redpids  "sed -E 's/^ +//' | sed -E 's/ +/	/g' | cut -f${REDCOL} " 
@@ -123,7 +123,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 
-	set hunthome=${HOME}
+	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
 	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
@@ -162,6 +162,7 @@ if ( $?prompt ) then
 	complete sudo  'p/1/( tcsh bash port fink )/'
 	complete r 'p/1/$hosts/'
 	complete s 'p/1/$hosts/'
+	complete sftp 'p/1/$hosts/'
 	complete S 'p/1/$hosts/'
 	complete R 'p/1/$hosts/'
 	complete p 'p/1/`p . | space2tab | cut -f1,4 `/'
@@ -180,7 +181,10 @@ if ( $?prompt ) then
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
+  complete ntpdate 'p/1/( pool.ntp.org  ) / '
 	#pkg wb
+
+if ( ${gUNAME} == "FreeBSD" ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
@@ -206,12 +210,15 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
+	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+endif #freebsd
+	complete gitreallybranchpush 'p/1/`git branch `/'
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
   set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
-                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+                        log ls-files mergetool mv pull push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
                         'n/branch/`git branch -a`/' \
@@ -275,11 +282,12 @@ if ( $?prompt ) then
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
-	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
-	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
-	complete screenlet 'p/1/c/' #commands for screenlet
+	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
+	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
+	complete screenlet 'p/1/c/' 
+  #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+  alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
 	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
@@ -317,6 +325,12 @@ if ( $?prompt ) then
 			set ssh_agent_report=`ssh-add -l `
 		endif
 	endif
+	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       \
+		login     package  plugin  port   powershell  provision  push      rdp      reload  resume  \
+		snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
+	complete vagrant 'p/1/$vag_topcommands/'
+	complete salt-call 'p/1/(state.apply)/'
+	
 	alias df	df -k
 	alias du	du -xk
 	alias h		'history -r | more'
@@ -329,6 +343,7 @@ if ( $?prompt ) then
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
+
 	set nobeep
 	set correct = cmd
 	set nostat="/afs /.a /proc /.amd /.automount /net"
@@ -363,6 +378,8 @@ if ( $?prompt ) then
 	bindkey ^]f backward-word
 	#f7
 	bindkey ^[[18~ backward-word
+	#f6
+	bindkey ^[[17~ vi-search-back
     #mac opt <-
 	bindkey ^[b backward-word
 	#f2
@@ -416,6 +433,7 @@ if ( $?prompt ) then
 	unalias ls
 	unalias vi
 	alias p		"ps -efwww | grep -v grep | grep "
+	alias aptimemo 'echo memoinstall \!\!:1; sleep 2; apt install -y \!\!:1 && echo \!\!:1 >> ~/memo_apt_list ; tail apt_list'
 	complete p 'p/1/`ps -efwww | cut -b39-120 `/'
 	complete kill 'c/-/S/' 'c/%/j/' 'p/1/`ps -ef | cut -b10-15 `/'
 	alias monstar	'tail -f /var/log/messages &;\
