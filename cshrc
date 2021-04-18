@@ -122,6 +122,7 @@ if ( $?prompt ) then
 	alias vll 'vi ~/.cshrc.local'
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
+	alias visshconf 'vi +$ ${HOME}/.ssh/config'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
