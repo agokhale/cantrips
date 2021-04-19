@@ -3,7 +3,7 @@
 #  ( because scp can't for some reason )
 
 
-pushscript=`mktemp -t sftppushscript`
+pushscript=`mktemp -t sftppushscript.XXXX`
 
 usage() {
 	echo 'usage: sftppush.sh <id_file> <user>  <host> <src_file> <dst_dir>'
