@@ -29,5 +29,5 @@ for b in $BLOCKSIZES; do
                 jq '.jobs[0].read.iops' ./${NAME}/read_${b}_${j}_*.json > ./${NAME}/read_iops_summary_${b}_${j}.txt
                 jq '.jobs[0].write.bw' ./${NAME}/write_${b}_${j}_*.json > ./${NAME}/write_bw_summary_${b}_${j}.txt
                 jq '.jobs[0].write.iops' ./${NAME}/write_${b}_${j}_*.json > ./${NAME}/write_iops_summary_${b}_${j}.txt
-	done'
+	done
 done
