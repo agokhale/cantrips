@@ -4,6 +4,8 @@ NAME=${NAME:=default}
 BLOCKSIZES="4k 8k 16k 32k 128k 1m"
 LOOPS="01 02 03 04 05"
 JOBS="1 2 4 8"
+LOOPS="01 02 "
+JOBS="4 "
 SIZE=2
 RUNTIME=120
 echo "Starting run..."
@@ -27,5 +29,5 @@ for b in $BLOCKSIZES; do
                 jq '.jobs[0].read.iops' ./${NAME}/read_${b}_${j}_*.json > ./${NAME}/read_iops_summary_${b}_${j}.txt
                 jq '.jobs[0].write.bw' ./${NAME}/write_${b}_${j}_*.json > ./${NAME}/write_bw_summary_${b}_${j}.txt
                 jq '.jobs[0].write.iops' ./${NAME}/write_${b}_${j}_*.json > ./${NAME}/write_iops_summary_${b}_${j}.txt
-	done
+	done'
 done
