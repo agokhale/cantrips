@@ -1,5 +1,11 @@
 #!/bin/sh
 # too simple to be right
+#20 6 * * 0   ${HOME}/bin/snap.sh weekly barrel/tmp
+#20 5 * * *   ${HOME}/bin/snap.sh daily barrel/tmp
+#29 * * * *   ${HOME}/bin/snap.sh hourly barrel/tmp
+#* * * * *   ${HOME}/bin/mover.sh barrel/tmp toohey z/reaver/btmp reaverbtmpflo > /dev/null
+#* * * * *   ${HOME}/bin/mover.sh barrel/tmp toohey z/reaver/btmp reaverbtmpflo > /dev/null
+
 if [ "${1}" = "hourly" ] ; then  
 	datefmt=`date +'%H'`
 fi
