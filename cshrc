@@ -120,6 +120,7 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
+	alias linstallcshrc 'ln -s ${HOME}/cantrips/cshrc ${HOME}/.cshrc'
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
@@ -436,6 +437,7 @@ if ( $?prompt ) then
 	unalias vi
 	alias p		"ps -efwww | grep -v grep | grep "
 	alias aptimemo 'echo memoinstall \!\!:1; sleep 2; apt install -y \!\!:1 && echo \!\!:1 >> ~/memo_apt_list ; tail apt_list'
+	complete apt 'p/1/( update install )/'
 	complete p 'p/1/`ps -efwww | cut -b39-120 `/'
 	complete kill 'c/-/S/' 'c/%/j/' 'p/1/`ps -ef | cut -b10-15 `/'
 	alias monstar	'tail -f /var/log/messages &;\
