@@ -2,6 +2,7 @@
 NAME=${NAME:=$1}
 NAME=${NAME:=default}
 BLOCKSIZES="4k 8k 16k 32k 128k 1m"
+BLOCKSIZES="4k 8k 16k 32k "
 LOOPS="01 02 03 04 05"
 JOBS="1 2 4 8"
 LOOPS="01 02 "
