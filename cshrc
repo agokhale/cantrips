@@ -29,7 +29,7 @@ set path_components = ( bin sbin libexec games tools )
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/libexec
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
 
 #now find more path_roots; 
@@ -160,9 +160,8 @@ if ( $?prompt ) then
 		'n/stop-instances/(--instance-ids )/' \
 		'n/start-instances/(--instance-ids )/'  
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
-	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
-	complete sudo  'p/1/( tcsh bash port fink )/'
+	complete sudo  'p/1/( tcsh )/'
 	complete r 'p/1/$hosts/'
 	complete s 'p/1/$hosts/'
 	complete sftp 'p/1/$hosts/'
@@ -359,7 +358,7 @@ endif #freebsd
 	#set savedirs  ##/annoying rentrant behaviours
 	set listmax = 120
 	set history = 1000
-	set ignoreeof = 5
+	set ignoreeof = 3
 	umask 22
 	#version
 	set	dcmesg = ".cshrc> $ashrcversion ${gUNAME} "
