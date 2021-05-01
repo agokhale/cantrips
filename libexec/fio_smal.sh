@@ -4,7 +4,7 @@ NAME=${NAME:=default}
 BLOCKSIZES="16k"
 LOOPS="01 "
 JOBS="2"
-LOOPS="01 
+LOOPS="01 "
 SIZE=2
 RUNTIME=120
 echo "Starting run..."
