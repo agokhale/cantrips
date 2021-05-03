@@ -1,3 +1,5 @@
+#Include ~/cantrips/env/sshconfig
+
 IgnoreUnknown 	yes
 ConnectionAttempts 240
 AddKeysToAgent 	yes
