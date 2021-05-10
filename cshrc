@@ -212,8 +212,8 @@ if ( ${gUNAME} == "FreeBSD" ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
-	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
 endif #freebsd
+	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
 	complete gitreallybranchpush 'p/1/`git branch `/'
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
