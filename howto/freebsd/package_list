@@ -55,7 +55,8 @@ openocd
 openvpn
 pcb
 procmail
-py37-virtualenv
+py38-virtualenv
+py38-salt
 radare2
 rrdtool
 rsync
