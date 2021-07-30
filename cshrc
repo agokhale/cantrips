@@ -341,8 +341,8 @@ endif #freebsd
 	alias hide 	'mkdir -p .hidden; mv \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias checkpoint 	'mkdir -p .hidden; cp \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias lf	ls -FA
-	alias ll	ls -lgsArtF
-	alias lr	ls -lgsAFR
+	alias ll	ls -lsArtF
+	alias lr	ls -lsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
