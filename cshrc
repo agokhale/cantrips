@@ -124,6 +124,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
+	alias citemp 'cp -v \!\!:1  `gTODAY`@\!\!:1'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
@@ -191,6 +192,9 @@ if ( ${gUNAME} == "FreeBSD" ) then
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
 	alias pkgsch	'set pkgtgt=`pkg search "-" | cut  -w -f1`; echo $pkgtgt' 
+	
+	#add a package to remember
+	alias pkgmemoize ' echo "\!\!:1" | tee -a ~/cantrips/howto/freebsd/package_list '
 	
 
 	alias __pkgs  'pkg info -q'
