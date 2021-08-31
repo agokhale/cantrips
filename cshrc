@@ -116,7 +116,7 @@ if ( $?prompt ) then
 	alias r 's -x -l root'
 	alias R 's -x  -Y -l root'
 	alias s 'ssh -Y '
-	alias S 's '
+	alias S 'ssh ' # no x11
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
@@ -287,6 +287,7 @@ endif #freebsd
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
+	alias exportcantrips 'git archive --format=tar --prefix=cantrips/ HEAD > /tmp/cantrips.tar'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
