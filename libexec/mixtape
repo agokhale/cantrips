@@ -22,7 +22,12 @@ elif [ $# -eq 2 ]; then
 		tr '\n' '\0' |  \
 		xargs  -t -0 tar -cf $outfile
 else
-	echo "usage: mixtape-add.sh	 <indexfile> DirToAdd/thing      - adds a dir to the mixtape plan "
-	echo "usage: mixtape.sh	 <indexfile>  	- get sizing for the mixtap "
-	echo "usage: mixtape.sh	 <indexfile> <outfile| - >  generate tarball or tar stream "
+	cat << BAZ
+usage: mixtape-add.sh	 <indexfile> DirToAdd/thing      - adds a dir to the mixtape plan "
+usage: mixtape.sh	 <indexfile>  	- get sizing for the mixtap "
+usage: mixtape.sh	 <indexfile> <outfile| - >  generate tarball or tar stream "
+
+
+	& mixtape playlist.60g - | ( cd /mnt/msd/ ; tar -xvf- )            
+BAZ
 fi

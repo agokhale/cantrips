@@ -1,11 +1,10 @@
 #!/bin/sh
 NAME=${NAME:=$1}
 NAME=${NAME:=default}
-BLOCKSIZES="4k 8k 16k 32k 128k 1m"
-LOOPS="01 02 03 04 05"
-JOBS="1 2 4 8"
-LOOPS="01 02 "
-JOBS="4 "
+BLOCKSIZES="16k"
+LOOPS="01 "
+JOBS="2"
+LOOPS="01 "
 SIZE=2
 RUNTIME=120
 echo "Starting run..."

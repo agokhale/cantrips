@@ -6,5 +6,5 @@ tcsh
 nfs-common
 autofs
 net-tools
-jq
 sysstat
+awscli

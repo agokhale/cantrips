@@ -1,0 +1,14 @@
+#Include ~/cantrips/env/sshconfig
+
+IgnoreUnknown 	yes
+ConnectionAttempts 240
+AddKeysToAgent 	yes
+IPQoS 	lowdelay
+Compression 	yes
+ForwardAgent 	yes
+HashKnownHosts 	no
+NoHostAuthenticationForLocalhost 	yes
+TCPKeepAlive 	no
+UpdateHostKeys 	ask
+VerifyHostKeyDNS 	no
+VisualHostKey 	yes

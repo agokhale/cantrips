@@ -29,7 +29,7 @@ set path_components = ( bin sbin libexec games tools )
 
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
-setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/libexec
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
 
 #now find more path_roots; 
@@ -116,12 +116,15 @@ if ( $?prompt ) then
 	alias r 's -x -l root'
 	alias R 's -x  -Y -l root'
 	alias s 'ssh -Y '
-	alias S 's '
+	alias S 'ssh ' # no x11
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
+	alias linstallcshrc 'ln -s ${HOME}/cantrips/cshrc ${HOME}/.cshrc'
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
+	alias visshconf 'vi +$ ${HOME}/.ssh/config'
+	alias citemp 'cp -v \!\!:1  `gTODAY`@\!\!:1'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
@@ -148,6 +151,7 @@ if ( $?prompt ) then
 	endif
     # populate multiple idents for ssh -i 
 	
+	complete cut 'p/1/(-w)/' 'p/2/(-f)/'
 	complete gstat 'p/1/(-f)/' 'p/2/(da)/' 'p/3/(-p)/'
 	complete viamillipede 'p/1/(tx rx verbose threads prbs)/'  'n/tx/$hosts/' 'N/tx/( 1234 )/' \
                'n/rx/( 1234 )/' 'n/verbose/( 4 )/' 'n/prbs/( 0xdead )/' 'N/verbose/( threads )/' \
@@ -157,9 +161,8 @@ if ( $?prompt ) then
 		'n/stop-instances/(--instance-ids )/' \
 		'n/start-instances/(--instance-ids )/'  
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
-	complete su  'p/1/-u/'
 	complete fg           'c/%/j/' #per wb
-	complete sudo  'p/1/( tcsh bash port fink )/'
+	complete sudo  'p/1/( tcsh )/'
 	complete r 'p/1/$hosts/'
 	complete s 'p/1/$hosts/'
 	complete sftp 'p/1/$hosts/'
@@ -181,11 +184,17 @@ if ( $?prompt ) then
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
+  complete ntpdate 'p/1/( pool.ntp.org  ) / '
 	#pkg wb
+
+if ( ${gUNAME} == "FreeBSD" ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
 	alias pkgsch	'set pkgtgt=`pkg search "-" | cut  -w -f1`; echo $pkgtgt' 
+	
+	#add a package to remember
+	alias pkgmemoize ' echo "\!\!:1" | tee -a ~/cantrips/howto/freebsd/package_list '
 	
 
 	alias __pkgs  'pkg info -q'
@@ -207,12 +216,15 @@ if ( $?prompt ) then
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
 
-	alias gitreallybranchpush 'git checkout -b \!\!:1 && git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+endif #freebsd
+	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
+	complete gitreallybranchpush 'p/1/`git branch `/'
+
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
 	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
 	alias _gitcommitish 'git rev-list --all '
   set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
-                        log ls-files mergetool mv push rebase remote rm show show-branch status submodule tag)
+                        log ls-files mergetool mv pull push rebase remote rm show show-branch status submodule tag)
 
 	complete git          "p/1/(${gitcmds})/" \
                         'n/branch/`git branch -a`/' \
@@ -275,12 +287,15 @@ if ( $?prompt ) then
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
+	alias exportcantrips 'git archive --format=tar --prefix=cantrips/ HEAD > /tmp/cantrips.tar'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
-	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/' 
-	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1' 
-	complete screenlet 'p/1/c/' #commands for screenlet
+	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
+	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
+	complete xmodmap 'p/1/(.xmodmap)/'
+	complete screenlet 'p/1/c/' 
+  #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+  alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
 	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
@@ -309,6 +324,7 @@ if ( $?prompt ) then
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
 	complete keydsa  'p/1/$hosts/'
+	complete ssh-add  'p%1%`find ${HOME}/.ssh -perm 600 | grep -v ".pub" ; echo *; echo "-l"`%'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
@@ -331,8 +347,8 @@ if ( $?prompt ) then
 	alias hide 	'mkdir -p .hidden; mv \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias checkpoint 	'mkdir -p .hidden; cp \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias lf	ls -FA
-	alias ll	ls -lgsArtF
-	alias lr	ls -lgsAFR
+	alias ll	ls -lsArtF
+	alias lr	ls -lsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
@@ -349,7 +365,7 @@ if ( $?prompt ) then
 	#set savedirs  ##/annoying rentrant behaviours
 	set listmax = 120
 	set history = 1000
-	set ignoreeof = 5
+	set ignoreeof = 3
 	umask 22
 	#version
 	set	dcmesg = ".cshrc> $ashrcversion ${gUNAME} "
@@ -427,6 +443,7 @@ if ( $?prompt ) then
 	unalias vi
 	alias p		"ps -efwww | grep -v grep | grep "
 	alias aptimemo 'echo memoinstall \!\!:1; sleep 2; apt install -y \!\!:1 && echo \!\!:1 >> ~/memo_apt_list ; tail apt_list'
+	complete apt 'p/1/( update install )/'
 	complete p 'p/1/`ps -efwww | cut -b39-120 `/'
 	complete kill 'c/-/S/' 'c/%/j/' 'p/1/`ps -ef | cut -b10-15 `/'
 	alias monstar	'tail -f /var/log/messages &;\

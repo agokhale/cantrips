@@ -3,6 +3,6 @@ while  true; do
 clear
 ( echo  $*)
 (   $* )
-sleep  ${WORRY_SLEEP:=1}
+sleep  ${WORRY_SLEEP:=3}
 done; 
 
