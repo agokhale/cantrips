@@ -116,6 +116,9 @@ if ( $?prompt ) then
 	alias r 's -x -l root'
 	alias R 's -x  -Y -l root'
 	alias s 'ssh -Y '
+	if  ( $?SSH_CLIENT && $?DISPLAY ) then
+		echo "${DISPLAY} X client: ${SSH_CLIENT}"
+	endif # tattle ssh forwarding 
 	alias S 'ssh ' # no x11
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
@@ -124,7 +127,7 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
-	alias citemp 'cp -v \!\!:1  `gTODAY`@\!\!:1'
+	alias citemp 'cp -aiv \!\!:1  `gTODAY`@\!\!:1'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
