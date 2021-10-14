@@ -299,8 +299,8 @@ endif #freebsd
 	complete screenlet 'p/1/c/' 
   #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-  alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
-	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
+	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+	complete sc 'p/1/`_screenoptavail.sh`/' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
