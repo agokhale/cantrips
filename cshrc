@@ -407,7 +407,25 @@ endif #freebsd
 	
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
 		setenv Xgreenscreenopts '-bg black -fg green'
-		alias xterm xterm  ${Xgreenscreenopts}
+		#bc blinky curs bcf bxfm
+		setenv Xbaseopts ' -u8 -bg black '
+		#bc blinky curs bcf bxfm/duty cycle
+		setenv Xbaseopts  "${Xbaseopts} -bc -bcn 250 -bcf 150 "
+		#get an extra pixel
+		setenv Xbaseopts  "${Xbaseopts} -b 1 "
+		#color curs
+		setenv Xbaseopts  "${Xbaseopts} -cr pink "
+		#color selbg
+		setenv Xbaseopts  "${Xbaseopts} -hc Grey40  -selfg white  "
+		#j umpscroll, async s croll
+		setenv Xbaseopts  "${Xbaseopts} -j -s "
+		# ptry color
+		setenv Xbaseopts  "${Xbaseopts}  -ms white "
+		#don't autoscroll, unless i type big scrollback
+		setenv Xbaseopts  "${Xbaseopts} -si -sk -sl 10000 "
+		setenv Xbaseopts  "${Xbaseopts} -title cantrips:${USER}@${HOST} "
+
+		alias xterm xterm   ${Xbaseopts} ${Xgreenscreenopts}
 		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
 		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
 		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"
