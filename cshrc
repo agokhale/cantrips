@@ -98,7 +98,7 @@ if ( $?prompt ) then
 	alias prbsvrfy ' vimillipede tx localhost 12346 threads 4 & viamillipede verbose 5 rx 12346 prbs 0xd00f > /dev/null  '
 
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
-	alias usage  "du -sxk * | sort -rn > usage; less usage"
+	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | more " # extra .[stuff] and * get dotfiles
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
 	alias ess	'\!-1 | less'
