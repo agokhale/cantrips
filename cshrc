@@ -271,6 +271,8 @@ endif #freebsd
   alias _npmruntargets 'cat package.json | jq ".scripts | keys"' 
   complete npm  "p/1/(${_npmcmds})/" \
       'n/run/`_npmruntargets`/'
+  #postgres
+  complete psql 'p/1/`psql -c "select datname from pg_database" template1`/'
   
 	# groups
 	complete chgrp 'p/1/g/'
