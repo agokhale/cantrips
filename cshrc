@@ -164,6 +164,7 @@ if ( $?prompt ) then
 		'n/--instance-ids/`awsinstanceids.sh`/' \
 		'n/stop-instances/(--instance-ids )/' \
 		'n/start-instances/(--instance-ids )/'  
+	complete bulkreplace.awk 'p/1/(<)/' 'p/2/(repl.instr)/' 'p/3/(>)/'  'p/4/(replacer.sh)/'
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete fg           'c/%/j/' #per wb
 	complete sudo  'p/1/( tcsh )/'
@@ -245,7 +246,8 @@ endif #freebsd
                         'n/remote/( show add rm prune update )/' \
                         'n/show-branch/`git branch -a`/' \
                         'n/stash/( apply branch clear drop list pop show )/' \
-                        'n/submodule/( add foreach init status summary sync update )/'
+                        'n/submodule/( add foreach init status summary sync update )/' \
+                        'n/add/`_gitstatusuntracked.sh `/'
 			
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
