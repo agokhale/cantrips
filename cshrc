@@ -247,7 +247,8 @@ endif #freebsd
                         'n/show-branch/`git branch -a`/' \
                         'n/stash/( apply branch clear drop list pop show )/' \
                         'n/submodule/( add foreach init status summary sync update )/' \
-                        'n/add/`_gitstatusuntracked.sh `/'
+                        'n/add/`_gitstatusuntracked.sh `/' \
+                        'n/commit/`_gitcommitable.sh `/'
 			
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
