@@ -1,0 +1,12 @@
+sysrc rpcbind_enable="YES"
+sysrc rpc_lockd_enable="YES"
+sysrc nfsv4_server_enable="YES"
+sysrc nfsuserd_enable="YES"
+sysrc nfs_client_enable="YES"
+sysrc amd_enable="YES"
+sysrc nfs_server_enable="YES"
+sysrc nfsd_enable="YES"
+sysrc mountd_enable="YES"
+
+sysrc nfs_server_flags="-t -u -n 8"
+

@@ -12,7 +12,7 @@ Shared with no implied warranty or suitability for purpose; this will probably l
 #
 # reference: https://www.slideshare.net/MatthewAhrens/openzfs-send-and-receive
 
-zfs  restartable delta sigma replication 
+mover.sh: zfs  restartable delta sigma replication 
 
 Each replication relationship is described by a four tulple which are the required argements that define a replication flow
 	1) lfs: local file system source , must be a zfs dataset  eg: tank/usr/home
@@ -20,11 +20,11 @@ Each replication relationship is described by a four tulple which are the requir
 	3) rfs: remote file system  target must be an existant dataset.  eg: dozer/repltarget/tank_usr_home
 	4) flowtag: a string that describes the flow  eg: ash-home-lab_to_tardis_transatlantic_flow
 
-
 Initally the mover will transmit a bulk snapshot to prime later instances of incremntal sends.
 Snapshots are created and destroyed autmatically and retained only slightly longer than needed. 
 The mover is restartable; zfs resume tokens are queried for restarts; no extra configuration is required. 
-Each flow is rentrant safe.  Feel free to schedule it in a tight loop or  from cron.  
+Each flow is rentrant safe.  Feel free to schedule it in a tight loop or  from cron, this scrtipt is 
+idempotent.    
 
 Not BUGS exactly:
 Recursion is not suported. 
@@ -38,6 +38,9 @@ FIXME:
 Needs more argument checks; always more. Invarients. Paranioa. 
 Push is not always nice; Needs a pull mode to run in a 'bunker' where network access is asymmetric due to nat. 
 Bulk transport mode; get ssh and perpaps userland out of the way. Perform 3rd party orchestration remotely away from the push host. 
+
+ENVIRONMENT VARS:
+	MOVER_VERBOSE: set 1 to be chatty about internals
 HOOOEY
 
 }
@@ -45,7 +48,6 @@ if [ $# -ne 4 ]; then
 	usage 
 	exit  0
 fi
-
 
 #local dataset to send
 lfs=${1}
@@ -59,7 +61,9 @@ mytag=${4}
 thedate=`date +"%s"`
 
 send_verbose_arg="    "
-send_verbose_arg=" -v "
+if [ "${#MOVER_VERBOSE}" -gt 0 ]; then
+	send_verbose_arg=" -v "
+fi
 
 # I advocate any rsh compatible pipe transpport,  ssh is ok I guess; netcat transport orchestration would be better 
 rsh=" ssh  "  
@@ -69,81 +73,138 @@ rsh=" $rsh -o ConnectionAttempts=5 "
 #rsh=" $rsh -o ForwardX11=no -o LogLevel=INFO "  
 #rsh=" $rsh -v  "  
 
-echo "the time is now: ${thedate}. we are sending $lfs.$mytag to $rhost:$rfs "
-
+echo "the time is now: ${thedate}. we are sending $lfs@${mytag}.EPOCH to $rhost:$rfs "
 
 lockfile_cleanup() {
-	rm $mover_lockfile $remote_flow_snapnumbers_file $local_flow_snapnumbers_file || echo "can't kill lockfile"
+	vecho "cleaning up tmpfiles"
+	vcat  $mover_lockfile 
+	vecho  remote snaps
+	vcat $remote_flow_snapnumbers_file 
+	vecho local snaps
+	vcat $local_flow_snapnumbers_file
+	#XXXXrm $mover_lockfile $remote_flow_snapnumbers_file $local_flow_snapnumbers_file || echo "can't kill lockfile"
 }
-
 catch_trap() {
-	echo "caught trap pid $$  $* for $mytag -  cleaning up locks and dying"
+	eerr=$?
+	ecmd=$!
+	echo "caught trap $eerr pid $$ $* cmd $ecmd $mytag -  cleaning up locks and dying"
 	lockfile_cleanup
-	exit -99
+	exit 99
 }
 child_trap (){
-	if [ $? -ne 0 ]; then 
+	eerr=$?
+	ecmd=$!
+	if [ $eerr -ne 0 ]; then 
 		# trap context elides some of the normal shell context
-		echo "got abnormal exit code $? from $! $*"
+		echo "got abnormal exit code $eerr from $ecmd $*"
 		catch_trap
 	else
-		echo -n "."
+		#generate a blinking . as childred exit
+		echo -n  "."
+		printf '\b'
 	fi 
 }
+set_traps() {
+	trap catch_trap TERM INT KILL BUS FPE 2 CHLD
+	trap child_trap CHLD
+	}
+unset_traps() {
+	trap - 
+	trap - TERM INT KILL BUS FPE 2 CHLD
+	trap - CHLD
+	}
 
+vecho() {
+	#if [ "${#MOVER_VERBOSE}" -gt 0 ]; then
+	#	echo $*
+	#fi
+}
+vcat() {
+	if [ "${#MOVER_VERBOSE}" -gt 0 ]; then
+		cat $*
+	fi
+}
+vtail () {
+	if [ "${#MOVER_VERBOSE}" -gt 0 ]; then
+		tail $*
+	fi
+}
+vjoin () {
+	if [ "${#MOVER_VERBOSE}" -gt 0 ]; then
+		join $*
+	fi
+}
+
+vecho  being verbose
 mover_lockfile=`mktemp /tmp/.mover-$mytag.lockXXX` ||  exit -4
 remote_flow_snapnumbers_file=`mktemp /tmp/.mover$mytag-rfs.XXX` || exit -5
 local_flow_snapnumbers_file=`mktemp /tmp/.mover$mytag-lfs.XXX` || exit -6
-
-echo tracking remote flow in $remote_flow_snapnumbers_file, local flow  in $local_flow_snapnumbers_file
-
-trap catch_trap TERM INT KILL BUS FPE 2 CHLD
-trap child_trap CHLD
+#echo tracking remote flow in $remote_flow_snapnumbers_file, local flow  in $local_flow_snapnumbers_file
 
 snapshot_now () {
 	#XX parameterise and armour
 	##xxx we might not shoot a snap untill unless there are no snaps to send or 
 	# resumable replication can proceed
+	unset_traps
 	nowsnapname="${lfs}@$mytag.${thedate}"
-	zfs snapshot $nowsnapname || exit -10
-	#update the local snapshot flow catalog
+	snap_exists=`zfs list -H -o name $nowsnapname 2> /dev/null`
+	set_traps
+	if [ -z $snap_exists ]; then
+		zfs snapshot $nowsnapname || exit -10
+		#update the local snapshot flow catalog
+	else
+		vecho "${nowsnapname} exists; that's ok"
+	fi	
 	get_lfs_snaps
 }
 
+get_rfs_presence () {
+	vecho "checking for existance of ${rfs}"
+	rfs_existsts=`$rsh $rhost "zfs list $rfs"`  ## this will bomb
+}
 
 get_rfs_snaps () {
 	# parameters @$rfs , $mytag
 	# side effect updates rfscount
-	echo remote snapshots in flow:
+	vecho remote snapshots in flow:
 	$rsh $rhost "zfs list -Hr  -t all -o name ${rfs}" | grep $mytag | cut -f2 -d@ >  $remote_flow_snapnumbers_file
-	cat $remote_flow_snapnumbers_file
+	vcat $remote_flow_snapnumbers_file
 	rfscount=`wc -l $remote_flow_snapnumbers_file | cut -b1-8`
+	if [ $rfscount -eq 0 ]; then 
+		vecho no remote snapshots. 
+	fi
 }
 
 get_rfs_resume_token (){
 	in_host=$1
 	in_remote_dataset=$2
 	resume_token=`$rsh $in_host "zfs get -H -o value receive_resume_token $in_remote_dataset"`
-	echo resume token from $in_host:$in_remote_dataset = $resume_token
+	if [ ${#resume_token} -le 30 ]; then 
+		#the resume token is '-' when not populatet; filter it to ""
+		resume_token="" 
+	else 
+		echo resume token from $in_host:$in_remote_dataset = $resume_token
+	fi
 }
 
 get_lfs_snaps() {
-	echo local snapshots:
+	vecho local snapshots:
 	zfs list -Hr -t all -o name  ${lfs}  | grep $mytag |  cut -f2 -d@ > $local_flow_snapnumbers_file
-	cat $local_flow_snapnumbers_file
+	vcat $local_flow_snapnumbers_file
 }
 
+set_traps
 get_lfs_snaps
+get_rfs_presence
 get_rfs_snaps 
 
 if [ $rfscount -eq 0 ]; then
 	echo "no remote snapshots found for $rhost: $rfs full  initial bulk tx from $lfs@$nowsnapname to $rfs "
-	echo "checking for existing token $resume_token"  
 	get_rfs_resume_token  $rhost $rfs	
-	##XXXXresume_token=`$rsh $rhost "zfs get -H -o value receive_resume_token $rfs"`
+	vecho "checking for existing token $resume_token"  
 	if [ ${#resume_token} -le 30 ]; then 
 		arg_resume_token=""
-		echo "no token found we shall need a new initial transmit snapshot"
+		echo "no token found. we shall need a new initial transmit snapshot"
 		snapshot_now
 		## side effecct generates $nowsnapname
 		zfs send $send_verbose_arg ${nowsnapname}  | $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
@@ -157,44 +218,48 @@ if [ $rfscount -eq 0 ]; then
 		zfs send $send_verbose_arg $arg_resume_token    | $rsh $rhost " $zfs_recv_buffer zfs recv  -sF $rfs"
 	fi 
 else 
-	echo remote snapshots exist
+	vecho remote snapshots exist. attempting incremental
 fi #no remote snapshots 
 
-echo generating fresh catch up  snapshot to operate on
+vecho generating fresh catch up snapshot to operate on, we run the catch up  incase the inital bulk tx takes forever
 snapshot_now
 
 if  [ $rfscount -eq 0 ]; then 
 	#if we got here and have no remote snapshots 
 	#something is stale after an initial bulk action  
 	# check the remote end for news.
-	echo refresh remote snapshots after bulk action 
+	vecho refresh remote snapshots after bulk action 
 	get_rfs_snaps
 fi 
 
-echo "joining local and remote snaps"
-join $local_flow_snapnumbers_file $remote_flow_snapnumbers_file
+vecho "joining local and remote snaps"
+vjoin $local_flow_snapnumbers_file $remote_flow_snapnumbers_file
 
 echo  -n "last common snapshot in flow:"
 lastcommon=`join $local_flow_snapnumbers_file $remote_flow_snapnumbers_file | tail -1`
+if [ -z $lastcommon ]; then 
+	echo " there is no common last snapshot; local snapshots may have been deleted by someone else!"
+	echo " remove remote dataset :${rfs}  and rerun me"
+	exit 67
+fi
 echo $lastcommon
 
 
 expire_local() {
-	echo -n "expire local versions before $frs $lastcommon"
+	vecho -n "expire local versions before $rfs $lastcommon"
 	ln=`grep -n  "$lastcommon" $local_flow_snapnumbers_file | cut -d: -f1`
 	ln=$(($ln - 1))
-	echo line $ln is the event horizon
+	#echo line $ln is the event horizon
 	if [ $ln -eq 0 ]; then
-		echo not enough snapshots not found,  
-		echo should be at least two snaps in the mag always, mabe unless restartability is working
+		vecho not enough snapshots not found,   this is fine.
+		vecho should be at least two snaps in the mag always, unless restarting an inital transmit
 	fi
-	head -$ln $local_flow_snapnumbers_file
-	########################## delete  old local  versions
-	if [ $ln >  6 ]; then
-		# destroy them 4 a time; to avoid buildup
-		# XX not clear if we ever need to kill 2 because we have restartable trasmits. 
-		for i in `head -$ln $local_flow_snapnumbers_file | head -4  `; do
-			echo "  $lfs@$i"
+	#head -$ln $local_flow_snapnumbers_file
+	#delete  old local  versions
+	if [ $ln -gt  4 ]; then
+		# destroy them batch at a time; to avoid buildup
+		for i in `head -$ln $local_flow_snapnumbers_file | head -16  `; do
+			vecho " destroying  local obsolete snaps  $lfs@$i"
 			# -d is a defferable destroy to avoid stalling replication 
 			zfs destroy -d $lfs@$i
 		done
@@ -203,36 +268,35 @@ expire_local() {
 
 
 expire_remote () {
-	echo  expire needs $rfs, $lastcommon 
-	###########################delete old remote versions
-	rln=`grep -n  "$lastcommon" $remote_flow_snapnumbers_file | cut -d: -f1`
+	vecho  expire snaps older than $rfs, $lastcommon 
+	#delete old remote versions
+	rln=`grep -n "$lastcommon" $remote_flow_snapnumbers_file | cut -d: -f1`
 	rln=$(($rln - 1))
-	echo "old remote versions:"
-	if [ $rln >  6 ]; then
-		for  i in `head -$rln $remote_flow_snapnumbers_file | head -4  `; do
-			echo "   "$rfs@$i
+	vecho " destroying obsolete remote versions:"
+	if [ $rln -gt 4 ]; then
+		for  i in `head -$rln $remote_flow_snapnumbers_file | head -16  `; do
+			vecho    ${rfs}  ${i}
 			# -d is a defferable destroy to avoid stalling replication 
 			$rsh $rhost "zfs destroy  -d $rfs@$i"
 		done
 	fi
 }
 
-echo "newer local versions after $lastcommon"
+vecho "newer local versions after $lastcommon"
 len=`wc -l $local_flow_snapnumbers_file | cut -b1-8`
 ln=$(($len - $ln  -1 ))
-tail -$ln $local_flow_snapnumbers_file
+vtail -$ln $local_flow_snapnumbers_file
 
 
 latestlocal=`tail -1 $local_flow_snapnumbers_file`
-echo " tx with common baselimne:  $lfs@$lastcommon with delta $lfs@$latestlocal" 
+echo " tx delta  from  $lfs@$lastcommon ->  @$latestlocal" 
 get_rfs_resume_token $rhost $rfs
 if [ ${#resume_token} -le 30 ]; then 
-	echo incremental proceeding
+	vecho incremental proceeding
 	zfs send  $send_verbose_arg -i  $lfs@$lastcommon $lfs@$latestlocal  |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"
 else
-	echo resume proceeding
+	echo resume proceeding with token  ${resume_token}
 	arg_resume_token="-t $resume_token"
-	#incremental zfs send -i  $lfs@$lastcommon $lfs@$latestlocal |sh  $rhost "zfs recv -sF $rfs"
 	#bulk with token revivifivcaiotn zfs send $send_verbose_arg $arg_resume_token  | $rsh $rhost "zfs recv -sF $rfs"
 	#blend the strengths!
 	zfs send $send_verbose_arg $arg_resume_token |  $rsh $rhost "$zfs_recv_buffer zfs recv -sF $rfs"

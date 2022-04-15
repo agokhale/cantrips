@@ -1,3 +1,11 @@
 jq
+gitk
 mosh
+screen
+locate
+tcsh
+nfs-common
+autofs
+net-tools
+sysstat
 awscli

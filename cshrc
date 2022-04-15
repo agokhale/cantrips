@@ -98,7 +98,7 @@ if ( $?prompt ) then
 	alias prbsvrfy ' vimillipede tx localhost 12346 threads 4 & viamillipede verbose 5 rx 12346 prbs 0xd00f > /dev/null  '
 
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
-	alias usage  "du -sxk * | sort -rn > usage; less usage"
+	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | more " # extra .[stuff] and * get dotfiles
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
 	alias ess	'\!-1 | less'
@@ -116,7 +116,10 @@ if ( $?prompt ) then
 	alias r 's -x -l root'
 	alias R 's -x  -Y -l root'
 	alias s 'ssh -Y '
-	alias S 's '
+	if  ( $?SSH_CLIENT && $?DISPLAY ) then
+		echo "${DISPLAY} X client: ${SSH_CLIENT}"
+	endif # tattle ssh forwarding 
+	alias S 'ssh ' # no x11
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
@@ -124,11 +127,13 @@ if ( $?prompt ) then
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
+	alias citemp 'cp -aiv \!\!:1  `gTODAY`@\!\!:1'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
+	alias hunt 'echo $hunthome; grep -niR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
+	alias huntcase 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported"'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
 	#go edit file with symbol $1 in filename matching $2
@@ -159,6 +164,7 @@ if ( $?prompt ) then
 		'n/--instance-ids/`awsinstanceids.sh`/' \
 		'n/stop-instances/(--instance-ids )/' \
 		'n/start-instances/(--instance-ids )/'  
+	complete bulkreplace.awk 'p/1/(<)/' 'p/2/(repl.instr)/' 'p/3/(>)/'  'p/4/(replacer.sh)/'
    	complete systat 'p/1/(-ifstat -vmstat -iostat)/' 
 	complete fg           'c/%/j/' #per wb
 	complete sudo  'p/1/( tcsh )/'
@@ -183,6 +189,7 @@ if ( $?prompt ) then
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
+	complete su 'p/1/( - )/' 'p/2/u/'
   complete ntpdate 'p/1/( pool.ntp.org  ) / '
 	#pkg wb
 
@@ -191,6 +198,9 @@ if ( ${gUNAME} == "FreeBSD" ) then
                         query register repo rquery search set shell shlib stats unlock update updating upgrade version which)
 	alias pkgsch	'set pkgtgt=`pkg search \!\!:1 | cut  -w -f1`; echo $pkgtgt' 
 	alias pkgsch	'set pkgtgt=`pkg search "-" | cut  -w -f1`; echo $pkgtgt' 
+	
+	#add a package to remember
+	alias pkgmemoize ' echo "\!\!:1" | tee -a ~/cantrips/howto/freebsd/package_list '
 	
 
 	alias __pkgs  'pkg info -q'
@@ -236,7 +246,9 @@ endif #freebsd
                         'n/remote/( show add rm prune update )/' \
                         'n/show-branch/`git branch -a`/' \
                         'n/stash/( apply branch clear drop list pop show )/' \
-                        'n/submodule/( add foreach init status summary sync update )/'
+                        'n/submodule/( add foreach init status summary sync update )/' \
+                        'n/add/`_gitstatusuntracked.sh `/' \
+                        'n/commit/`_gitcommitable.sh `/'
 			
 
 	complete find 'n/-name/f/' 'n/-newer/f/' 'n/-{,n}cpio/f/' \
@@ -262,6 +274,8 @@ endif #freebsd
   alias _npmruntargets 'cat package.json | jq ".scripts | keys"' 
   complete npm  "p/1/(${_npmcmds})/" \
       'n/run/`_npmruntargets`/'
+  #postgres
+  complete psql 'p/1/`psql -c "select datname from pg_database" template1`/'
   
 	# groups
 	complete chgrp 'p/1/g/'
@@ -283,6 +297,7 @@ endif #freebsd
 	complete td  'p/1/$interfaces/' 'p/*/$tdterms/'
 	alias tdtrace 'echo "interface \!\!:1 file: \!\!:2 expression: \!\!:3-$";              sudo tcpdump -s0 -i \!\!:1 -C 24 -W 10 -w \!\!:2`date +"%s"`.\!\!:1.pcap                                \!\!:3-$'
 	alias fixcshrc 'wget "https://github.com/agokhale/cantrips/archive/master.zip"'
+	alias exportcantrips 'git archive --format=tar --prefix=cantrips/ HEAD > /tmp/cantrips.tar'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
 	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
@@ -290,8 +305,8 @@ endif #freebsd
 	complete screenlet 'p/1/c/' 
   #commands for screenlet
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
-  alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
-	complete sc 'p/1/(-dr) S /' 'p/2/`_screenparts`/' 
+	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
+	complete sc 'p/1/`_screenoptavail.sh`/' 'p/2/`_screenparts`/' 
 	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
@@ -319,6 +334,7 @@ endif #freebsd
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
 	complete keydsa  'p/1/$hosts/'
+	complete ssh-add  'p%1%`find ${HOME}/.ssh -perm 600 | grep -v ".pub" ; echo *; echo "-l"`%'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
@@ -341,8 +357,8 @@ endif #freebsd
 	alias hide 	'mkdir -p .hidden; mv \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias checkpoint 	'mkdir -p .hidden; cp \!\!:1 .hidden/\!\!:1\-`date +"%s"`'
 	alias lf	ls -FA
-	alias ll	ls -lgsArtF
-	alias lr	ls -lgsAFR
+	alias ll	ls -lsArtF
+	alias lr	ls -lsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
 	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
@@ -396,7 +412,25 @@ endif #freebsd
 	
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
 		setenv Xgreenscreenopts '-bg black -fg green'
-		alias xterm xterm  ${Xgreenscreenopts}
+		#bc blinky curs bcf bxfm
+		setenv Xbaseopts ' -u8 -bg black '
+		#bc blinky curs bcf bxfm/duty cycle
+		setenv Xbaseopts  "${Xbaseopts} -bc -bcn 250 -bcf 150 "
+		#get an extra pixel
+		setenv Xbaseopts  "${Xbaseopts} -b 1 "
+		#color curs
+		setenv Xbaseopts  "${Xbaseopts} -cr pink "
+		#color selbg
+		setenv Xbaseopts  "${Xbaseopts} -hc Grey40  -selfg white  "
+		#j umpscroll, async s croll
+		setenv Xbaseopts  "${Xbaseopts} -j -s "
+		# ptry color
+		setenv Xbaseopts  "${Xbaseopts}  -ms white "
+		#don't autoscroll, unless i type big scrollback
+		setenv Xbaseopts  "${Xbaseopts} -si -sk -sl 10000 "
+		setenv Xbaseopts  "${Xbaseopts} -title cantrips:${USER}@${HOST} "
+
+		alias xterm xterm   ${Xbaseopts} ${Xgreenscreenopts}
 		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
 		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
 		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"

@@ -6,6 +6,6 @@ syscall::execve:return
 { @e[curpsinfo->pr_psargs]=count(); }
 
 tick-4s 
-{printa(@e); trunc(@e);}
+{printf("uptime(s): %i\n",timestamp/1000000000 ); printa(@e); trunc(@e);}
 
 
