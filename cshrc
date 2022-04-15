@@ -146,7 +146,7 @@ if ( $?prompt ) then
 		set hosts=($hosts $hostskn)
 	endif
 	if ( -f ${HOME}/.ssh/config ) then
-		set hosts=($hosts `awk '/Host/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
+		set hosts=($hosts `awk '/[Hh]ost/ {print $2}    NR==264  { print (NR,"truncated");exit(0)}' ${HOME}/.ssh/config`)
 	endif
     # populate multiple idents for ssh -i 
 	
