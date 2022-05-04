@@ -31,6 +31,7 @@ set path_components = ( bin sbin libexec games tools )
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/libexec
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
+setenv PAGER less
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
