@@ -447,6 +447,8 @@ endif #freebsd
 			"$betterfont30" &'
 		alias xt40 'xterm -bg black -fg green -fn \\
 			"$betterfont40" &'
+		set lucida='-*-lucidatypewriter-*-r-normal-*-*-180-*-*-*-*-*-*'
+		alias xlucida 'xterm -bg black -fg green -fn "$lucida" &'
 		#if ( $USER == "root" ) then 
 			#printf "\b\n\033[31m\033[43m thou art root\n"
 		#else
