@@ -31,7 +31,7 @@ set path_components = ( bin sbin libexec games tools )
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/libexec
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
-setenv PAGER less
+setenv PAGER "less -e"
 
 #now find more path_roots; 
 #possibly expensive workaround for /usr/local/* in path_roots
@@ -241,7 +241,7 @@ endif #freebsd
                         'n/fetch/`git branch -r`/' \
                         "n/help/(${gitcmds})/" \
                         'n/init/( --bare --template= )/' \
-                        'n/merge/`git-list all branches tags`/' \
+                        'n/merge/`_gitobjs`/' \
                         'n/push/( origin `git branch -a`)/' \
                         'N/remote/`git branch -r`/' \
                         'n/remote/( show add rm prune update )/' \
