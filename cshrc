@@ -133,7 +133,7 @@ if ( $?prompt ) then
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -niR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
+	alias hunt 'echo $hunthome; grep -niR \!\!:1 $hunthome |& | cut -b 1-256 | grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
 	alias huntcase 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
