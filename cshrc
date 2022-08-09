@@ -99,7 +99,7 @@ if ( $?prompt ) then
 	alias prbsvrfy ' vimillipede tx localhost 12346 threads 4 & viamillipede verbose 5 rx 12346 prbs 0xd00f > /dev/null  '
 
 	alias chomp "sed -E 's/^ +//'"  #strip leading space
-	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | more " # extra .[stuff] and * get dotfiles
+	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | tee usage | more " # extra .[stuff] and * get dotfiles
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
 	alias ess	'\!-1 | less'
@@ -133,7 +133,7 @@ if ( $?prompt ) then
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
 	#find a zymbol
-	alias hunt 'echo $hunthome; grep -niR \!\!:1 $hunthome |& | cut -b 1-256 | grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
+	alias hunt 'echo $hunthome; grep -niR \!\!:1 $hunthome |&  cut -b 1-256 | grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
 	alias huntcase 'echo $hunthome; grep -nR \!\!:1 $hunthome |& grep -v "No such file or" | grep -v ": Permission denied" | grep -v "Operation not supported" | ${PAGER}'
 	#transform  file:linenum: into vi $1 +$2
 	alias jump '`hunt \!\!:1 \!\!:2 | space2tab | cut -f1 | uniq |  viize`'
