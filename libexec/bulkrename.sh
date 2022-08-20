@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh -xe
 
 srcpat=$1
 destpat=$2
@@ -11,8 +11,11 @@ fi
 
 echo renaming $1 to $2
 srcnames=` ls  |  grep "$srcpat"`
+echo srcs:
+echo ${srcnames}
+echo ""
 for i  in $srcnames; do
-	echo  \#mv $i `echo $i | sed -e "s/$srcpat/$destpat/"`
+	echo  \#mv $i `echo ${i} | sed -e "s/${srcpat}/${destpat}/"`
 done
 echo ok?
 read ok
