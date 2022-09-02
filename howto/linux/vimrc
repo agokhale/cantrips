@@ -1,0 +1,9 @@
+colorscheme industry
+set ts=2
+set shiftwidth=2
+set expandtab
+" set syntax=off
+set backupdir=/tmp/
+set directory=/tmp/
+set undodir=/tmp/
+au BufNewFile,BufRead *.vue,*.Vue   setf javascript
