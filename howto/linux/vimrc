@@ -1,9 +1,33 @@
-colorscheme industry
+colorscheme delek
+
+" thnx benedict
+set cursorline
+set cursorcolumn  
+set number
+set relativenumber
+
+"2048 lines max register size, 
+" '100 files to memernb
+" s1025 register can be a magabyte in size
+" h  hlserach highlight search
+set viminfo='100,<2049,s1025,h
+
+" node spesicifc
 set ts=2
 set shiftwidth=2
 set expandtab
-" set syntax=off
-set backupdir=/tmp/
-set directory=/tmp/
-set undodir=/tmp/
+" hateful
+" set syntax=off 
+
+"keep junk out of .
+set backupdir=~/tmp
+set directory=~/tmp
+set undodir=~/tmp
+
+" vue.js specific is  javascritpt'ish
 au BufNewFile,BufRead *.vue,*.Vue   setf javascript
+
+
+"expand
+iab  eLg eligibility
+
