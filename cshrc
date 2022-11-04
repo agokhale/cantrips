@@ -1,4 +1,4 @@
-set ashrcversion = "10.3.2"
+set ashrcversion = "10.3.66"
 # "$Id: cshrc,v 1.64 2017/07/21 19:20:48 xpi Exp $"
 # 1999 - 2017 Ash
 # BSD license
@@ -336,6 +336,8 @@ endif #freebsd
 	alias keydsa 		'cat ~/.ssh/id_*sa.pub  | ssh \!\!:1 "mkdir -p .ssh; chmod 700 .ssh; cat - >> .ssh/authorized_keys ; chmod 600 .ssh/authorized_keys"'
 	complete keydsa  'p/1/$hosts/'
 	complete ssh-add  'p%1%`find ${HOME}/.ssh -perm 600 | grep -v ".pub" ; echo *; echo "-l"`%'
+	complete unzip 'p/1/`echo *.[zZ][iI][pP]`/'
+	complete gpg  'p/1/( -d )/' 'p/2/`echo *.[pPgG][pPgG][pPgG]`/'
 	alias keydrop 'echo "keydropping ssh key (two seconds to abort)" ; grep "^\!\!:1" ~/.ssh/known_hosts || echo "did you mean this one?:"; grep \!\!:1 ~/.ssh/known_hosts ; sleep 1; echo "."; sleep 1; cp ~/.ssh/known_hosts /tmp/; cat ~/.ssh/known_hosts | sed -e "/^\!\!:1/d" > /tmp/keytmp && cp /tmp/keytmp ~/.ssh/known_hosts'
 	complete keydrop 'p/1/$hosts/'
 	if ( -f ${HOME}/.tmp/ssh-agent.csh ) then
@@ -410,6 +412,7 @@ endif #freebsd
 	#smart up key
 	bindkey -k up history-search-backward
 	bindkey -k down history-search-forward
+
 	
 	if (  ${?TERM} & ${TERM} =~ "xterm*" || ${TERM} == "screen"  ) then
 		setenv Xgreenscreenopts '-bg black -fg green'
