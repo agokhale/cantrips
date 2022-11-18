@@ -101,3 +101,7 @@ sysrc rpc_lockd_enable="YES"
 sysrc amd_enable="YES"
 sysrc nfsd_enable="YES"
 
+
+#accelerated xorg gl video 
+echo log in user needs video  group
+ #pw groupmod video -m ${LOWPRIVUSE}
