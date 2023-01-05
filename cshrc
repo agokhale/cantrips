@@ -156,6 +156,7 @@ if ( $?prompt ) then
 	endif
     # populate multiple idents for ssh -i 
 	
+	complete id 'p/1/u/'
 	complete cut 'p/1/(-w)/' 'p/2/(-f)/'
 	complete gstat 'p/1/(-f)/' 'p/2/(da)/' 'p/3/(-p)/'
 	complete viamillipede 'p/1/(tx rx verbose threads prbs)/'  'n/tx/$hosts/' 'N/tx/( 1234 )/' \
