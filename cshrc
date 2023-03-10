@@ -124,7 +124,6 @@ if ( $?prompt ) then
 	alias l 'source ~/.cshrc'	
 	alias vl 'vi ~/.cshrc'
 	alias vll 'vi ~/.cshrc.local'
-	alias linstallcshrc 'ln -s ${HOME}/cantrips/cshrc ${HOME}/.cshrc'
 	alias ve 'vi +$'
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
