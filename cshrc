@@ -117,6 +117,8 @@ if ( $?prompt ) then
 	alias r 's -x -l root'
 	alias R 's -x  -Y -l root'
 	alias s 'ssh -Y '
+	alias sec2 'ssh  -o CheckHostIP=no   ec2-user@\!\!:1'
+	complete sec2 'p/1/`aws_make_sense_of_descinstances.sh`/'
 	if  ( $?SSH_CLIENT && $?DISPLAY ) then
 		echo "${DISPLAY} X client: ${SSH_CLIENT}"
 	endif # tattle ssh forwarding 
@@ -492,6 +494,7 @@ setenv MANPATH /sw/share/man/:$MANPATH
 setenv PAGER `which less`
 if ( $?prompt ) then
 	complete redtide 'p/1/`ps -axwww`/'
+	alias usage "du -sxk [a-zA-Z0-9]*"
 endif #prompt
 endif #darwin
 #________________________________________________________________
