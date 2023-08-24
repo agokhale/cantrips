@@ -6,7 +6,8 @@ jq  -r \
 	( 
 	"state:" + (.State.Name) +
 	"   nnt:" +  (  .Tags[] | select(.Key == "Name" ) | .Value )) +
-	"   pubip:" + (.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp )
+	"   pubip:" + (.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp ) +
+	"   prvip:" + (.NetworkInterfaces[].PrivateIpAddresses[].PrivateIpAddress )
 ' | \
 sort -r
 
