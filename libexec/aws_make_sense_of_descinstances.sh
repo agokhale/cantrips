@@ -1,4 +1,5 @@
-#!/bin/sh -x
+#!/bin/sh 
+#set -x
 aws ec2 describe-instances | \
 jq  -r \
 '
@@ -10,6 +11,4 @@ jq  -r \
 	"   prvip:" + (.NetworkInterfaces[].PrivateIpAddresses[].PrivateIpAddress )
 ' | \
 sort -r
-
-#'.Reservations[].Instances[].InstanceId, .Reservations[].Instances[].Tags , .Reservations[].Instances[].State.Name, .Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp'
 
