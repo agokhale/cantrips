@@ -14,6 +14,7 @@ srcnames=` ls  |  grep "$srcpat"`
 echo srcs:
 echo ${srcnames}
 echo ""
+# this word list  breaks spaces in files 
 for i  in $srcnames; do
 	echo  \#mv $i `echo ${i} | sed -e "s/${srcpat}/${destpat}/"`
 done
