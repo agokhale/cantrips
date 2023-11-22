@@ -1,6 +1,6 @@
 startup_message off
 nethack on 
-bell_message 'peeping in %n'"
+bell_message 'peeping in %n'
 autorefresh 9
 defscrollback 15000
 blanker on

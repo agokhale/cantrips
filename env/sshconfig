@@ -9,6 +9,6 @@ ForwardAgent 	yes
 HashKnownHosts 	no
 NoHostAuthenticationForLocalhost 	yes
 TCPKeepAlive 	no
-UpdateHostKeys 	ask
+UpdateHostKeys 	yes
 VerifyHostKeyDNS 	no
 VisualHostKey 	yes

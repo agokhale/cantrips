@@ -98,7 +98,8 @@ if ( $?prompt ) then
 	alias prbsgen 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit \!\!:1 threads 4'
 	alias prbsvrfy ' vimillipede tx localhost 12346 threads 4 & viamillipede verbose 5 rx 12346 prbs 0xd00f > /dev/null  '
 
-	alias chomp "sed -E 's/^ +//'"  #strip leading space
+	#strip leading space and blanks a la perl 
+	alias chomp "sed -E 's/^ +//'"
 	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | tee usage | more " # extra .[stuff] and * get dotfiles
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
@@ -130,6 +131,9 @@ if ( $?prompt ) then
 	alias vimsg 'v +$ /var/log/messages'
 	alias visshconf 'vi +$ ${HOME}/.ssh/config'
 	alias citemp 'cp -aiv \!\!:1  `gTODAY`@\!\!:1'
+	alias citemptarj 'tar cjf \!\!:1@`gTODAY`.tjf   \!\!:1'
+	alias citemptarz 'tar czf \!\!:1@`gTODAY`.tgz   \!\!:1'
+	alias citemptar 'tar cf \!\!:1@`gTODAY`.tar   \!\!:1'
 
 	#set hunthome=${PWD}
 	alias hunting_ground 'set hunthome=`pwd`'
