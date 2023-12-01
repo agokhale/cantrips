@@ -6,9 +6,10 @@ jq  -r \
 .Reservations[].Instances[] | 
 	( 
 	"state:" + (.State.Name) +
-	"   nnt:" +  (  .Tags[] | select(.Key == "Name" ) | .Value )) +
-	"   pubip:" + (.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp ) +
-	"   prvip:" + (.NetworkInterfaces[].PrivateIpAddresses[].PrivateIpAddress )
+	" id:" + (.InstanceId) +
+	" nametag:" +  (  .Tags[] | select(.Key == "Name" ) | .Value )) +
+	" pubip:" + (.NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp ) +
+	" prvip:" + (.NetworkInterfaces[].PrivateIpAddresses[].PrivateIpAddress )
 ' | \
 sort -r
 
