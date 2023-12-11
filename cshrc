@@ -97,9 +97,6 @@ if ( $?prompt ) then
 	alias space2tab "sed -E 's/ +/	/g'" #that's a hard tab in that hole
 	alias prbsgen 'viamillipede verbose 5 tx localhost 12345 rx 12345 prbs 0xd00f leglimit \!\!:1 threads 4'
 	alias prbsvrfy ' vimillipede tx localhost 12346 threads 4 & viamillipede verbose 5 rx 12346 prbs 0xd00f > /dev/null  '
-
-	#strip leading space and blanks a la perl 
-	alias chomp "sed -E 's/^ +//'"
 	alias usage  " du -sxk .[a-zA-Z0-9]* * | sort -rn | tee usage | more " # extra .[stuff] and * get dotfiles
 	alias xrange 'python -c "for i in xrange (\!\!:1,\!\!:2):  print i" '
 	alias byte 'python -c "import sys; sys.stdout.write (chr(\!\!:1))"'
