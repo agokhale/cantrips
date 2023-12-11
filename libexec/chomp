@@ -1,0 +1,2 @@
+#!/bin/sh -xe
+sed -e '/^$/d' | grep -v "^#.*"  | sed -E 's/^[ \t].*//g'
