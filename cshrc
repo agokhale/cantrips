@@ -276,9 +276,8 @@ endif #freebsd
 		'n/set/`zfs get all  | cut -w -f2 | sort | uniq`/=' 'N/set/`zfs list | cut -w -f1`/' \
 	
   set _npmcmds=(ci install run)
-  alias _npmruntargets 'cat package.json | jq ".scripts | keys"' 
   complete npm  "p/1/(${_npmcmds})/" \
-      'n/run/`_npmruntargets`/'
+      'n/run/`_npmlistrunscripttargets.sh`/'
   #postgres
   complete psql 'p/1/`psql -c "select datname from pg_database" template1`/'
   
