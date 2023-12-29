@@ -188,7 +188,7 @@ if ( $?prompt ) then
 			'p/2/`ls  `/' \
                         'p/3/$hosts/'
 	alias __maketargets 'getmaketargets.awk *akefile'
-	complete make 'p/1/`__maketargets`/'
+	complete make 'p/1/( -j )/' 'p/2/`_ncpus`/'  'p/*/`__maketargets`/'
 	complete man 'p/1/c/'
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
@@ -225,6 +225,7 @@ if ( ${gUNAME} == "FreeBSD" ) then
 			'n/which/`__pkg-which-opts`/' \
 			'N/which/`__pkgs`/' \
 			'n/install/`pkgsch`/'
+	alias _ncpus 'sysctl -n hw.ncpu'
 
 endif #freebsd
 	alias gitreallybranchpush 'git push origin \!\!:1 && git branch --set-upstream-to=origin/\!\!:1 \!\!:1'
