@@ -1,0 +1,8 @@
+set ruler
+set ignorecase
+set shiftwidth=4
+set tabstop=19
+set flash
+set extended
+set comment
+set autoindent
