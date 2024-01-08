@@ -1,3 +1,5 @@
 #!/bin/sh -xe
 sleep "$1"
-sudo shutdown +30m
+echo "feeling tired" | wall 
+sleep 60
+sudo  poweroff
