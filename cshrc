@@ -232,7 +232,7 @@ endif #freebsd
 	complete gitreallybranchpush 'p/1/`git branch `/'
 
 	 # based on https://github.com/cobber/git-tools/blob/master/tcsh/completions
-	alias _gitobjs 'git branch -ar | sed -e "s:origin/::"; ls'
+	alias _gitobjs 'git branch -ar | sed -e "s:origin/::";  git tag; ls'
 	alias _gitcommitish 'git rev-list --all '
   set gitcmds=(add bisect blame branch checkout cherry-pick clean clone commit describe difftool fetch grep help init \
                         log ls-files mergetool mv pull push rebase remote rm show show-branch status submodule tag)
@@ -466,6 +466,7 @@ endif #freebsd
 		#endif
 		alias beepcmd 'printf "\033[35mbeep?\033[39;49m\b\b\b\b\b"'
 	endif #xterm specializations
+	which zpool > /dev/null  &&  zpool status -x > /dev/null  || zpool status -x
 
 endif #prompt
 
@@ -537,3 +538,4 @@ endif
 setenv IRCNICK nopenpoe
 setenv IRCNAME  "user is much too lame "
 setenv IRCSERVER  irc.freenode.net
+setenv PYTHONPYCACHEPREFIX ${HOME}/tmp/__pycache__
