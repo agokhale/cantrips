@@ -30,6 +30,7 @@ set path_components = ( bin sbin libexec games tools )
 #start with minimal paths so we have a path should things short out during launch
 setenv MANPATH /usr/share/man:/usr/local/man
 setenv PATH /bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/libexec
+setenv PATH ${PATH}:/opt/X11/bin 
 setenv PATH ${PATH}:${HOME}/cantrips/libexec:${HOME}/cantrips/dt:${HOME}/bin
 setenv PAGER "less -e"
 
@@ -253,6 +254,7 @@ endif #freebsd
                         'n/stash/( apply branch clear drop list pop show )/' \
                         'n/submodule/( add foreach init status summary sync update )/' \
                         'n/add/`_gitstatusuntracked.sh `/' \
+                        'n/clone/( git@github.com:agokhale/ )' \
                         'n/commit/`_gitcommitable.sh `/'
 			
 
@@ -405,6 +407,10 @@ endif #freebsd
 	bindkey ^[[17~ vi-search-back
     #mac opt <-
 	bindkey ^[b backward-word
+	#f4
+	bindkey -s ^[OS 'vi `scratch_last.sh`'
+	#f3
+	bindkey -c ^[OR 'scratch_me.sh'
 	#f2
 	bindkey -c ^[OQ 'date +"%s - %+ " >> ~/lerg;  cat ${HOME}/.tmp/cltmp >> ~/lerg; vi +$ ~/lerg' 
 	#f1  edit last command line
