@@ -9,6 +9,6 @@ dir=${HOME}/tmp/screenshorts/
 filstem=${dir}/${1}
 mkdir -p ${HOME}/tmp/screenshorts/
 xwd > ${filstem}.xwd
-convert ${filstem}.xwd ${filstem}.jpeg
+gm convert ${filstem}.xwd ${filstem}.jpeg
 xv ${filstem}.jpeg
 
