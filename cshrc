@@ -192,6 +192,7 @@ if ( $?prompt ) then
 	alias __maketargets 'getmaketargets.awk *akefile'
 	complete make 'p/1/( -j )/' 'p/2/`_ncpus`/'  'p/*/`__maketargets`/'
 	complete man 'p/1/c/'
+	complete unxz "p/1/(`ls *.xz`)/"
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
@@ -314,7 +315,6 @@ endif #freebsd
 	alias sc 'screen -c ${HOME}/cantrips/env/screenrc'
 	alias _screenparts 'screen -ls | grep  tached | cut -f2 | cut -f2 -d.; screen -ls | grep tached | cut -f2'
 	complete sc 'p/1/`_screenoptavail.sh`/' 'p/2/`_screenparts`/' 
-	alias cs 'cscope -R'
 	alias  td 'tcpdump  -n'
 	complete td 'p/1/( -i )/'  'p/*/( -v -x -X -wfile -rfile -s00 )/'
 	complete dc 'p/1/(-e)/' 'n/-e/(16o16iDEADp 2p32^p)/' 
