@@ -192,7 +192,6 @@ if ( $?prompt ) then
 	alias __maketargets 'getmaketargets.awk *akefile'
 	complete make 'p/1/( -j )/' 'p/2/`_ncpus`/'  'p/*/`__maketargets`/'
 	complete man 'p/1/c/'
-	complete unxz "p/1/(`ls *.xz`)/"
 	complete which 'p/1/c/'
 	complete where 'p/1/c/'
 	complete cdrecord 'p/1/(dev=3,0,0<see_camcontrol_devlist>)/' 'p/2/f/'
