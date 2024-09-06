@@ -1,22 +1,35 @@
 #!/bin/sh -x
-
 usage(){
-	echo "transcode_to mp3 *.wav"
+	echo "transcode_to '.*Night .*/Cannons .*wav'  'wav' 'mp3'"
+	echo # ./Night Drive/Cannons - Night Drive - 03 Kiss Me.wav
 }
 
 
 if [ $# -le 1 ]; then
 	usage
+	exit
 fi
 
-srcformat=$1
-destformat=$2
+#nerf the IFS global to avoid dumb shell space -> list field splitting
+# hope the | isn't in my patterns
+IFS='|' 
 
-shift 
+rpattern=$1
+srcformat=$2 # wav
+dstformat=$3 # mp3
 
-while  $1
-do
-	stem=`sed -e "s/\.wav//"`
-	echo "sox  '$stem.wav' '$stem.mp3'"
-done
-echo destformat $destformat
+echo $rpattern
+find -s . -regex $rpattern  
+echo  ----------------
+find -s . -regex $rpattern | sed -e "s/$srcformat/$dstformat/g"
+
+echo ok?
+read ok
+
+#find position depentant  so print0 is last
+find -s .  -regex $rpattern  -print0 \
+	| sed -e "s/$srcformat//g" \
+	| xargs -0 -n1 -I% --verbose sox %$srcformat %$dstformat
+
+exit
+
