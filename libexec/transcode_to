@@ -29,7 +29,11 @@ read ok
 #find position depentant  so print0 is last
 find -s .  -regex $rpattern  -print0 \
 	| sed -e "s/$srcformat//g" \
-	| xargs -0 -n1 -I% --verbose sox %$srcformat %$dstformat
+	| xargs -0 -n1 -I% --verbose  \
+		sox   --show-progress -V3  \
+			%$srcformat \
+			--compression 256.01 %$dstformat \
+			stats
 
 exit
 
