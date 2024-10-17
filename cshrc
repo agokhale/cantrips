@@ -12,6 +12,11 @@ if ( -f /etc/skel/.chsrc ) then
 	source /etc/skel/.cshrc	
 endif #etcskel
 
+# ######################## important securitry things here
+# API_USER=bobjdobs@aeria.net
+# API_KEY=AKIdroptables
+# ######################## end important securitry things here
+
 #path_roots are possible stems for path heirarchy. 
 #  taken from various unix traditions
 # perform discovery for places to put executables, libraries and man pages
