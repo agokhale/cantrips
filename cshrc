@@ -198,6 +198,7 @@ if ( $?prompt ) then
 	complete su 'p/1/( - )/' 'p/2/u/'
   complete ntpdate 'p/1/( pool.ntp.org  ) / '
 	#pkg wb
+	complete gm 'p/1/( convert identify  )/' 'p/*/f/'
 
 if ( ${gUNAME} == "FreeBSD" ) then
 	set pkgcmds=(help add annotate audit autoremove backup check clean convert create delete fetch info install lock plugins \
