@@ -118,7 +118,9 @@ function scale ( inmax, inmin, scalemax, scalemin, in_val) {
 	out_val = scalemin + (  (in_val - inmin ) * scale_factor ) ; 
 	return (int( out_val)) ;
 }
-
+# Density function providea a mapping from a static range of occurances in
+# in a graph pile-up where many points are being over striked
+# this is the basis for a poor 3rd dimnesion for a 2d histogram
 function dsymbol ( in_d) {
 	outval = " ";
 	if ( in_d > 64 ) {
