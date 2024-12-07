@@ -478,7 +478,8 @@ endif #freebsd
 		#endif
 		alias beepcmd 'printf "\033[35mbeep?\033[39;49m\b\b\b\b\b"'
 	endif #xterm specializations
-	which zpool >& /dev/null  &&  (zpool status -x > /dev/null  || zpool status -x)
+	#annoying
+	#which zpool >& /dev/null  &&  (zpool status -x > /dev/null  || zpool status -x)
 
 endif #prompt
 
