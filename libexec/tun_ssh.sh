@@ -18,7 +18,7 @@ ssh ssh://localhost:$local_sshport true
 #dont step on my own gastropod
 
 pidfile=`echo $1-$2 | tr -c "[:alpha:][:digit:]" "_"`
-pidfile=tmp/${pidfile}.pid
+pidfile=${HOME}/tmp/${pidfile}.pid
 
 
 cleanuppid() {
