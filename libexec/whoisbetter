@@ -1,0 +1,4 @@
+#!/bin/sh -xe
+whois $1
+whois -h whois.cymru.com $1
+
