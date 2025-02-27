@@ -1,0 +1,26 @@
+#!/bin/sh -ex
+tarenc_alg=${tarenc_alg:=aria-256-ecb}
+
+me=$(basename $0)
+dirname=$1
+
+if [ "^^^${me}" == '^^^tarenc' ]; then
+  if [ ! -d ${dirname} ]; then 
+    echo "must be directory "
+    exit -4 
+  fi
+
+  #tarenc <some.dir> 
+  #... ask passwor
+  tar -cvjf-  ${dirname} | \
+    openssl enc -${tarenc_alg} -iter 680 > ${dirname}.hqxj
+
+elif [ "^^^${me}" == '^^^tardec' ]; then
+  if [ ! -f ${dirname} ]; then 
+    echo "${dirname} must be hqxjk "
+    exit -4 
+  fi
+  cat  ${dirname} | \
+    openssl enc -d -${tarenc_alg}  -iter 680  | \
+    tar -tvjf -
+fi
