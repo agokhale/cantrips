@@ -454,7 +454,7 @@ endif #freebsd
 		set betterfont10="-*-courier-*-r-*-*-10-*-*-*-*-*-*-*"
 		set betterfont8="-*-courier-*-r-*-*-8-*-*-*-*-*-*-*"
 		set betterfont="-*-courier-*-r-*-*-12-*-*-*-*-*-*-*"
-		alias xt 'xterm -u8  ${Xgreenscreenopts}  &'
+		alias xt 'xterm -u8  ${Xbaseopts}  ${Xgreenscreenopts}  &'
 		alias xt8 'xterm ${Xgreenscreenopts} \\
 			-fn "$betterfont8" &'
 		alias xt20 'xterm -bg black -fg green -fn \\
