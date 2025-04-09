@@ -2,7 +2,7 @@
 
 # provide a view of whats in the the fields of a big csv 
 BEGIN{
-  FS="|";
+  FS=",";
 }
 
 // { 

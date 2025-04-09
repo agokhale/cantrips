@@ -1,0 +1,6 @@
+#COntour shuttle pro2 jog shuttle thingus 
+Generic_Desktop:Wheel  1  0 		xdotool key Page_Up
+Generic_Desktop:Wheel  -1 0  xdotool key Page_Down
+
+Consumer:Consumer_Control.Consumer:Consumer_Control.Generic_Desktop:Dial * 1  xdotool  key Page_Down
+Consumer:Consumer_Control.Consumer:Consumer_Control.Generic_Desktop:Dial * -1  xdotool  key Page_Up

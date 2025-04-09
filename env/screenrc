@@ -12,7 +12,7 @@ defslowpaste 5
 mousetrack off
 wrap on
 hardstatus alwayslastline
-hardstatus string '%{mk}%S %l[%= %{wk}%?%-Lw%?%{=b kR}(%{g}%n*%f %t%?(%u)%?%{=b kR})%{= kw}%?%+Lw%?%?%= %{g}]%{=w C}%m/%d %c.%s%{gk}'
+hardstatus string '%{mk}%S %l[%= %{wk}%?%-Lw%?%{=b kR}(%{g}%n*%f %t%?(%u)%?%{=b kR})%{= kw}%?%+Lw%?%?%= %{g}]%{=w C}%m/%d %c%{gk}'
 vbell no
 shell -$SHELL
 logtstamp on
