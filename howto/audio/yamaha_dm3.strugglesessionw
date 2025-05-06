@@ -1,0 +1,227 @@
+Yamaha DM3 is an acessable pro multifucntion digital mixer that has optional dante transport and does 18x18 at 96khz by 32bit on USB.  It sounds amazing, it's  beast and works driver free on 14.2.
+It might be  worth the cost just to get a 16x16 usb/dante bridge wihtout paying the driver ransom to audiante.
+
+I got it to record and play back in multichannel with jack  and virtual_oss, but I still need a bit of help getting system audio to route to it. 
+
+
+#get debuggy
+sysctl hw.usb.uaudio.debug=1
+sysctl hw.snd.verbose: 4
+
+
+
+
+boot takes a minute then:
+/*
+    May  6 19:41:46 inara kernel: ugen0.7: <Yamaha Corporation Yamaha DM3> at usbus0
+    May  6 19:41:46 inara kernel: uaudio0 on uhub0
+    May  6 19:41:46 inara kernel: uaudio0: <Yamaha Corporation Yamaha DM3, class 239/2, rev 2.10/0.00, addr 10> on usbus0
+    May  6 19:41:46 inara kernel: uaudio0: Play[0]: 96000 Hz, 18 ch, 32-bit S-LE PCM format, 2x4ms buffer. (selected)
+    May  6 19:41:46 inara kernel: uaudio0: Play[0]: 48000 Hz, 18 ch, 32-bit S-LE PCM format, 2x4ms buffer.
+    May  6 19:41:46 inara kernel: uaudio0: Record[0]: 96000 Hz, 18 ch, 32-bit S-LE PCM format, 2x4ms buffer. (selected)
+    May  6 19:41:46 inara kernel: uaudio0: Record[0]: 48000 Hz, 18 ch, 32-bit S-LE PCM format, 2x4ms buffer.
+    May  6 19:41:46 inara kernel: uaudio0: MIDI sequencer.
+    May  6 19:41:46 inara kernel: pcm3 on uaudio0
+    May  6 19:41:46 inara kernel: sndbuf_resize(): b=0xfffff802275ee000 0 -> 0xfffffe01134a0000 [0 -> 110592 : 110592]
+    May  6 19:41:46 inara kernel: sndbuf_resize(): b=0xfffff80363af7000 0 -> 0xfffffe01169f9000 [0 -> 110592 : 110592]
+    May  6 19:41:46 inara kernel: sndbuf_resize(): b=0xfffff802275ee000 110592 [27648] NOCHANGE
+    May  6 19:41:46 inara kernel: sndbuf_remalloc(): b=0xfffff8035c5e5900 0 -> 32768 [32688]
+    May  6 19:41:46 inara kernel: pcm3: chn_resizebuf(): PCMDIR_PLAY (hardware) timeout=9 b[27648/13824/2] bs[32688/16344/2] limit=0
+    May  6 19:41:46 inara syslogd: last message repeated 1 times
+    May  6 19:41:46 inara kernel: sndbuf_resize(): b=0xfffff80363af7000 110592 [27648] NOCHANGE
+    May  6 19:41:46 inara kernel: sndbuf_remalloc(): b=0xfffff802e7098480 0 -> 32768 [32688]
+    May  6 19:41:46 inara kernel: pcm3: chn_resizebuf(): PCMDIR_REC (hardware) timeout=9 b[27648/13824/2] bs[32688/16344/2] limit=0
+    May  6 19:41:46 inara syslogd: last message repeated 1 times
+    May  6 19:41:46 inara kernel: uaudio0: No HID volume keys found.
+*/
+
+and some  stats:
+& sysctl dev.pcm.3
+dev.pcm.3.feedback_rate: 0
+dev.pcm.3.mode: 7
+dev.pcm.3.bitperfect: 1
+dev.pcm.3.buffersize: 0
+dev.pcm.3.rec.vchanformat: s32le:18.0
+dev.pcm.3.rec.vchanrate: 96000
+dev.pcm.3.rec.vchanmode: fixed
+dev.pcm.3.rec.vchans: 2 <----------------------dunno if this needs poked
+dev.pcm.3.play.vchanformat: s32le:18.0
+dev.pcm.3.play.vchanrate: 96000
+dev.pcm.3.play.vchanmode: fixed
+dev.pcm.3.play.vchans: 2
+dev.pcm.3.hwvol_mixer: vol
+dev.pcm.3.hwvol_step: 5
+dev.pcm.3.%iommu: 
+dev.pcm.3.%parent: uaudio0
+dev.pcm.3.%pnpinfo: 
+dev.pcm.3.%location: 
+dev.pcm.3.%driver: pcm
+dev.pcm.3.%desc: Yamaha Corporation Yamaha DM3
+
+cat /dev/sndstat
+pcm3: <Yamaha Corporation Yamaha DM3> on uaudio0 (1p:2v/1r:2v)
+        snddev flags=0x3e6<AUTOVCHAN,SOFTPCMVOL,BUSY,MPSAFE,REGISTERED,BITPERFECT,VPC>
+        [dsp3.play.0]: spd 96000, fmt 0x01201000, flags 0x20002108, 0x00000004
+                interrupts 834693, underruns 0, feed 834692, ready 0 
+                [b:55296/27648/2|bs:65520/32760/2]
+                channel flags=0x20002108<TRIGGERED,BUSY,HAS_VCHAN,BITPERFECT>
+                {userland} -> feeder_mixer(0x01201000) -> {hardware}
+        dsp3.play.0[dsp3.virtual_play.0]: spd 96000, fmt 0x01201000, flags 0x3000112c, 0x00000001, pid 15957 (jackd)
+                interrupts 0, underruns 0, feed 834692, ready 130752 
+                [b:0/0/0|bs:130752/16344/8]
+                channel flags=0x3000112c<RUNNING,TRIGGERED,SLEEPING,BUSY,HAS_SIZE,VIRTUAL,BITPERFECT>
+                {userland} -> feeder_root(0x01201000) -> {dsp3.play.0}
+        dsp3.play.0[dsp3.virtual_play.1]: spd 96000, fmt 0x01201000, flags 0x30000000, 0x00000001
+                interrupts 0, underruns 0, feed 0, ready 0 
+                [b:0/0/0|bs:130752/16344/8]
+                channel flags=0x30000000<VIRTUAL,BITPERFECT>
+                {userland} -> feeder_root(0x01201000) -> {dsp3.play.0}
+        [dsp3.record.0]: spd 96000, fmt 0x01201000, flags 0x20002108, 0x00000005
+                interrupts 834683, overruns 0, feed 1669366, hfree 55296, sfree 65519
+                [b:55296/27648/2|bs:65520/32760/2]
+                channel flags=0x20002108<TRIGGERED,BUSY,HAS_VCHAN,BITPERFECT>
+                {hardware} -> feeder_root(0x01201000) -> feeder_mixer(0x01201000) -> {userland}
+        dsp3.record.0[dsp3.virtual_record.0]: spd 96000, fmt 0x01201000, flags 0x3000110c, 0x00000001, pid 15957 (jackd)
+                interrupts 0, overruns 0, feed 1669366, hfree 0, sfree 99432
+                [b:0/0/0|bs:129024/1008/128]
+                channel flags=0x3000110c<RUNNING,TRIGGERED,BUSY,HAS_SIZE,VIRTUAL,BITPERFECT>
+                {dsp3.record.0} -> feeder_root(0x01201000) -> {userland}
+        dsp3.record.0[dsp3.virtual_record.1]: spd 96000, fmt 0x01201000, flags 0x30000000, 0x00000001
+                interrupts 0, overruns 0, feed 0, hfree 0, sfree 129024
+                [b:0/0/0|bs:129024/1008/128]
+                channel flags=0x30000000<VIRTUAL,BITPERFECT>
+                {dsp3.record.0} -> feeder_root(0x01201000) -> {userland}
+
+sysctl dev.pcm.3.play.vchans=18 ?? -- not needed  maybe?
+
+
+#the midi surface transmit works when enabled from the settings-> midi -> enable control, program change then
+cat /dev/umidi0.0 
+#then wiggle the faders because .. funny - see dirtyriggers' filter for ops
+    -or-
+mididump -t /dev/umidi0.0
+//push buttons on control surface.. 
+Control/Mode change     channel=1, control=72 (Sound Controller 3), value=0
+Control/Mode change     channel=1, control=72 (Sound Controller 3), value=127
+
+#now get the 18x18 audio interface running
+#attach jackd  with defaults ( 48khz)
+jackd -d oss -C /dev/dsp3 -P /dev/dsp3
+
+
+#set 96khz saple rate to match DM's max  settings-> clockrate 96khz
+# do both or jackd will error out
+sysctl dev.pcm.3.rec.vchanrate=96000
+sysctl dev.pcm.3.play.vchanrate=96000
+
+#and -r for jackd
+jackd -d oss -r 96000 -C /dev/dsp3 -P /dev/dsp3
+
+#get https://github.com/jackaudio/jack-example-tools/ from pkg or whereever 
+#make a sad test tone
+# creates audio (annoying steristest tones) on the dm3 !!
+jack_simple_client
+
+#setttings ->  patch  will show the channel lit on input:USB 1,2  when signals are hitting it, it's really handy to see the signal while learning to route the board's audio
+# patch them to convenient channels (9-10?)
+
+#what ports:
+& jack_lsp
+Cannot lock down 107341340 byte memory area (Cannot allocate memory)
+system:capture_1
+system:capture_2
+...
+system:playback_17
+system:playback_18
+
+
+#now some recording
+#activate a test burst tone from oscillator, patch it to a mix bus and out usb1,2
+# this works for multichannel!!!!!, just add all the system:capture[.] devices to jack_rec target
+
+& jack_rec -f /tmp/burst.wav -d 4 -b 32 system:capture_1 system:capture_2
+Cannot lock down 107341340 byte memory area (Cannot allocate memory)
+disk thread finished
+
+
+#see what we got, looks good in audacity too
+# sox -V3 /tmp/burst.wav /tmp/dummy.wav
+
+    Input File     : '/tmp/burst.wav'
+    Channels       : 2
+    Sample Rate    : 96000
+    Precision      : 32-bit
+    Duration       : 00:00:04.00 = 384000 samples ~ 300 CDDA sectors
+    File Size      : 3.07M                                       <<--- the droppings are not smallish at 96khz 32le
+    Bit Rate       : 6.14M
+    Sample Encoding: 32-bit Signed Integer PCM
+    Endian Type    : little
+    Reverse Nibbles: no
+    Reverse Bits   : no
+
+
+#list the post aliases:
+jack_lsp -A
+
+    ...
+    system:capture_17
+    oss:/dev/dsp3:out17
+    system:capture_18
+    oss:/dev/dsp3:out18
+    system:playback_1
+    oss:/dev/dsp3:in1
+    system:playback_2
+    oss:/dev/dsp3:in2
+    ...
+
+<killing jackd>
+
+now how doI use this? mplayer refuses to open dsp3:
+
+installing virtual_oss from pkg ??
+
+#-S resample
+#-Q 0 burn the cpu for resampling jqaulity
+#-C 18 mix channels, 96khz, 32bit
+# #  -s 4ms buffer  
+ 44 ms is way to many
+#-f my dm3's /dev/dspX entry
+#realtimeprio -i 8 
+#downmix to -d dsp for consumption elsewhere ( /dev/dsp seems to work in audacity) 
+    #-a   amplitudes of not 0 can be unfortunate , the examples have crazy high gain specified 
+    #-b 32bit, really  
+    #-c 2 it's a 2 channel device for music playback
+    #-m 0,0,1,1 .. rx->tx virtual channel to dsp3 physical channel, 
+    #-f call it /dev/dsp for ea
+
+#extra downmix channel vdsp.playbk
+
+#the actual command
+virtual_oss \
+                   -S \ 
+                   -Q 0 \ 
+                   -i 8 \
+                   -C 18 -c 18 -r 96000 -b 32 -s 4ms -f /dev/dsp3 \
+                   -a 0 -b 32 -c 2 -m 0,0,1,1 -d dsp \
+                   -a 0 -b 32 -c 2 -m 0,0,1,1 -d vdsp.playbk \
+
+# now I can  play  from stuff that will talk to the oss driver
+mplayer -ao oss:/dev/dsp  rickrol.mp3
+
+
+#seems to bypass the 0db vpc control???
+#=100 was should be the default value!
+hw.snd.vpc_0db: 45 -> 11  <<--------   this should be terrible, but no effect
+this default is very wrong in base anyway as it clips  instantly, i think a quick hard knee compression could be an ok default
+# mixer isn't playing nice eirther 
+mixer -d 3 pcm=0.3 <<--------- no effect
+
+
+
+
+Now for the ask:
+How do i get other normal system audio to see that virtual_oss?
+can set the  -f /dev/dsp4 but can' set snd.default_unit to 4  =(
+
+
+
