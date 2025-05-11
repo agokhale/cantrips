@@ -446,6 +446,8 @@ endif #freebsd
 		#don't autoscroll, unless i type big scrollback
 		setenv Xbaseopts  "${Xbaseopts} -si -sk -sl 10000 "
 		setenv Xbaseopts  "${Xbaseopts} -title cantrips:${USER}@${HOST} "
+		#permit sixel support
+		setenv Xbaseopts  "${Xbaseopts} -ti vt340 "
 
 		alias xterm xterm   ${Xbaseopts} ${Xgreenscreenopts}
 		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
