@@ -223,5 +223,7 @@ Now for the ask:
 How do i get other normal system audio to see that virtual_oss?
 can set the  -f /dev/dsp4 but can' set snd.default_unit to 4  =(
 
+Nevermind - something latched  up the audio stu.. erebooteed and set default_unit, i made a dsp that was ok.
 
 
+qjackctl parameters samples per frame must be > 256 or will fail to initialize??
