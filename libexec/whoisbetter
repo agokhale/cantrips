@@ -5,5 +5,9 @@ whois $1
 whois -h whois.cymru.com $1
 
 #https://www.circl.lu/services/passive-dns/
-curl -H 'dribble-paginate-count: 5' -H 'dribble-filter-rrtype: SOA' https://www.circl.lu/pdns/query/$1
+# -H "Authorization: ${CIRCLpDNSAUTH}" \
+
+curl  -H 'dribble-paginate-count: 5' -H 'dribble-filter-rrtype: SOA' \
+-u  ${CIRCLpDNSUSER}:${CIRCLpDNSAUTH}  --basic \
+ https://www.circl.lu/pdns/query/$1
 
