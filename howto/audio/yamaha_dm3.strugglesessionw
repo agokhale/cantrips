@@ -227,3 +227,5 @@ Nevermind - something latched  up the audio stu.. erebooteed and set default_uni
 
 
 qjackctl parameters samples per frame must be > 256 or will fail to initialize??
+#from qjackctl - this seems to work
+	/usr/local/bin/jackd -doss -r96000 -p392 -n3 -w32 -C/dev/dsp3 -P/dev/dsp3 -i18 -I1
