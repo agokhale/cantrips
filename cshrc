@@ -450,6 +450,8 @@ endif #freebsd
 		setenv Xbaseopts  "${Xbaseopts} -ti vt340 "
 
 		alias xterm xterm   ${Xbaseopts} ${Xgreenscreenopts}
+		#suitable for xt20
+		set biggeom="-geometry 188x75+0+0"
 		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
 		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
 		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"
@@ -459,8 +461,8 @@ endif #freebsd
 		alias xt 'xterm -u8  ${Xbaseopts}  ${Xgreenscreenopts}  &'
 		alias xt8 'xterm ${Xgreenscreenopts} \\
 			-fn "$betterfont8" &'
-		alias xt20 'xterm -bg black -fg green -fn \\
-			"$betterfont20" &'
+		alias xt20 'xterm -bg black -fg green $biggeom \\
+			-fn "$betterfont20"  &'
 		alias xt30 'xterm -bg black -fg green -fn \\
 			"$betterfont30" &'
 		alias xt40 'xterm -bg black -fg green -fn \\
