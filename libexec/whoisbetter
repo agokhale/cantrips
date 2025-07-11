@@ -1,13 +1,20 @@
 #!/bin/sh -xe
 
-whois $1
+now=` date +"%s" `
 
-whois -h whois.cymru.com $1
+fn=${HOME}/tmp/whoisbetr.$1.$now
+
+whois $1 | tee  -a $fn.whois
+
+whois -h whois.cymru.com $1 | tee -a $fn.whois.cyrmu
 
 #https://www.circl.lu/services/passive-dns/
 # -H "Authorization: ${CIRCLpDNSAUTH}" \
 
 curl  -H 'dribble-paginate-count: 5'  \
 -u  ${CIRCLpDNSUSER}:${CIRCLpDNSAUTH}  --basic \
- https://www.circl.lu/pdns/query/$1
+ https://www.circl.lu/pdns/query/$1  \
+	> $fn.pdns.json
+
+cat $fn.pdns.json | jq
 
