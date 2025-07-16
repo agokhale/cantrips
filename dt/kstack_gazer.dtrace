@@ -1,0 +1,12 @@
+#!/usr/sbin/dtrace  -qs
+
+profile-266 / probefunc != "acpi_cpu_idle"/
+{ @hist[stack()] = count ();}
+
+tick-3sec
+{ 
+	printa ( @hist); 
+	trunc (@hist); 
+	exit(0);
+}
+
