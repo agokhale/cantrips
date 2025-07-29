@@ -229,3 +229,15 @@ Nevermind - something latched  up the audio stu.. erebooteed and set default_uni
 qjackctl parameters samples per frame must be > 256 or will fail to initialize??
 #from qjackctl - this seems to work
 	/usr/local/bin/jackd -doss -r96000 -p392 -n3 -w32 -C/dev/dsp3 -P/dev/dsp3 -i18 -I1
+
+
+
+	o
+1753756068 - Mon Jul 28 22:27:48 EDT 2025   
+When dm3 is power cycled and usb is rattached the audio playback is choppy at  LFO rates with 
+    Jul 29 02:26:09 kaylee kernel: feed_root: (virtual) appending 20736 bytes (count=25344 l=4608 feed=90)
+    Jul 29 02:26:09 kaylee kernel: feed_root: (virtual) appending 25344 bytes (count=25344 l=0 feed=91)
+    Jul 29 02:26:09 kaylee kernel: feed_root: (virtual) appending 20736 bytes (count=25344 l=4608 feed=94)
+
+kldunload snd_uaudio 
+<- fixess this stutter BUG in reattach stuf 
