@@ -3,6 +3,11 @@
 pcmdev="9"
 rate="96000"
 
+#should i?
+kldunload snd_uaudio 
+# let the bus settl ingmi  out of the race war
+sleep 1
+
 sysctl dev.pcm.9.%desc 
 # should be 
 sysctl dev.pcm.$pcmdev.rec.vchanrate=$rate
