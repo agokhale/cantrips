@@ -1,0 +1,86 @@
+{
+    "Name": "deadsimple",
+    "Theme": "AAAAAQAAAAAAAAAA/////wAAAAALAAAABQAAAAAB//8AAAAAAAAAAAAAAAUAAAABAf//UlJTU1NTAAAAAAAFAAAABgH//4yM//80NAAAAAAABQAAAAcB/////xMTWloAAAAAAAUAAAAIAf//////////AAAAAAAFAAAACQH//wAAAAAAAAAAAAAABQAAAAoB//8AAAAAAAAAAAAAAAUAAAAMAf//fX1MTAMDAAAAAAAFAAAADQH//////////wAAAAAABQAAABAB//9UVAIC9/cAAAAAAAUAAAAUAYCAAAAAAAAAAAAAAAAA",
+    "Version": 1,
+    "Widgets": [
+        {
+            "TabStack": {
+                "Position": "North",
+                "State": "dirs\u001finfo",
+                "Widgets": [
+                    {
+                        "DirectoryBrowser": {
+                        }
+                    },
+                    {
+                        "SplitterVertical": {
+                            "State": "AAAA/wAAAAEAAAACAAACqQAAAFIA/////wEAAAACAA==",
+                            "Widgets": [
+                                {
+                                    "SplitterVertical": {
+                                        "State": "AAAA/wAAAAEAAAACAAABCwAAAI8A/////wEAAAACAA==",
+                                        "Widgets": [
+                                            {
+                                                "SelectionInfo": {
+                                                    "Options": 23,
+                                                    "State": "AAAA/wAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfkAAAACAAAAAQAAAAAAAAAAAAAAAGT/////AAAAhAAAAAAAAAACAAAAZAAAAAEAAAAAAAABlQAAAAEAAAAAAAAD6AAAAABkAAAAAAAAAAAAAAAAAAAAAQ=="
+                                                }
+                                            },
+                                            {
+                                                "WaveBar": {
+                                                    "ElapsedTotal": false,
+                                                    "ShowLabels": false
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "SplitterHorizontal": {
+                                        "State": "AAAA/wAAAAEAAAACAAAAiQAAAIkA/////wEAAAABAA==",
+                                        "Widgets": [
+                                            {
+                                                "SplitterVertical": {
+                                                    "State": "AAAA/wAAAAEAAAACAAAAJAAAACQA/////wEAAAACAA==",
+                                                    "Widgets": [
+                                                        {
+                                                            "SplitterHorizontal": {
+                                                                "State": "AAAA/wAAAAEAAAACAAAAiQAAAIkA/////wEAAAABAA==",
+                                                                "Widgets": [
+                                                                    {
+                                                                        "PeakMeter": {
+                                                                            "Orientation": 1,
+                                                                            "ShowLegend": false,
+                                                                            "ShowPeaks": false
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "PlayerControls": {
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        {
+                                                            "VolumeControls": {
+                                                                "Mode": 3
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "StatusBar": {
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

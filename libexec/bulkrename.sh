@@ -9,18 +9,11 @@ if [ 2 -ne  $# ]; then
 	exit 3
 fi 
 
+
 echo renaming $1 to $2
-srcnames=` ls  |  grep "$srcpat"`
-echo srcs:
-echo ${srcnames}
-echo ""
-# this word list  breaks spaces in files 
-for i  in $srcnames; do
-	echo  \#mv $i `echo ${i} | sed -e "s/${srcpat}/${destpat}/"`
-done
-echo ok?
-read ok
-for i  in $srcnames; do
-	mv $i `echo $i | sed -e "s/$srcpat/$destpat/"`
-done
+
+ls | grep "${srcpat}" | awk  -v spat="${srcpat}"  -v dpat="${dstpat}"        \
+	'// {o = $0; r = gsub (spat,  dpat, $0); printf( "mv \"%s\" \t\t\t \"%s\"\n ", o, $0 ) }   '
+
+
 
