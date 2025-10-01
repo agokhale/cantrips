@@ -88,6 +88,7 @@ function rangeck( i ) {
 /#.*/ {
 #toss whitespace
 }
+
 /[[:digit:][:space:].-e].*/ {
 	if (verbose > 5) 
 		printf ("naked line %s\n", $0);
