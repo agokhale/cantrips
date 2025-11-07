@@ -12,7 +12,8 @@ BGEIN { uid = "uu";}
 	printf ( "%s\t%s %s \n",  ip, name,uid);
 	}
 
-	uid="";
-	name="";
+	uid="--";
+	name="--";
+	ip="--";
 	bound=0;
 }
