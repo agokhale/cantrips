@@ -1,8 +1,9 @@
 set ruler
 set ignorecase
-set shiftwidth=4
-set tabstop=19
+set shiftwidth=2
+set ts=2
 set flash
 set extended
 set comment
 set autoindent
+set iclower
