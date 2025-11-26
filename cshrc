@@ -339,8 +339,6 @@ endif #freebsd
 	set printexitvalue
 	#if something takes 1 sec - find out how long. 
 	set time=(1 "user:%U system:%S wall:%E cpu:%P%% shared:%X+private:%DkB  input:%I output:%O faultsin:%F swaps:%W")
-	#unset color
-	#unsetenv LS_COLOR
 	set listflags="XaA"
 	alias v 	view
 	alias ssh-initagent 'mkdir -v -m 700 -p ${HOME}/.tmp/; ssh-agent -c > ${HOME}/.tmp/ssh-agent.csh; source  ${HOME}/.tmp/ssh-agent.csh'
@@ -356,11 +354,6 @@ endif #freebsd
 			set ssh_agent_report=`ssh-add -l `
 		endif
 	endif
-	set vag_topcommands = ( autocomplete box        cloud     destroy  global-status halt         help        init       \
-		login     package  plugin  port   powershell  provision  push      rdp      reload  resume  \
-		snapshot ssh     ssh-config status   suspend up     upload validate version winrm  winrm-config )
-	complete vagrant 'p/1/$vag_topcommands/'
-	complete salt-call 'p/1/(state.apply)/'
 	
 	alias df	df -k
 	alias du	du -xk
@@ -372,7 +365,6 @@ endif #freebsd
 	alias ll	ls -lsArtF
 	alias lr	ls -lsAFR
 	alias tset	'set noglob histchars=""; eval `\tset -s \!*`; unset noglob histchars'
-	alias mc  'mc -b' #no color please
 	alias random_playback 'find . -type f -name "*.mp3" -print0 | sort -zR | xargs -L1 -I% -0 mplayer -ao oss:/dev/dsp1 "%"'
 
 	set nobeep
