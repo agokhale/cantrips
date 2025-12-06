@@ -313,7 +313,6 @@ endif #freebsd
 	alias exportcantrips 'git archive --format=tar --prefix=cantrips/ HEAD > /tmp/cantrips.tar'
 	complete tdtrace 'p/1/$interfaces/' 'p/2/(pcapfile inny outty foo)/' 'p/*/$tdterms/'
 	complete netstat 'p/1/(-m -an -i -Tn -xn -Q )/' 'p/2/(-finet)/'
-	alias screenlet 'screen -S `echo \!\!:1 | cut -w -f1  ` -dm \!\!:1'
 	complete xmodmap 'p/1/(.xmodmap)/'
 	complete screenlet 'p/1/c/' 
   #commands for screenlet

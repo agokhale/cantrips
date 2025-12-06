@@ -1,0 +1,14 @@
+#!/bin/sh -x
+# Dispatch a  named screen session that's detached from the 
+#  controlling tty, think of `at now` but you can get it back later.
+
+#echo $#
+#echo $*
+cmdn=$1
+shift
+# It's astonishing that shift doesn't operate on $0
+# echo $*
+# echo $0
+cmdargs=$*
+sname="${cmdn}_screenlet"
+screen -S ${sname} -d -m  ${cmdn} ${cmdargs}
