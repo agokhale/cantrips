@@ -10,6 +10,7 @@ sleep 1
 
 sysctl dev.pcm.9.%desc 
 # should be 
+sysctl hw.snd.vpc_0db=100
 sysctl dev.pcm.$pcmdev.rec.vchanrate=$rate
 sysctl dev.pcm.$pcmdev.play.vchanrate=$rate
 
