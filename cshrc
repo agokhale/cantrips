@@ -272,7 +272,7 @@ endif #freebsd
        ctime depth inum ls mtime nogroup nouser perm print prune \
        size xdev)/' \
        'p/*/d/'	
-	alias finddaterange 'find log/ -newermt "Nov 10, 2020 23:59:59" ! -newermt "Nov 26, 2020 23:59:59"'
+	alias finddaterange 'find . -newermt "Nov 10, 2020 23:59:59" ! -newermt "Jan 26, 2026 23:59:59"'
 
 	#zfs
 	complete zfs 'p/1/(get set list destroy snapshot create clone promote send recv hold )/' \
@@ -442,7 +442,7 @@ endif #freebsd
 
 		alias xterm xterm   ${Xbaseopts} ${Xgreenscreenopts}
 		#suitable for xt20
-		set biggeom="-geometry 188x75+0+0"
+		set biggeom="-geometry 120x55+0+0"
 		set betterfont40="-*-courier-*-r-*-*-40-*-*-*-*-*-*-*"
 		set betterfont20="-*-courier-*-r-*-*-20-*-*-*-*-*-*-*"
 		set betterfont30="-*-courier-*-r-*-*-30-*-*-*-*-*-*-*"
@@ -533,6 +533,12 @@ endif ##sunos
 setenv CVS_RSH	`which ssh`
 setenv RSYNC_RSH `which ssh`	 
 setenv RSH `which ssh`	 #for rdist
+
+set completespath=${HOME}/cantrips/completes.tcsh
+if ( -r $completespath ) then
+	source  $completespath
+endif
+
 #________________________________________________________the last word locally
 #makes all things here mutable
 #let the local thing mutate  my nice presets
