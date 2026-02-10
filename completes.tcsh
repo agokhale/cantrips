@@ -1,6 +1,7 @@
 complete xpdf 'p/1/`echo *.pdf `/'
 #this inner qouting is silly
 complete FreeCAD	'p/1/`find . -regex \^\.\*\\.FCStd\$`/'
+complete prusa-slicer	'p/1/`find . -regex \^\.\*\\.3mf\$`/'
 
 complete usbconfig 'p/1/(-d )/'  'p/2/`usbconfig | cut -d:  -f1 `/' 'p/3/( set_config set_alt set_template get_template detach_kernel_driver dump_quirk_names dump_device_quirks dump_all_desc dump_device_desc dump_curr_config_desc dump_all_config_desc dump_string  dump_info dump_stats show_ifdrv suspend resume power_off power_save power_on reset list do_request )/'
 
