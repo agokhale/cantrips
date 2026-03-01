@@ -3,10 +3,6 @@
 #generate all the combinations of all the letters
 #ubrute.awk -vcdict='asdf' -vlen=3
 
-function cdx(idx,     ca){
-  split (cdict, ca, "");
-	return (ca[idx]);
-}
 
 function rain (depth,a,     ccur){
 	if (depth == 0) {
@@ -18,14 +14,15 @@ function rain (depth,a,     ccur){
 	ar="";
   while (ccur-- > 0) {
 		rain(depth-1, ar);
-		ar = sprintf("%s%s",  cdx(ccur),a)
+		ar = sprintf("%s%s",  ca[ccur],a)
 	}
 }
 
 BEGIN {
 	if (cdict == "") {
-		cdict="abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890- !@#$%^&*()'";
+		cdict="abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890- !@#$%^&*.";
 		}
+	split (cdict, ca, "");
 	rain(len,"")
 	exit(0);
 }
