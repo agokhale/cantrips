@@ -1,6 +1,6 @@
 #!/bin/sh -xe
 # for whatever reason this needs to be run twice, or the audio is distrorted un der 14.2
-pcmdev="9"
+pcmdev="6"
 rate="96000"
 
 #should i?
@@ -8,7 +8,7 @@ kldunload snd_uaudio
 # let the bus settl ingmi  out of the race war
 sleep 1
 
-sysctl dev.pcm.9.%desc 
+sysctl dev.pcm.${pcmdev}.%desc 
 # should be 
 sysctl hw.snd.vpc_0db=100
 sysctl dev.pcm.$pcmdev.rec.vchanrate=$rate
