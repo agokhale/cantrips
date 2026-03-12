@@ -6,7 +6,7 @@
 
 function rain (depth,a,     ccur){
 	if (depth == 0) {
-		printf("%s\n",a);
+		printf("%s\r\n",a);
 		return (0);
 		}
   ccur = length(cdict)	+ 1
@@ -20,7 +20,7 @@ function rain (depth,a,     ccur){
 
 BEGIN {
 	if (cdict == "") {
-		cdict="abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890- !@#$%^&*.";
+		cdict="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 		}
 	split (cdict, ca, "");
 	rain(len,"")
