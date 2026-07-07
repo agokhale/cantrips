@@ -1,6 +1,6 @@
-setenv D /z/aeria
+setenv D /zz/jail/bs
 mkdir -p $D 
-cd /usr/src
+cd /usr/src/freebsd
 make buildworld 
 make installworld DESTDIR=$D 
 make distribution DESTDIR=$D 

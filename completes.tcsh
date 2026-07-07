@@ -1,4 +1,5 @@
 complete xpdf 'p/1/`echo *.pdf `/'
+complete unxz 'p/1/`echo *.xz `/'
 #this inner qouting is silly
 complete FreeCAD	'p/1/`find . -regex \^\.\*\\.FCStd\$`/'
 complete prusa-slicer	'p/1/`find . -regex \^\.\*\\.3mf\$`/'
