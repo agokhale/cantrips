@@ -1,0 +1,10 @@
+Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_13 	1	0 xdotool  click --repeat 3 --delay 30 4 
+Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_12 	1	0 xdotool  click --repeat 3 --delay 30 5
+Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_11 	1	0 xdotool key 112
+Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_10 	1	0 xdotool key 117
+#Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_11 	1	0 xdotool key Prior
+#Consumer:Consumer_Control.Consumer:Consumer_Control.Button:Button_10 	1	0 xdotool key Next
+#a usbhidaction -f /dev/uhid0 -c contour.usbhiaction -v 
+#usbconfig list
+#ugen0.4: <ShuttlePro v2 Contour Design, Inc.> at usbus0, cfg=0 md=HOST spd=LOW (1.5Mbps) pwr=ON (100mA)
+
