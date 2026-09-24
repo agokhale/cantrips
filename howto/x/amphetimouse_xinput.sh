@@ -18,5 +18,10 @@ $xsetprp "$xdev" "libinput Accel Custom Motion Step" 0.33
 # curve 
 $xsetprp "$xdev" "libinput Accel Custom Motion Points" 0.0 0.1 0.3 1.3 6
 
+
+# curve 
+$xsetprp "$xdev" "libinput Accel Custom Scroll Step" 0.1
+$xsetprp "$xdev" "libinput Accel Custom Scroll Points" 0.0 0.1 0.3 1.3 6
+
 echo speed!
-xinput list-props "$xdev" | grep "Accel Custom"
+xinput list-props "$xdev" 
